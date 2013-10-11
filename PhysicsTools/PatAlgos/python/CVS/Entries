@@ -1,0 +1,15 @@
+/patEventContent_cff.py/1.25/Tue Feb 22 18:29:51 2011//TV08-07-52
+/patHeavyIonSequences_cff.py/1.3/Thu Jan 21 15:33:43 2010//TV08-07-52
+/patSequences_cff.py/1.13/Thu Dec 17 15:24:43 2009//TV08-07-52
+/patTemplate_cfg.py/1.46.2.5/Sun Jun 10 13:22:03 2012//TV08-07-52
+/patTestJEC_cfi.py/1.4/Thu May  5 09:21:03 2011//TV08-07-52
+/patTestJEC_local_cfi.py/1.1/Thu May  5 09:21:03 2011//TV08-07-52
+D/cleaningLayer1////
+D/famos////
+D/mcMatchLayer0////
+D/producersHeavyIons////
+D/producersLayer1////
+D/recoLayer0////
+D/selectionLayer1////
+D/tools////
+D/triggerLayer1////

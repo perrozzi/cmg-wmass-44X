@@ -1,0 +1,116 @@
+Index: test_mu_2011_cfg.py
+===================================================================
+RCS file: /local/reps/CMSSW/UserCode/CMG/CMGTools/WMass/cfg/test_mu_2011_cfg.py,v
+retrieving revision 1.6
+diff -r1.6 test_mu_2011_cfg.py
+54a55,58
+> genAna = cfg.Analyzer(
+>     'GenParticleAnalyzerFSR',
+>     src = 'genParticlesPruned'
+>     )
+56a61
+>     genAna,
+60,63c65,68
+<     WAna,
+<     WtreeProducer,
+<     # ZAna,
+<     # ZtreeProducer
+---
+>     # WAna,
+>     # WtreeProducer,
+>     ZAna,
+>     ZtreeProducer
+72c77
+< DYJets.files = DYJets.files[:5]
+---
+> DYJets.files = DYJets.files[:1]
+82c87
+< WJets.files = WJets.files[:5]
+---
+> WJets.files = WJets.files[:1]
+91c96
+< TTJets.files = TTJets.files[:5]
+---
+> TTJets.files = TTJets.files[:1]
+100,101c105,106
+< selectedComponents = [WJets]
+< # selectedComponents = [DYJets]
+---
+> # selectedComponents = [WJets]
+> selectedComponents = [DYJets]
+Index: test_mu_DYJetsToMM_2011_cfg.py
+===================================================================
+RCS file: /local/reps/CMSSW/UserCode/CMG/CMGTools/WMass/cfg/test_mu_DYJetsToMM_2011_cfg.py,v
+retrieving revision 1.2.4.1
+diff -r1.2.4.1 test_mu_DYJetsToMM_2011_cfg.py
+70c70
+<    # WtreeProducer,
+---
+>    WtreeProducer,
+Index: test_mu_DYJetsToTauTau.py
+===================================================================
+RCS file: /local/reps/CMSSW/UserCode/CMG/CMGTools/WMass/cfg/test_mu_DYJetsToTauTau.py,v
+retrieving revision 1.2
+diff -r1.2 test_mu_DYJetsToTauTau.py
+68c68
+<    # WtreeProducer,
+---
+>     WtreeProducer,
+Index: test_mu_QCD_2011_cfg.py
+===================================================================
+RCS file: /local/reps/CMSSW/UserCode/CMG/CMGTools/WMass/cfg/test_mu_QCD_2011_cfg.py,v
+retrieving revision 1.1
+diff -r1.1 test_mu_QCD_2011_cfg.py
+54a55,58
+> genAna = cfg.Analyzer(
+>     'GenParticleAnalyzerFSR',
+>     src = 'genParticlesPruned'
+>     )
+56a61
+>     genAna,
+Index: test_mu_WJetsToLNu_2011_cfg.py
+===================================================================
+RCS file: /local/reps/CMSSW/UserCode/CMG/CMGTools/WMass/cfg/test_mu_WJetsToLNu_2011_cfg.py,v
+retrieving revision 1.3
+diff -r1.3 test_mu_WJetsToLNu_2011_cfg.py
+75,77c75,90
+< # WJets.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+< WJets.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+< WJets.triggers = ["HLT_IsoMu24_v1","HLT_IsoMu24_v2","HLT_IsoMu24_v3","HLT_IsoMu24_v4","HLT_IsoMu24_v5","HLT_IsoMu24_v6","HLT_IsoMu24_v7",\
+---
+> # # WJets.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+> # WJets.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+> # WJets.triggers = ["HLT_IsoMu24_v1","HLT_IsoMu24_v2","HLT_IsoMu24_v3","HLT_IsoMu24_v4","HLT_IsoMu24_v5","HLT_IsoMu24_v6","HLT_IsoMu24_v7",\
+>                    # "HLT_IsoMu24_v8","HLT_IsoMu24_v9","HLT_IsoMu24_v10","HLT_IsoMu24_v11","HLT_IsoMu24_v12","HLT_IsoMu24_v13","HLT_IsoMu24_v14",\
+>                    # "HLT_IsoMu24_eta2p1_v1","HLT_IsoMu24_eta2p1_v2","HLT_IsoMu24_eta2p1_v3","HLT_IsoMu24_eta2p1_v4","HLT_IsoMu24_eta2p1_v5",\
+>                    # "HLT_IsoMu24_eta2p1_v6","HLT_IsoMu24_eta2p1_v7","HLT_IsoMu24_eta2p1_v8"
+>                    # ]
+> 
+> # selectedComponents = [WJets]
+> 
+> # WJets.splitFactor = 1500
+> 
+> # TEST
+> WJets1 = copy.deepcopy(WJets)
+> WJets1.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+> WJets1.triggers = ["HLT_IsoMu24_v1","HLT_IsoMu24_v2","HLT_IsoMu24_v3","HLT_IsoMu24_v4","HLT_IsoMu24_v5","HLT_IsoMu24_v6","HLT_IsoMu24_v7",\
+81a95,109
+> WJets1.files = WJets1.files[:2500]
+> WJets1.splitFactor = 1000
+> WJets1.name = 'WJets1'
+> WJets2 = copy.deepcopy(WJets)
+> WJets2.files = getFiles('/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM/V5_B/PAT_CMG_V5_6_0_B', 'cmgtools', '.*root')
+> WJets2.triggers = ["HLT_IsoMu24_v1","HLT_IsoMu24_v2","HLT_IsoMu24_v3","HLT_IsoMu24_v4","HLT_IsoMu24_v5","HLT_IsoMu24_v6","HLT_IsoMu24_v7",\
+>                    "HLT_IsoMu24_v8","HLT_IsoMu24_v9","HLT_IsoMu24_v10","HLT_IsoMu24_v11","HLT_IsoMu24_v12","HLT_IsoMu24_v13","HLT_IsoMu24_v14",\
+>                    "HLT_IsoMu24_eta2p1_v1","HLT_IsoMu24_eta2p1_v2","HLT_IsoMu24_eta2p1_v3","HLT_IsoMu24_eta2p1_v4","HLT_IsoMu24_eta2p1_v5",\
+>                    "HLT_IsoMu24_eta2p1_v6","HLT_IsoMu24_eta2p1_v7","HLT_IsoMu24_eta2p1_v8"
+>                    ]
+> WJets2.files = WJets2.files[2500:]
+> WJets2.splitFactor = 1000
+> WJets2.name = 'WJets2'
+> selectedComponents = [WJets1,WJets2]
+> # END TEST
+83,85d110
+< selectedComponents = [WJets]
+< 
+< WJets.splitFactor = 1500

@@ -1,0 +1,48 @@
+/PFVertexProducer_cfi.py/1.2/Fri May 18 13:41:39 2012//Tlucieg_Ap18_44X
+/analysis_cff.py/1.16/Wed May 23 15:07:20 2012//Tlucieg_Ap18_44X
+/countingSequences_cff.py/1.1/Thu Nov 11 14:09:05 2010//Tlucieg_Ap18_44X
+/createFactory.py/1.1/Thu Nov 11 14:09:05 2010//Tlucieg_Ap18_44X
+/cutSummary_cff.py/1.3/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/diElectron_cff.py/1.4/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/diHemi_cff.py/1.1/Fri Apr  1 18:02:00 2011//Tlucieg_Ap18_44X
+/diMuon_cff.py/1.6/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/diTau_cff.py/1.5/Fri Feb  3 12:20:42 2012//Tlucieg_Ap18_44X
+/electron_cff.py/1.4/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/gen_cff.py/1.12/Sun Apr 21 11:14:36 2013//Tlucieg_Ap18_44X
+/genericPhysicsObjectSelector_cfi.py/1.1/Thu Nov 11 14:09:05 2010//Tlucieg_Ap18_44X
+/hemi_cff.py/1.1/Fri Apr  1 18:02:00 2011//Tlucieg_Ap18_44X
+/histogram_cff.py/1.8/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/jetId_cff.py/1.2/Tue Jul  5 08:11:29 2011//Tlucieg_Ap18_44X
+/jet_cff.py/1.24/Wed Dec 12 17:21:55 2012//Tlucieg_Ap18_44X
+/met_cff.py/1.15/Fri Mar 16 15:26:21 2012//Tlucieg_Ap18_44X
+/muEle_cff.py/1.1/Fri Feb  3 12:20:42 2012//Tlucieg_Ap18_44X
+/multiJet_cff.py/1.1/Thu Apr  7 07:44:57 2011//Tlucieg_Ap18_44X
+/muon_cff.py/1.7/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/pfCandidate_cff.py/1.1/Fri Oct 14 15:03:45 2011//Tlucieg_Ap18_44X
+/photon_cff.py/1.3/Thu May 10 09:53:27 2012//Tlucieg_Ap18_44X
+/physicsObjectPrinter_cfi.py/1.1/Wed Mar  2 13:57:47 2011//Tlucieg_Ap18_44X
+/runInfoAccounting_cff.py/1.2/Thu Oct  6 10:35:46 2011//Tlucieg_Ap18_44X
+/runInfoAccounting_cfi.py/1.2/Mon Sep 12 13:16:29 2011//Tlucieg_Ap18_44X
+/skim_cff.py/1.6/Wed May 25 07:26:46 2011//Tlucieg_Ap18_44X
+/tauEle_cff.py/1.1/Fri Feb  3 12:20:43 2012//Tlucieg_Ap18_44X
+/tauMu_cff.py/1.1/Tue Jun  7 07:03:57 2011//Tlucieg_Ap18_44X
+/tau_cff.py/1.4/Mon Jul 25 14:00:06 2011//Tlucieg_Ap18_44X
+/trigger_cff.py/1.3/Wed Nov 14 11:30:35 2012//Tlucieg_Ap18_44X
+/wENu_cff.py/1.1/Wed Mar 16 16:22:01 2011//Tlucieg_Ap18_44X
+/wMuNu_cff.py/1.1/Fri Mar 11 15:53:40 2011//Tlucieg_Ap18_44X
+D/CMG////
+D/PAT////
+D/Tools////
+D/eventCleaning////
+D/eventContent////
+D/factories////
+D/generator////
+D/histograms////
+D/miscProducers////
+D/release_info////
+D/roodatasets////
+D/runInfoAccounting////
+D/selections////
+D/skims////
+D/templates////
+D/testing_sources////

@@ -1,0 +1,13 @@
+/cmgPFJetCleaner_cfi.py/1.1/Wed Jan 11 11:38:31 2012//Tlucieg_Ap18_44X
+/cmgPFJetCorrector_cfi.py/1.3/Tue May 15 10:12:52 2012//Tlucieg_Ap18_44X
+/cmgPatElectronProducer_cfi.py/1.2/Fri Apr 13 07:49:27 2012//Tlucieg_Ap18_44X
+/cmgPatMuonProducer_cfi.py/1.1/Fri Jan 20 09:14:04 2012//Tlucieg_Ap18_44X
+/deltaPhiJetMET_cfi.py/1.1/Fri Jul 22 15:57:45 2011//Tlucieg_Ap18_44X
+/deltaRJetElectrons_cfi.py/1.4/Thu Feb  9 13:58:51 2012//Tlucieg_Ap18_44X
+/deltaRJetMuons_cfi.py/1.4/Thu Feb  9 13:58:51 2012//Tlucieg_Ap18_44X
+/metSignificance_cfi.py/1.2/Thu Sep 29 15:43:59 2011//Tlucieg_Ap18_44X
+/misc_cff.py/1.7/Mon Oct  1 16:26:40 2012//Tlucieg_Ap18_44X
+/simpleParticleFlow_cfi.py/1.1/Mon Oct  1 16:26:40 2012//Tlucieg_Ap18_44X
+/trackIsolationMaker_cfi.py/1.1/Wed Nov 21 09:52:48 2012//Tlucieg_Ap18_44X
+D/collectionSize////
+D/mvaMET////

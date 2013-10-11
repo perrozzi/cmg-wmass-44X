@@ -1,0 +1,16 @@
+/HBHEFilters_cff.py/1.1/Thu Jun 30 11:35:53 2011//Tlucieg_Ap18_44X
+/HBHENoiseFilter2010_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/HBHENoiseFilter2011IsoDefault_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/HBHENoiseFilter2011NonIsoRecommended_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/HBHENoiseFilterResultProducer2010_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/HBHENoiseFilterResultProducer2011IsoDefault_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/HBHENoiseFilterResultProducer2011NonIsoRecommended_cfi.py/1.2/Thu Feb  2 10:36:01 2012//Tlucieg_Ap18_44X
+/eeNoiseFilter_cfi.py/1.1/Fri Jul 22 12:54:37 2011//Tlucieg_Ap18_44X
+/eventCleaning_cff.py/1.12/Tue Oct  2 09:02:09 2012//Tlucieg_Ap18_44X
+/goodPVFilter_cfi.py/1.1/Thu Jun 30 11:35:54 2011//Tlucieg_Ap18_44X
+/goodPrimaryVertexFilter_cfi.py/1.1/Mon Nov  7 16:31:25 2011//Tlucieg_Ap18_44X
+/recovRecHitFilter_cfi.py/1.2/Fri Jul 22 12:54:37 2011//Tlucieg_Ap18_44X
+/scrapingFilter_cfi.py/1.2/Mon Nov  7 16:31:25 2011//Tlucieg_Ap18_44X
+/totalKinematicsFilterCMG_cfi.py/1.1/Mon Nov  7 16:31:24 2011//Tlucieg_Ap18_44X
+/trackingFailureFilter_cfi.py/1.3/Wed May  2 15:05:47 2012//Tlucieg_Ap18_44X
+D

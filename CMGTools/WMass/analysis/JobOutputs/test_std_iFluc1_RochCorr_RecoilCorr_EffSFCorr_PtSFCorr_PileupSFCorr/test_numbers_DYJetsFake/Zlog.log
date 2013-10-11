@@ -1,0 +1,8 @@
+processing line Zanalysis zDATA("root://eoscms//eos/cms/store/cmst3/user/perrozzi/CMG/ntuples_2012_12_20/DYJets/ZTreeProducer_tree_FakeRecoSkimmed.root",0.407656,0)
+/afs/cern.ch/work/p/perrozzi/private/CMGTools/test_sync/CMGTools/CMSSW_4_4_5/src/CMGTools/WMass/analysis/AnalysisCode
+Error in <TTree::SetBranchAddress>: unknown branch -> u1corr
+Error in <TTree::SetBranchAddress>: unknown branch -> u2corr
+processing line zDATA.Loop(0,0,"../JobOutputs/test_std_iFluc1_RochCorr_RecoilCorr_EffSFCorr_PtSFCorr_PileupSFCorr/test_numbers_DYJetsFake/",1,0,1,1,1,1,"DYJetsFake",10042,0,0)
+generated_PDF_set= 10042 generated_PDF_member= 0 contains_PDF_reweight= 0 WMass::NtoysMomCorr= 1
+output filename= ../JobOutputs/test_std_iFluc1_RochCorr_RecoilCorr_EffSFCorr_PtSFCorr_PileupSFCorr/test_numbers_DYJetsFake//Zanalysis.root
+Analyzed entry 0/64456

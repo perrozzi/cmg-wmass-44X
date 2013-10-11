@@ -1,0 +1,12 @@
+/EcalDeadCellBoundaryEnergyFilter_cfi.py/1.5/Fri Apr 13 15:19:03 2012//Tlhx_14APR2012_v1
+/EcalDeadCellDeltaRFilter_cfi.py/1.2/Thu Feb  2 05:32:38 2012//Tlhx_14APR2012_v1
+/EcalDeadCellTriggerPrimitiveFilter_cfi.py/1.3/Fri Apr 13 15:37:33 2012//Tlhx_14APR2012_v1
+/GenerateHcalLaserBadRunList.py/1.1/Thu Jan 26 07:08:47 2012//Tlhx_14APR2012_v1
+/greedyMuonPFCandidateFilter_cfi.py/1.2/Wed Mar 21 14:43:38 2012//Tlhx_14APR2012_v1
+/hcalLaserBadEvents_2011.py/1.1/Wed Feb  8 07:14:34 2012//Tlhx_14APR2012_v1
+/hcalLaserEventFilter_cfi.py/1.4/Wed Feb  8 07:14:06 2012//Tlhx_14APR2012_v1
+/inconsistentMuonPFCandidateFilter_cfi.py/1.3/Wed Mar 21 14:43:38 2012//Tlhx_14APR2012_v1
+/jetIDFailureFilter_cfi.py/1.1/Fri Apr 13 02:31:34 2012//Tlhx_14APR2012_v1
+/multiEventFilter_cfi.py/1.3/Fri Feb  3 15:24:28 2012//Tlhx_14APR2012_v1
+/trackingFailureFilter_cfi.py/1.3/Wed Mar 21 14:43:38 2012//Tlhx_14APR2012_v1
+D

@@ -1,0 +1,27 @@
+/BuildFile.xml/1.1/Sun Feb 21 01:37:43 2010//TV08-07-52
+/IntegrationTest_cfg.py/1.2/Mon Jan 31 12:59:03 2011//TV08-07-52
+/checkPySintax/1.1/Wed Jun 25 07:02:43 2008//TV08-07-52
+/diskSize.pl/1.5/Wed Mar  2 11:10:51 2011//TV08-07-52
+/patTuple_PATandPF2PAT_cfg.py/1.14/Thu Sep 29 05:23:57 2011//TV08-07-52
+/patTuple_PF2PATGsfElectrons_cfg.py/1.1.2.1/Wed May  9 16:26:24 2012//TV08-07-52
+/patTuple_PF2PAT_cfg.py/1.16.2.1/Wed May  9 16:11:05 2012//TV08-07-52
+/patTuple_addDecayInFlight_cfg.py/1.1/Tue Apr 13 17:34:02 2010//TV08-07-52
+/patTuple_addJets_cfg.py/1.9/Mon Jul 18 16:25:32 2011//TV08-07-52
+/patTuple_addTracks_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_addTriggerInfo_cfg.py/1.2/Thu Dec  2 20:52:17 2010//TV08-07-52
+/patTuple_addVertexInfo_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_caloTaus_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_fastsim_cfg.py/1.3/Wed Dec  1 18:36:58 2010//TV08-07-52
+/patTuple_onlyElectrons_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_onlyJets_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_onlyMET_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_onlyMuons_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_onlyPhotons_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_onlyTaus_cfg.py/1.1/Tue Apr 13 17:34:03 2010//TV08-07-52
+/patTuple_pfIso_cfg.py/1.1.4.2/Thu Mar 29 12:38:11 2012//TV08-07-52
+/patTuple_standard_cfg.py/1.3/Sat Dec 18 11:31:06 2010//TV08-07-52
+/patTuple_topSelection_cfg.py/1.6.2.1/Tue Nov  8 11:35:12 2011//TV08-07-52
+/patTuple_userData_cfg.py/1.2/Fri Jan 28 21:08:21 2011//TV08-07-52
+/runAsyncTests.pl/1.11/Thu Jun 25 16:58:15 2009//TV08-07-52
+D/fwlite////
+D/private////

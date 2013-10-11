@@ -1,0 +1,23 @@
+/BTagEfficiency.py/1.1/Tue Oct  9 16:15:49 2012//Tcbern_mvametbuiddfix_17Apr13
+/BtagSF.py/1.1/Tue Oct 23 18:18:20 2012//Tcbern_mvametbuiddfix_17Apr13
+/H2TauTauDataMC.py/1.17/Wed Jun 27 06:16:53 2012//Tcbern_mvametbuiddfix_17Apr13
+/H2TauTauDataMC_MuEle.py/1.1/Thu Feb 16 08:07:17 2012//Tcbern_mvametbuiddfix_17Apr13
+/H2TauTauMC.py/1.2/Wed Mar 14 12:41:18 2012//Tcbern_mvametbuiddfix_17Apr13
+/HistogramSet.py/1.1/Tue Jan 31 16:06:27 2012//Tcbern_mvametbuiddfix_17Apr13
+/QCDShapeUncertaintyFit_diTau.py/1.1/Wed Sep 26 12:00:16 2012//Tcbern_mvametbuiddfix_17Apr13
+/QCDShapeUncertainty_diTau.py/1.2/Wed Sep 26 12:00:16 2012//Tcbern_mvametbuiddfix_17Apr13
+/TriggerEfficiency.py/1.7/Fri Jun 22 15:05:56 2012//Tcbern_mvametbuiddfix_17Apr13
+/VBFMVA.py/1.3/Sat Oct  6 14:21:30 2012//Tcbern_mvametbuiddfix_17Apr13
+/analysis_dimus_cfg.py/1.2/Tue Jan 31 16:06:27 2012//Tcbern_mvametbuiddfix_17Apr13
+/analysis_taumu_cfg.py/1.4/Thu Feb  2 14:48:46 2012//Tcbern_mvametbuiddfix_17Apr13
+/old_cfg.py/1.2/Tue Jan 31 13:45:08 2012//Tcbern_mvametbuiddfix_17Apr13
+/plot_H2TauTauDataMC.py/1.4/Mon May 14 16:20:19 2012//Tcbern_mvametbuiddfix_17Apr13
+/rootlogonMoriond.C/1.1/Thu Jan 24 07:31:20 2013//Tcbern_mvametbuiddfix_17Apr13
+D/Samples////
+D/analyzers////
+D/framework////
+D/physicsobjects////
+D/plotter////
+D/samples////
+D/statistics////
+D/weights////
