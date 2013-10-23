@@ -174,13 +174,17 @@ class WTreeProducer( TreeAnalyzerNumpy ):
       
       bookJet(tr, 'Jet_leading')
 
+      var(tr, 'genWLept')
        
     def process(self, iEvent, event):
         
         self.readCollections( iEvent )
         tr = self.tree
         tr.reset()
-          
+
+        if (self.cfg_comp.isMC):
+          fill(tr, 'genWLept', len(event.genWLept))
+
         if (event.savegenpW and self.cfg_comp.isMC):
           
           fill(tr, 'FSRWeight',event.fsrWeight)
@@ -192,6 +196,7 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           fillParticle(tr, 'MuGenStatus1', event.genMuStatus1[0])      
           fill(tr, 'MuDRGenP',event.muGenDeltaRgenP)
           fillParticle(tr, 'NuGen', event.genNu[0])
+
 
         if event.WGoodEvent == True :
                       

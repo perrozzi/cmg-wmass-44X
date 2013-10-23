@@ -1,10 +1,6 @@
 D/SignalExtraction////
 D/includes////
 D/utils////
-/launch_Z_controlplots.py/1.2/Wed Jun 26 07:20:16 2013//
-/launch_analysis.py/1.7/Fri Aug 16 15:09:17 2013//
-/manipulate_parameters.sh/1.2/Tue Jul  9 17:07:39 2013//
-/runRecoAndCountingsAndPlotting.C/1.4/Mon Dec 17 09:43:04 2012//
 D/AnalysisCode////
 D/DATAcode////
 D/Fitcode////
@@ -12,5 +8,9 @@ D/MCcode////
 D/PROOFcode////
 D/PlottingCode////
 D/RecoilCode////
-/launch_analysis_testSplit_bkp.py/1.4/Wed Oct  2 12:40:57 2013//
-/fit_all_in_one.py/1.2/Tue Oct  1 12:10:38 2013//
+/fit_all_in_one.py/1.2/Fri Oct 11 16:21:12 2013//
+/launch_Z_controlplots.py/1.2/Fri Oct 11 16:21:12 2013//
+/launch_analysis.py/1.7/Fri Oct 11 16:21:12 2013//
+/launch_analysis_testSplit_bkp.py/1.4/Fri Oct 11 16:21:12 2013//
+/manipulate_parameters.sh/1.2/Fri Oct 11 16:21:12 2013//
+/runRecoAndCountingsAndPlotting.C/1.4/Fri Oct 11 16:21:12 2013//
