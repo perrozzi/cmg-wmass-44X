@@ -1,9 +1,0 @@
-/BadPFClusterProducer.cc/1.1/Mon Jan  3 14:30:48 2011//Twreece_020512
-/BuildFile.xml/1.4/Fri Apr 29 17:02:52 2011//Twreece_020512
-/GreedyMuonPFCandidateFilter.cc/1.3/Wed May  2 14:37:52 2012//Twreece_020512
-/InconsistentMuonPFCandidateFilter.cc/1.3/Wed May  2 14:37:52 2012//Twreece_020512
-/METCorrelationFilter.cc/1.2/Thu Jan  6 08:45:30 2011//Twreece_020512
-/MaskedECALProducer.cc/1.2/Thu May  5 15:23:20 2011//Twreece_020512
-/PFEventFilter.cc/1.6/Fri May 27 09:39:55 2011//Twreece_020512
-/PFRecHitToClusterConvertor.cc/1.1/Mon Jan  3 14:30:48 2011//Twreece_020512
-D
