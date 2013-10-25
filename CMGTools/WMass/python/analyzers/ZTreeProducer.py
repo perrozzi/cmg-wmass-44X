@@ -241,6 +241,12 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       bookMET(tr, 'pumet')
       bookMET(tr, 'tkmet')
       var(tr, 'pfmet_sumEt')
+
+      # var( tr, 'pfmetcov00')
+      # var( tr, 'pfmetcov01')
+      # var( tr, 'pfmetcov10')
+      # var( tr, 'pfmetcov11')
+
       bookMET(tr, 'pfmetWlikeNeg')
       bookMET(tr, 'pfmetWlikePos')
 
@@ -360,7 +366,7 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
           fillParticle(tr, 'MuPos', event.BestZPosMuon)
           if ( event.BestZPosMuon.isGlobalMuon() or event.BestZPosMuon.isTrackerMuon() ) and event.passedVertexAnalyzer:
             fill(tr, 'MuPos_dxy', math.fabs(event.BestZPosMuon.dxy()))
-            fill(tr, 'MuPos_dz',event.BestZPosMuon.dz())
+            fill(tr, 'MuPos_dz',math.fabs(event.BestZPosMuon.dz()))
           fill(tr, 'MuPosRelIso', event.BestZPosMuon.relIso(0.5))
           fill(tr, 'MuPosTrg', event.BestZPosMuonHasTriggered)
           fill(tr, 'MuPosIsTightAndIso',event.BestZPosMuonIsTightAndIso)
@@ -370,7 +376,7 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
           fillParticle(tr, 'MuNeg', event.BestZNegMuon)
           if ( event.BestZNegMuon.isGlobalMuon() or event.BestZNegMuon.isTrackerMuon() ) and event.passedVertexAnalyzer:
             fill(tr, 'MuNeg_dxy', math.fabs(event.BestZNegMuon.dxy()))
-            fill(tr, 'MuNeg_dz',event.BestZNegMuon.dz())
+            fill(tr, 'MuNeg_dz',math.fabs(event.BestZNegMuon.dz()))
           fill(tr, 'MuNegRelIso', event.BestZNegMuon.relIso(0.5))
           fill(tr, 'MuNegTrg', event.BestZNegMuonHasTriggered)
           fill(tr, 'MuNegIsTightAndIso',event.BestZNegMuonIsTightAndIso)
@@ -396,7 +402,12 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
           fillMET(tr, 'pfmet', event.ZpfmetNoMu)
           # event.pfmet2 = self.handles['pfMet'].product()[0]
           event.pfmetraw = self.handles['pfMetraw'].product()[0]
-          event.pfMetSignificance = self.handles['pfMetSignificance'].product()
+          pfMetSignificance = self.handles['pfMetSignificance'].product().significance()
+          # fill( tr, 'pfmetcov00', pfMetSignificance(0,0))
+          # fill( tr, 'pfmetcov01', pfMetSignificance(0,1))
+          # fill( tr, 'pfmetcov10', pfMetSignificance(1,0))
+          # fill( tr, 'pfmetcov11', pfMetSignificance(1,1))
+
           event.nopumet = self.handles['nopuMet'].product()[0]
           event.pucmet = self.handles['pucMet'].product()[0]
           event.pfMetForRegression = self.handles['pfMetForRegression'].product()[0]

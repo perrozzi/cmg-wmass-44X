@@ -7,6 +7,7 @@ from CMGTools.RootTools.fwlite.AutoHandle import AutoHandle
 from CMGTools.RootTools.physicsobjects.PhysicsObjects import Muon, Jet, GenParticle
 from CMGTools.RootTools.utils.TriggerMatching import triggerMatched
 from CMGTools.RootTools.utils.DeltaR import bestMatch, deltaR, deltaR2
+from CMGTools.WMass.analyzers.common_functions import *
 # from CMGTools.Utilities.mvaMET.mvaMet import MVAMet, PFMET
 # from WMass.analyzers.GetMVAMET import GetMVAMET
 
@@ -146,7 +147,7 @@ class WAnalyzer( Analyzer ):
           if len(event.genW)==1:
 
             event.savegenpW=True
-            event.genW_mt = self.mT(event.genW[0].daughter(0).p4() , event.genW[0].daughter(1).p4())
+            event.genW_mt = mT(self,event.genW[0].daughter(0).p4() , event.genW[0].daughter(1).p4())
             event.muGenDeltaRgenP=1e6
 
             event.genWLept.append(event.genW[0])
@@ -159,7 +160,7 @@ class WAnalyzer( Analyzer ):
             
             if(len(event.genMu) >0):
               if(math.fabs(event.genW[0].mother(0).pdgId())!=6):
-                event.genMuStatus1.append(self.returnMuonDaughterStatus1(event.genMu[0]))
+                event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
               else:
                 event.genMuStatus1.append(event.genMu[0])
 
@@ -189,10 +190,10 @@ class WAnalyzer( Analyzer ):
                 if ( math.fabs(event.genW[0].daughter(0).pdgId())==13 ):
                     event.genMu.append(event.genW[0].daughter(0))
                     event.genNu.append(event.genW[0].daughter(1))
-                    event.genW_mt = self.mT(event.genMu[0].p4() , event.genNu[0].p4())
+                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
                     event.muGenDeltaRgenP=1e6
                     if(len(event.genMu) >0):
-                        event.genMuStatus1.append(self.returnMuonDaughterStatus1(event.genMu[0]))
+                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
                     event.savegenpW=True
 
             if ( math.fabs(event.genW[0].daughter(1).pdgId())==13. or math.fabs(event.genW[0].daughter(1).pdgId())==15. or math.fabs(event.genW[0].daughter(1).pdgId())==11. ):
@@ -202,10 +203,10 @@ class WAnalyzer( Analyzer ):
                 if ( math.fabs(event.genW[0].daughter(1).pdgId())==13 ):
                     event.genMu.append(event.genW[0].daughter(1))
                     event.genNu.append(event.genW[0].daughter(0))
-                    event.genW_mt = self.mT(event.genMu[0].p4() , event.genNu[0].p4())
+                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
                     event.muGenDeltaRgenP=1e6
                     if(len(event.genMu) >0):
-                        event.genMuStatus1.append(self.returnMuonDaughterStatus1(event.genMu[0]))
+                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
                     event.savegenpW=True
                     
             if ( math.fabs(event.genW[1].daughter(0).pdgId())==13. or math.fabs(event.genW[1].daughter(0).pdgId())==15. or math.fabs(event.genW[1].daughter(0).pdgId())==11. ):
@@ -215,10 +216,10 @@ class WAnalyzer( Analyzer ):
                 if ( math.fabs(event.genW[1].daughter(0).pdgId())==13 ):
                     event.genMu.append(event.genW[1].daughter(0))
                     event.genNu.append(event.genW[1].daughter(1))
-                    event.genW_mt = self.mT(event.genMu[0].p4() , event.genNu[0].p4())                
+                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
                     event.muGenDeltaRgenP=1e6
                     if(len(event.genMu) >0):
-                        event.genMuStatus1.append(self.returnMuonDaughterStatus1(event.genMu[0]))
+                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
                     event.savegenpW=True
                     
             if ( math.fabs(event.genW[1].daughter(1).pdgId())==13. or math.fabs(event.genW[1].daughter(1).pdgId())==15. or math.fabs(event.genW[1].daughter(1).pdgId())==11. ):
@@ -228,10 +229,10 @@ class WAnalyzer( Analyzer ):
                 if ( math.fabs(event.genW[1].daughter(1).pdgId())==13 ):
                     event.genMu.append(event.genW[1].daughter(1))
                     event.genNu.append(event.genW[1].daughter(0))
-                    event.genW_mt = self.mT(event.genMu[0].p4() , event.genNu[0].p4())                
+                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
                     event.muGenDeltaRgenP=1e6
                     if(len(event.genMu) >0):
-                        event.genMuStatus1.append(self.returnMuonDaughterStatus1(event.genMu[0]))
+                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
                     event.savegenpW=True
                     
             # if the genp is not signal, don't save genp but do not exit 
@@ -267,7 +268,7 @@ class WAnalyzer( Analyzer ):
         if len(self.cfg_comp.triggers)>0:
             # muon object trigger matching
             event.selMuons = [lep for lep in event.allMuons if \
-                            self.trigMatched(event, lep)]
+                            trigMatched(self, event, lep)]
             # exit if there are no triggered muons
             if len(event.selMuons) == 0:
                 return True, 'trigger matching failed'
@@ -284,7 +285,7 @@ class WAnalyzer( Analyzer ):
 
         # store muons that did not fire the trigger
         event.NoTriggeredMuonsLeadingPt = [lep for lep in event.allMuons if \
-                        not self.trigMatched(event, lep) ]
+                        not trigMatched(self, event, lep) ]
         
         # print "len(event.NoTriggeredMuonsLeadingPt)= ",len(event.NoTriggeredMuonsLeadingPt)
         # if len(event.NoTriggeredMuonsLeadingPt)>0 : print "event.NoTriggeredMuonsLeadingPt[0].pt() = ",event.NoTriggeredMuonsLeadingPt[0].pt()
@@ -307,8 +308,8 @@ class WAnalyzer( Analyzer ):
         event.selMuons[0].associatedVertex = event.goodVertices[0]
                 
         # testing offline muon cuts (tight+iso, no kinematical cuts)
-        event.selMuonIsTightAndIso = self.testLeg( event.selMuons[0] ) 
-        event.selMuonIsTight = self.testLegID( event.selMuons[0] ) 
+        event.selMuonIsTightAndIso = testLeg(self, event.selMuons[0] ) 
+        event.selMuonIsTight = testLegID( self,event.selMuons[0] ) 
           
         # START RETRIEVING MVAMET
         
@@ -367,10 +368,10 @@ class WAnalyzer( Analyzer ):
         
         # define a W from lepton and MET
         event.W4V = event.selMuons[0].p4() + event.pfmet.p4()
-        event.W4V_mt = self.mT(event.selMuons[0].p4() , event.pfmet.p4())        
+        event.W4V_mt = mT(self,event.selMuons[0].p4() , event.pfmet.p4())        
         
         event.covMatrixMuon = []
-        self.RetrieveMuonMatrixIntoVector(event.selMuons[0],event.covMatrixMuon)
+        RetrieveMuonMatrixIntoVector(self,event.selMuons[0],event.covMatrixMuon)
         # print event.covMatrixMuon
 
         # Code to study the recoil (not very useful for W...)
@@ -397,7 +398,7 @@ class WAnalyzer( Analyzer ):
         if fillCounter:
           if event.selMuonIsTightAndIso : 
             self.counters.counter('WAna').inc('W lep is MuIsTightAndIso')
-            if self.testLegKine( event.selMuons[0] , 30 , 2.1 ) : 
+            if testLegKine( self, event.selMuons[0] , 30 , 2.1 ) : 
               self.counters.counter('WAna').inc('W Mu_eta<2.1 && Mu_pt>30')
               if event.pfmet.pt() >25: 
                 self.counters.counter('WAna').inc('W pfmet>25')
@@ -437,165 +438,3 @@ class WAnalyzer( Analyzer ):
         self.mchandles['genpart'] =  AutoHandle('genParticlesPruned','std::vector<reco::GenParticle>')
         self.mchandles['LHEweights'] =  AutoHandle('source','LHEEventProduct')
 
-
-    def testJet(self, jet):
-        '''returns testjetID && testjetIso && testjetKine for jet'''
-        return jet.pt() > self.cfg_ana.jetptcut
-
-    def testLeg(self, leg):
-        '''returns testLegID && testLegIso && testLegKine for leg'''
-        return self.testLegID(leg) and \
-               self.testLegIso(leg, self.cfg_ana.iso) 
-               # and self.testLegKine(leg, self.cfg_ana.pt, self.cfg_ana.eta)
-
-    
-    def testLegID(self, leg):
-        '''Always return true by default, overload in your subclass'''
-        # return True
-        return ( leg.tightId() and \
-                 leg.dxy() < 0.2 and\
-                 leg.dz() < 0.5 and\
-                 leg.trackerLayersWithMeasurement() > 8
-                 )
-
-    
-    def testLegIso(self, leg, isocut):
-        '''If isocut is None, the iso value is taken from the iso1 parameter.
-        Checks the standard dbeta corrected isolation.
-        '''
-        if isocut is None:
-            isocut = self.cfg_ana.iso
-        return leg.relIso(0.5) < isocut
-
-
-    def testLegKine(self, leg, ptcut, etacut ):
-        '''Tests pt and eta.'''
-        return leg.pt() > ptcut and \
-               abs(leg.eta()) < etacut 
-
-
-    def mT(self, leg1, leg2):
-        # print 'leg1.Pt() ',leg1.Pt(),' leg2.Pt() ',leg2.Pt(),' leg1.Px() ',leg1.Px(),' leg2.Px() ',leg2.Px(),' leg2.Py() ',leg2.Py(),' leg1.Pt() ',leg1.Pt(),' leg2.Pt() ',leg2.Pt(),' before sqrt ',( 2*leg1.Pt()*leg2.Pt()*( 1 - (leg1.Px()*leg2.Px() + leg1.Py()*leg2.Py()) / ( leg1.Pt()*leg2.Pt() ) ) )
-        if (2*leg1.Pt()*leg2.Pt()*( 1 - (leg1.Px()*leg2.Px() + leg1.Py()*leg2.Py()) / ( leg1.Pt()*leg2.Pt() ) )) > 0:
-            return math.sqrt( 2*leg1.Pt()*leg2.Pt()*( 1 - (leg1.Px()*leg2.Px() + leg1.Py()*leg2.Py()) / ( leg1.Pt()*leg2.Pt() ) ) )
-        else:
-            return 0
-
-
-    def trigMatched(self, event, leg):
-        '''Returns true if the leg is matched to a trigger object as defined in the
-        triggerMap parameter'''
-        if not hasattr( self.cfg_ana, 'triggerMap'):
-            return True
-        path = event.hltPath
-        triggerObjects = event.triggerObjects
-        filters = self.cfg_ana.triggerMap[ path ]
-        # the dR2Max value is 0.1^2
-        return triggerMatched(leg, triggerObjects, path, filters,
-                              dR2Max=0.01,
-                              pdgIds=None )
-
-                              
-    # def prepareObjectsForMVAMET(self,event):
-    
-        # event.NJetsGt30 = 0 # Number of jets above 30 Gev in cmgPFJetSel after cleaning
-        # event.nJetsPtGt1Clean = event.nJetsPtGt1H # Number of jets above 1 Gev in cmgPFJetSel after cleaning
-    
-        # for jet in event.allJets:
-            # if jet.pt>=1:
-                # if deltaR(jet.eta(),jet.phi(),event.selMuons[0].eta(),event.selMuons[0].phi())<0.5 : 
-                    # event.nJetsPtGt1Clean = event.nJetsPtGt1Clean - 1
-                # else:
-                    # if jet.pt>=30:
-                        # event.NJetsGt30 = event.NJetsGt30 + 1
-        # if(event.nJetsPtGt1Clean < 0): event.nJetsPtGt1Clean = 0
-        
-        # # Clean various METs (but PUMET)
-        
-        # dummyVertex = ROOTmath.XYZPointD()
-        
-        # cleanpfmetp4 = event.pfMetForRegression.p4() + event.selMuons[0].p4()
-        # cleanpfmetsumet = event.pfMetForRegression.sumEt() - event.selMuons[0].pt()
-        # event.cleanpfmetForRegression = PFMET(event.pfMetForRegression.getSpecific(),cleanpfmetsumet,cleanpfmetp4,dummyVertex)
-        
-        # cleanpucmetp4 = event.pucmet.p4() + event.selMuons[0].p4()
-        # cleanpucmetsumet = event.pucmet.sumEt() - event.selMuons[0].pt()
-        # event.cleanpucmet = PFMET(event.pucmet.getSpecific(),cleanpucmetsumet,cleanpucmetp4,dummyVertex)
-        
-        # cleantkmetp4 = event.tkmet.p4() + event.selMuons[0].p4()
-        # cleantkmetsumet = event.tkmet.sumEt() - event.selMuons[0].pt()
-        # event.cleantkmet = PFMET(event.tkmet.getSpecific(),cleantkmetsumet,cleantkmetp4,dummyVertex)
-        
-        # cleannopumetp4 = event.nopumet.p4() + event.selMuons[0].p4()
-        # cleannopumetsumet = event.nopumet.sumEt() - event.selMuons[0].pt()
-        # event.cleannopumet = PFMET(event.nopumet.getSpecific(),cleannopumetsumet,cleannopumetp4,dummyVertex)
-        
-        # event.iLeadJet = 0 # Leading jet (if any) from cmgPFBaseJetLead after cleaning
-        # event.i2ndJet = 0 # Second leading jet (if any) from cmgPFBaseJetLead collection after cleaning
-        
-        # event.jetLeadClean = [jet for jet in event.jetLead if \
-                                          # deltaR(jet.eta(),jet.phi(),event.selMuons[0].eta(),event.selMuons[0].phi())<0.5 ]
-                        
-        # if(len(event.jetLeadClean)>0): event.iLeadJet = event.jetLeadClean[0].p4()
-        # if(len(event.jetLeadClean)>1): event.i2ndJet = event.jetLeadClean[1].p4()
-
-        # event.visObjectP4s_array = [event.selMuons[0].p4()] # Visual part of the signal (single muon for the W, dimuon for the Z)
-        
-        # # iJets struct from cmgPFJetSel without cleaning (will be probably done afterwards)
-        # event.iJets_p4 = []
-        # event.iJets_mva = []
-        # event.iJets_neutFrac = []
-        # for jet in event.allJets:
-            # if jet.looseJetId():
-                # event.iJets_p4.append(jet.p4())
-                # event.iJets_mva.append(jet.puMva('philv1'))
-                # neutFrac=1
-                # # DOES THIS HOLD ALSO IN 44X ???
-                # if(math.fabs(jet.eta())<2.5): 
-                    # neutFrac = jet.component(reco.PFCandidate.gamma).fraction() + jet.component(reco.PFCandidate.h0).fraction() + jet.component(reco.PFCandidate.egamma_HF).fraction()
-                # event.iJets_neutFrac.append( neutFrac )
-                
-        # print ' event.pfmet.pt() ',event.pfmet.pt()
-        # print ' event.pfMetForRegression.pt() ',event.pfMetForRegression.pt(),' event.tkmet.pt() ',event.tkmet.pt(),\
-              # ' event.nopumet.pt() ',event.nopumet.pt(),' event.pumet.pt() ',event.pumet.pt(),\
-              # ' event.pucmet.pt() ',event.pucmet.pt()
-
-        # print ' event.cleanpfmetForRegression.pt() ',event.cleanpfmetForRegression.pt(),' event.cleantkmet.pt() ',event.cleantkmet.pt(),\
-              # ' event.cleannopumet.pt() ',event.cleannopumet.pt(),' event.pumet.pt() ',event.pumet.pt(),\
-              # ' event.cleanpucmet.pt() ',event.cleanpucmet.pt()
-
-
-    def returnMuonDaughter(self,genp_muon):
-        if genp_muon.numberOfDaughters()>0:
-           for k in range(0,genp_muon.numberOfDaughters()):
-             if genp_muon.daughter(k).pdgId()==13:
-               return genp_muon.daughter(k)
-             elif genp_muon.daughter(k).pdgId()==-13:
-               return genp_muon.daughter(k)
-             # else:
-               # print 'no muon daughter?'  
-        else:
-          # print 'Satus > 1 muon had no daughter'
-          return genp_muon
-      
-    def returnMuonDaughterStatus1(self,genp_muon_daughter):
-        if genp_muon_daughter.status()==1:
-          return genp_muon_daughter
-        else:
-          #print 'Calling again'
-          return self.returnMuonDaughterStatus1(self.returnMuonDaughter(genp_muon_daughter))
-
-                              
-    def RetrieveMuonMatrixIntoVector(self,muon,matrix):
-        for i in range(0,3):
-            for j in range(0,3):
-                matrix.append(muon.covarianceMatrix()(i,j))
-                # matrix[offset+i][offset+j] = muon.covarianceMatrix()(i+3,j+3)
-              
-
-class WBoson(object):
-
-        def __init__(self, lepton, met):
-                self.lepton = lepton
-                self.met = met
-                self.mt = None

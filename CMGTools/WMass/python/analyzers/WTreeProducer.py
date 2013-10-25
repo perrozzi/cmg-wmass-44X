@@ -145,6 +145,10 @@ class WTreeProducer( TreeAnalyzerNumpy ):
       bookMET2( tr, 'pfMetForRegression')
       bookMET2( tr, 'pfmetraw')
 
+      # var( tr, 'pfmetcov00')
+      # var( tr, 'pfmetcov01')
+      # var( tr, 'pfmetcov10')
+      # var( tr, 'pfmetcov11')
 
       bookW( tr, 'W')
       var( tr, 'W_mt')
@@ -251,8 +255,13 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           fill( tr, 'evtHasTrg', event.passedTriggerAnalyzer)
           fill( tr, 'evtWSel', event.WGoodEvent)
           fillMET(tr, 'pfmet', event.pfmet)
+          # pfMetSignificance = self.handles['pfMetSignificance'].product().significance()
+          # fill( tr, 'pfmetcov00', pfMetSignificance(0,0))
+          # fill( tr, 'pfmetcov01', pfMetSignificance(0,1))
+          # fill( tr, 'pfmetcov10', pfMetSignificance(1,0))
+          # fill( tr, 'pfmetcov11', pfMetSignificance(1,1))
+
           event.pfmetraw = self.handles['pfMetraw'].product()[0]
-          event.pfMetSignificance = self.handles['pfMetSignificance'].product()
           event.nopumet = self.handles['nopuMet'].product()[0]
           event.pucmet = self.handles['pucMet'].product()[0]
           event.pfMetForRegression = self.handles['pfMetForRegression'].product()[0]
