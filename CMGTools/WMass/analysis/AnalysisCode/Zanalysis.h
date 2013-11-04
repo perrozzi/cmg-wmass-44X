@@ -101,6 +101,10 @@ class Zanalysis {
   Double_t        Jet_leading_pt;
   Double_t        Jet_leading_eta;
   Double_t        Jet_leading_phi;
+  Double_t        LHE_weight[200];
+  Double_t        LHE_ren[200];
+  Double_t        LHE_fac[200];
+  Double_t        LHE_pdf[200];
 
   // List of branches
   TBranch        *b_scalePDF;   //!
@@ -180,6 +184,11 @@ class Zanalysis {
   TBranch        *b_Jet_leading_pt;   //!
   TBranch        *b_Jet_leading_eta;   //!
   TBranch        *b_Jet_leading_phi;   //!
+  TBranch        *b_LHE_weight;   //!
+  TBranch        *b_LHE_ren;   //!
+  TBranch        *b_LHE_fac;   //!
+  TBranch        *b_LHE_pdf;   //!
+
 
   Zanalysis(TString f_str=0, double lumi_scaling_input=1, int useGen=0, TTree *tree=0);
   virtual ~Zanalysis();
@@ -318,6 +327,11 @@ void Zanalysis::Init(TTree *tree)
   fChain->SetBranchAddress("Jet_leading_pt", &Jet_leading_pt, &b_Jet_leading_pt);
   fChain->SetBranchAddress("Jet_leading_eta", &Jet_leading_eta, &b_Jet_leading_eta);
   fChain->SetBranchAddress("Jet_leading_phi", &Jet_leading_phi, &b_Jet_leading_phi);
+  fChain->SetBranchAddress("LHE_weight", LHE_weight, &b_LHE_weight);
+  fChain->SetBranchAddress("LHE_ren", LHE_ren, &b_LHE_ren);
+  fChain->SetBranchAddress("LHE_fac", LHE_fac, &b_LHE_fac);
+  fChain->SetBranchAddress("LHE_pdf", LHE_pdf, &b_LHE_pdf);
+  
   if(useGenVar){
     fChain->SetBranchAddress("ZGen_mass", &ZGen_mass, &b_ZGen_mass);
     fChain->SetBranchAddress("ZGen_pt", &ZGen_pt, &b_ZGen_pt);
