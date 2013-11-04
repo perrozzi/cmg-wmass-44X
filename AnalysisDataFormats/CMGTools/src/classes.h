@@ -25,6 +25,7 @@
 #include "AnalysisDataFormats/CMGTools/interface/METSignificance.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "AnalysisDataFormats/CMGTools/interface/Candidate.h"
 
 #include <vector>
 
@@ -112,6 +113,11 @@ namespace {
     edm::Wrapper<cmg::SimpleParticle> wsp;
     edm::Wrapper<std::vector<cmg::SimpleParticle> > wvsp;
 
+    cmg::Candidate cc;
+    std::vector<cmg::Candidate> ccv;    
+    edm::Wrapper<cmg::Candidate> wcc;
+    edm::Wrapper<std::vector<cmg::Candidate> > wvcc;
+    
     cmg::Tau t;
     std::vector<cmg::Tau> tv;
     edm::Wrapper<cmg::Tau> et;

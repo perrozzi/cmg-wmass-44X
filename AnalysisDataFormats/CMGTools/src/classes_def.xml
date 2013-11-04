@@ -147,6 +147,11 @@
   
   <class name="pat::strbitset" />
   <class name="std::map<std::basic_string<char>,unsigned int>" />
+
+  <class name="cmg::Candidate"/>
+  <class name="std::vector<cmg::Candidate>"/>
+  <class name="edm::Wrapper<cmg::Candidate>"/>
+  <class name="edm::Wrapper<std::vector<cmg::Candidate> >"/>
   
   <class name="cmg::PFCandidate"/>
   <class name="std::vector<cmg::PFCandidate>"/>
