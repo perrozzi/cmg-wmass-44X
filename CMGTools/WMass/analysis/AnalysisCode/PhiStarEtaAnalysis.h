@@ -137,6 +137,7 @@ class PhiStarEtaAnalysis {
   Int_t           cmgmuons_number;
   Double_t        cmgmuons_charge[10];
   Double_t        cmgmuons_ID[10];
+  Double_t        cmgmuons_ID_8TeV[10];
   Double_t        cmgmuons_Iso[10];
   Double_t        cmgmuons_IsPromt[10];
   Double_t        cmgmuons_IsTrig[10];
@@ -285,8 +286,9 @@ class PhiStarEtaAnalysis {
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
+  virtual Long64_t NumEntries();
   virtual void     Init(TTree *tree);
-  virtual void     Loop(int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int buildTemplates=0, int useMomentumCorr=0, int smearRochCorrByNsigma=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1);
+  virtual void     Loop(int chunk=0, int Entry_ini=0, int Entry_fin=0, int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int buildTemplates=0, int useMomentumCorr=0, int smearRochCorrByNsigma=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
   void SetMuPosNegZ(const Int_t& iPos, const Int_t& iNeg);
@@ -301,7 +303,8 @@ class PhiStarEtaAnalysis {
   bool SelectBestElMuPair();
   TLorentzVector HZ_lv, HMuPos_lv, HMuNeg_lv;
   int HMuPosIsPrompt, HMuNegIsPrompt;
-  
+  void my_handler(int s);
+
 };
 
 #endif
@@ -352,6 +355,11 @@ Long64_t PhiStarEtaAnalysis::LoadTree(Long64_t entry)
   }
   return centry;
 }
+
+Long64_t PhiStarEtaAnalysis::NumEntries(){
+  return fChain->GetEntries();
+};
+
 
 void PhiStarEtaAnalysis::Init(TTree *tree)
 {
@@ -474,28 +482,28 @@ void PhiStarEtaAnalysis::Init(TTree *tree)
     fChain->SetBranchAddress("MuNegGenStatus1_mass", &MuNegGenStatus1_mass, &b_MuNegGenStatus1_mass);
     fChain->SetBranchAddress("MuNegGenStatus1_charge", &MuNegGenStatus1_charge, &b_MuNegGenStatus1_charge);
     fChain->SetBranchAddress("MuNegDRGenP", &MuNegDRGenP, &b_MuNegDRGenP);
-    fChain->SetBranchAddress("cmgjets_number", &cmgjets_number, &b_cmgjets_number);
-    fChain->SetBranchAddress("cmgjets_pt", cmgjets_pt, &b_cmgjets_pt);
-    fChain->SetBranchAddress("cmgjets_eta", cmgjets_eta, &b_cmgjets_eta);
-    fChain->SetBranchAddress("cmgjets_phi", cmgjets_phi, &b_cmgjets_phi);
-    fChain->SetBranchAddress("cmgmuons_number", &cmgmuons_number, &b_cmgmuons_number);
-    fChain->SetBranchAddress("cmgmuons_charge", cmgmuons_charge, &b_cmgmuons_charge);
-    fChain->SetBranchAddress("cmgmuons_ID", cmgmuons_ID, &b_cmgmuons_ID);
-    fChain->SetBranchAddress("cmgmuons_Iso", cmgmuons_Iso, &b_cmgmuons_Iso);
-    fChain->SetBranchAddress("cmgmuons_IsPromt", cmgmuons_IsPromt, &b_cmgmuons_IsPromt);
-    fChain->SetBranchAddress("cmgmuons_IsTrig", cmgmuons_IsTrig, &b_cmgmuons_IsTrig);
-    fChain->SetBranchAddress("cmgmuons_pt", cmgmuons_pt, &b_cmgmuons_pt);
-    fChain->SetBranchAddress("cmgmuons_eta", cmgmuons_eta, &b_cmgmuons_eta);
-    fChain->SetBranchAddress("cmgmuons_phi", cmgmuons_phi, &b_cmgmuons_phi);
-    fChain->SetBranchAddress("cmgelectrons_number", &cmgelectrons_number, &b_cmgelectrons_number);
-    fChain->SetBranchAddress("cmgelectrons_pt", cmgelectrons_pt, &b_cmgelectrons_pt);
-    fChain->SetBranchAddress("cmgelectrons_eta", cmgelectrons_eta, &b_cmgelectrons_eta);
-    fChain->SetBranchAddress("cmgelectrons_phi", cmgelectrons_phi, &b_cmgelectrons_phi);
-    fChain->SetBranchAddress("cmgelectrons_TightID", cmgelectrons_TightID, &b_cmgelectrons_TightID);
-    fChain->SetBranchAddress("cmgelectrons_TightIso", cmgelectrons_TightIso, &b_cmgelectrons_TightIso);
-    fChain->SetBranchAddress("cmgelectrons_charge", cmgelectrons_charge, &b_cmgelectrons_charge);
-    fChain->SetBranchAddress("cmgelectrons_IsPromt", cmgelectrons_IsPromt, &b_cmgelectrons_IsPromt);
   }
+  fChain->SetBranchAddress("cmgjets_number", &cmgjets_number, &b_cmgjets_number);
+  fChain->SetBranchAddress("cmgjets_pt", cmgjets_pt, &b_cmgjets_pt);
+  fChain->SetBranchAddress("cmgjets_eta", cmgjets_eta, &b_cmgjets_eta);
+  fChain->SetBranchAddress("cmgjets_phi", cmgjets_phi, &b_cmgjets_phi);
+  fChain->SetBranchAddress("cmgmuons_number", &cmgmuons_number, &b_cmgmuons_number);
+  fChain->SetBranchAddress("cmgmuons_charge", cmgmuons_charge, &b_cmgmuons_charge);
+  fChain->SetBranchAddress("cmgmuons_ID", cmgmuons_ID, &b_cmgmuons_ID);
+  fChain->SetBranchAddress("cmgmuons_Iso", cmgmuons_Iso, &b_cmgmuons_Iso);
+  fChain->SetBranchAddress("cmgmuons_IsPromt", cmgmuons_IsPromt, &b_cmgmuons_IsPromt);
+  fChain->SetBranchAddress("cmgmuons_IsTrig", cmgmuons_IsTrig, &b_cmgmuons_IsTrig);
+  fChain->SetBranchAddress("cmgmuons_pt", cmgmuons_pt, &b_cmgmuons_pt);
+  fChain->SetBranchAddress("cmgmuons_eta", cmgmuons_eta, &b_cmgmuons_eta);
+  fChain->SetBranchAddress("cmgmuons_phi", cmgmuons_phi, &b_cmgmuons_phi);
+  fChain->SetBranchAddress("cmgelectrons_number", &cmgelectrons_number, &b_cmgelectrons_number);
+  fChain->SetBranchAddress("cmgelectrons_pt", cmgelectrons_pt, &b_cmgelectrons_pt);
+  fChain->SetBranchAddress("cmgelectrons_eta", cmgelectrons_eta, &b_cmgelectrons_eta);
+  fChain->SetBranchAddress("cmgelectrons_phi", cmgelectrons_phi, &b_cmgelectrons_phi);
+  fChain->SetBranchAddress("cmgelectrons_TightID", cmgelectrons_TightID, &b_cmgelectrons_TightID);
+  fChain->SetBranchAddress("cmgelectrons_TightIso", cmgelectrons_TightIso, &b_cmgelectrons_TightIso);
+  fChain->SetBranchAddress("cmgelectrons_charge", cmgelectrons_charge, &b_cmgelectrons_charge);
+  fChain->SetBranchAddress("cmgelectrons_IsPromt", cmgelectrons_IsPromt, &b_cmgelectrons_IsPromt);
   Notify();
 }
 
