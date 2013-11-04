@@ -1,5 +1,5 @@
 // UNCOMMENT TO USE PDF REWEIGHTING
-//#define LHAPDF_ON
+#define LHAPDF_ON
 
 #ifdef LHAPDF_ON
 #include "LHAPDF/LHAPDF.h"
@@ -26,7 +26,7 @@
 
 double MuLeadingPt_TRG_Tight_Iso0p12_SF = 1;
 double MuSubLeadingPt_Tight_Iso0p5_SF = 1;
-int muLeadingPt_charge, muSubLeadingPt_charge, muLeadingPt_trg, muLeadingPt_tight, muSubLeadingPt_tight, muLeadingPt_dxy, muSubLeadingPt_dxy;
+int muLeadingPt_charge, muSubLeadingPt_charge, muLeadingPt_trg, muLeadingPt_tight, muSubLeadingPt_tight, muLeadingPt_dxy, muLeadingPt_dz, muSubLeadingPt_dxy, muSubLeadingPt_dz;
 double muLeadingPtIso, muSubLeadingPtIso;
 
 TLorentzVector muLeadingPtCorr,muSubLeadingPtCorr, muLeadingPtNoCorr,muSubLeadingPtNoCorr, Zcorr, ZNocorr; //TLorentzVector of the reconstructed muon
@@ -45,7 +45,7 @@ HTransformToHelicityFrame *GoToHXframe;
 rochcor_44X_v3 *rmcor44X;
 MuScleFitCorrector *corrector;
 
-void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int buildTemplates, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight)
+void PhiStarEtaAnalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int buildTemplates, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight)
 {
 
   if (fChain == 0) return;
@@ -60,13 +60,13 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
   << " WMass::NtoysMomCorr= " << WMass::NtoysMomCorr
   << endl;
 
-  ofstream outTXTfile;
+  // ofstream outTXTfile;
 
   TRandom3 *r = new TRandom3(0);
 
   if(!outputdir.Contains("../")) outputdir = "../"+outputdir;
-  cout << "output filename= " << Form("%s/PhiStarEtaAnalysis.root",outputdir.Data()) << endl;
-  outTXTfile.open(Form("%s/PhiStarEtaAnalysis_EVlog.log",outputdir.Data()));
+  // cout << "output filename= " << Form("%s/PhiStarEtaAnalysis.root",outputdir.Data()) << endl;
+  // outTXTfile.open(Form("%s/PhiStarEtaAnalysis_EVlog.log",outputdir.Data()));
   
   #ifdef LHAPDF_ON
   // LHAPDF::initPDFSet(1,"CT10nnlo.LHgrid");
@@ -139,13 +139,13 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
     hEffSF_DATA_TIGHT_ISO05_Tid_iso_trg_Ppt_Peta_PLOT=(TH2F*)finEffSF->Get("SF_DATA_TIGHT_ISO05_Tid_iso_trg_Ppt_Peta_PLOT");
     
   }
-  if(!finEffSF){
+  if(useEffSF!=0 && !finEffSF){
     cout << "file MuonEfficiencies_SF_2011_44X_DataMC.root is missing, impossible to retrieve efficiency scale factors" << endl;
     return;
   }
 
   if(useVtxSF && (IS_MC_CLOSURE_TEST || isMCorDATA==0)){
-    TString vtx_str = sampleName; vtx_str.ReplaceAll("Sig",""); vtx_str.ReplaceAll("Fake","");
+    // TString vtx_str = sampleName; vtx_str.ReplaceAll("Sig",""); vtx_str.ReplaceAll("Fake","");
     // finPileupSF = new TFile(Form("../utils/pileup_reweighting_%s.root",vtx_str.Data())); // used only to build templates
     finPileupSF = new TFile(Form("../utils/pileup/pileup_reweighting_Fall11_7TeV_Markus.root")); // used only to build templates
     if(!finPileupSF){
@@ -191,8 +191,17 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
   double zero_dummy = 0;
   int jetMult = 0; // set to zero;
   
-  Long64_t first_entry = 0;
-  Long64_t nentries = fChain->GetEntriesFast();
+  // Long64_t first_entry = 0;
+  // Long64_t nentries = fChain->GetEntriesFast();
+  Long64_t first_entry = Entry_ini;
+  Long64_t nentries = Entry_fin;
+  // int chunk = nentries != fChain->GetEntries() && first_entry>0 ? (int)nentries/1e6:0;
+  TString chunk_str = chunk>0? Form("_chunk%d",chunk) : "";
+  ofstream outTXTfile;
+  outTXTfile.open(Form("%s/PhiStarEtaAnalysis_EVlog%s.log",outputdir.Data(),chunk_str.Data()));
+  if(!outputdir.Contains("../")) outputdir = "../"+outputdir;
+  cout << "output filename= " << Form("%s/PhiStarEtaAnalysis%s.root",outputdir.Data(),chunk_str.Data()) << endl;
+
   if(IS_MC_CLOSURE_TEST==1 && isMCorDATA==1) first_entry=nentries/2; // in case of closure test, DATA runs from N/2 to N
   if(IS_MC_CLOSURE_TEST==1 && isMCorDATA==0) nentries=nentries/2; // in case of closure test, MC runs from 0 to N/2
   if(IS_MC_CLOSURE_TEST==1) lumi_scaling=lumi_scaling*2; // in case of closure test, scaling must be multiplied by 2
@@ -210,6 +219,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
   GoToHXframe = new HTransformToHelicityFrame();
   
   Long64_t nbytes = 0, nb = 0;
+  // BEGINNING OF THE EVENT LOOP
   for (Long64_t jentry=first_entry; jentry<nentries;jentry++) {
   // for (Long64_t jentry=0; jentry<5e5+1;jentry++) {
   
@@ -217,6 +227,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
+
     if(jentry%50000==0){
       time_t now = time(0);
       TString dt = ctime(&now); dt.ReplaceAll("\n"," ");
@@ -375,7 +386,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                                        nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
                 common_stuff::plot1D(Form("ZMass_gen_MCEffLeadTightIsoTRGSubTightIsoWeighted_ATLASbin_pdf%d_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,eta_str.Data()),
                                        ZGen.M(), gen_evt_weight_Eff, h_1d, 
-                                       nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
+                                       300,50,200 );
 
                                        
                 if(evtHasGoodVtx && TMath::Abs(muLeadingPtCorr.Eta())<WMass::etaMaxMuons[i] 
@@ -443,35 +454,36 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
             if(usePtSF && (IS_MC_CLOSURE_TEST || isMCorDATA==0) && hZPtSF && sampleName.Contains("DYJetsSig")) evt_weight_NoEff*=hZPtSF->GetBinContent(hZPtSF->GetXaxis()->FindBin(Zcorr.Pt()>0?Zcorr.Pt():ZGen.Pt()));
             
             double evt_weight_Eff = evt_weight_NoEff;
-            
             if(!useGenVar){
               SelectBestMuPosNegPair();
               AssignRecoLeadingAndSubleadingMuonLabels(useMomentumCorr, IS_MC_CLOSURE_TEST, isMCorDATA, smearRochCorrByNsigma);
               ComputeHXVarAndPhiStarEta();
             }
 
-            if(useEffSF==1 && (IS_MC_CLOSURE_TEST || isMCorDATA==0)){
-              MuLeadingPt_TRG_Tight_Iso0p12_SF = hEffSF_MuId_eta_2011[runopt_MC]->Eval(MuPos_eta)*hEffSF_Iso_eta_2011[runopt_MC]->Eval(MuPos_eta)*hEffSF_HLT_eta_2011->Eval(MuPos_eta);
-              MuSubLeadingPt_Tight_Iso0p5_SF = hEffSF_MuId_eta_2011[runopt_MC]->Eval(MuNeg_eta)*hEffSF_Iso_eta_2011[runopt_MC]->Eval(MuNeg_eta)*hEffSF_HLT_eta_2011->Eval(MuPos_eta);
-            
-            }else if(useEffSF==2 && !(IS_MC_CLOSURE_TEST || isMCorDATA==0)){
-            
-              MuLeadingPt_TRG_Tight_Iso0p12_SF = hEffSF_DATA_2011_HLT_IsoMu24_eta2p1_eta_pair_pt[run<175832 ? 0 : 1]->GetBinContent(
-                                                  hEffSF_DATA_2011_HLT_IsoMu24_eta2p1_eta_pair_pt[run<175832 ? 0 : 1]->FindBin(
-                                                    muLeadingPtNoCorr.Eta(), ZNocorr.Pt()
-                                                  )
-                                                 );
-              MuLeadingPt_TRG_Tight_Iso0p12_SF *= hEffSF_DATA_2011_TIGHT_ISO_PT6_Ptrg_eta_pt[run<175832 ? 0 : 1]->GetBinContent(
+            if(muLeadingPtNoCorr.Pt()>0){
+              if(useEffSF==1 && (IS_MC_CLOSURE_TEST || isMCorDATA==0)){
+                MuLeadingPt_TRG_Tight_Iso0p12_SF = hEffSF_MuId_eta_2011[runopt_MC]->Eval(MuPos_eta)*hEffSF_Iso_eta_2011[runopt_MC]->Eval(MuPos_eta)*hEffSF_HLT_eta_2011->Eval(MuPos_eta);
+                MuSubLeadingPt_Tight_Iso0p5_SF = hEffSF_MuId_eta_2011[runopt_MC]->Eval(MuNeg_eta)*hEffSF_Iso_eta_2011[runopt_MC]->Eval(MuNeg_eta)*hEffSF_HLT_eta_2011->Eval(MuPos_eta);
+              
+              }else if(useEffSF==2 && !(IS_MC_CLOSURE_TEST || isMCorDATA==0)){
+              
+                MuLeadingPt_TRG_Tight_Iso0p12_SF = hEffSF_DATA_2011_HLT_IsoMu24_eta2p1_eta_pair_pt[run<175832 ? 0 : 1]->GetBinContent(
                                                     hEffSF_DATA_2011_HLT_IsoMu24_eta2p1_eta_pair_pt[run<175832 ? 0 : 1]->FindBin(
-                                                      muLeadingPtNoCorr.Eta(), muLeadingPtNoCorr.Pt()
+                                                      muLeadingPtNoCorr.Eta(), ZNocorr.Pt()
                                                     )
-                                                  );
-              MuSubLeadingPt_Tight_Iso0p5_SF = hEffSF_DATA_TIGHT_ISO05_Tid_iso_trg_CosThetaStar_PhiStarAbs_Zpt_PLOT->GetBinContent(
-                                                 hEffSF_DATA_TIGHT_ISO05_Tid_iso_trg_CosThetaStar_PhiStarAbs_Zpt_PLOT->FindBin(
-                                                   costh_HX, TMath::Abs(phi_HX), Zcorr.Pt()
-                                                 )
-                                               );
-              cout << "I'm USING THE EFFICIENCIES FOR THE RECO EVENTS AS WELL" << endl;
+                                                   );
+                MuLeadingPt_TRG_Tight_Iso0p12_SF *= hEffSF_DATA_2011_TIGHT_ISO_PT6_Ptrg_eta_pt[run<175832 ? 0 : 1]->GetBinContent(
+                                                      hEffSF_DATA_2011_HLT_IsoMu24_eta2p1_eta_pair_pt[run<175832 ? 0 : 1]->FindBin(
+                                                        muLeadingPtNoCorr.Eta(), muLeadingPtNoCorr.Pt()
+                                                      )
+                                                    );
+                MuSubLeadingPt_Tight_Iso0p5_SF = hEffSF_DATA_TIGHT_ISO05_Tid_iso_trg_CosThetaStar_PhiStarAbs_Zpt_PLOT->GetBinContent(
+                                                   hEffSF_DATA_TIGHT_ISO05_Tid_iso_trg_CosThetaStar_PhiStarAbs_Zpt_PLOT->FindBin(
+                                                     costh_HX, TMath::Abs(phi_HX), Zcorr.Pt()
+                                                   )
+                                                 );
+                // cout << "I'm USING THE EFFICIENCIES FOR THE RECO EVENTS AS WELL" << endl;
+              }
             }
             
             evt_weight_Eff*=MuLeadingPt_TRG_Tight_Iso0p12_SF*MuSubLeadingPt_Tight_Iso0p5_SF;
@@ -483,9 +495,9 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                         
             TLorentzVector WlikePos_met,WlikePos_nu,WlikePos;
             WlikePos_met.SetPtEtaPhiM(pfmet,0,pfmet_phi,0);
-            WlikePos_nu = muSubLeadingPtCorr + WlikePos_met;
-            WlikePos = muLeadingPtCorr + WlikePos_nu;
-
+            // WlikePos_nu = muSubLeadingPtCorr + WlikePos_met;
+            // WlikePos = muLeadingPtCorr + WlikePos_nu;
+            
             // good pair within acceptance cuts for both muons
             if(Zcorr.M()>70 && Zcorr.M()<110
                 && TMath::Abs(muLeadingPtCorr.Eta())<WMass::etaMaxMuons[i] 
@@ -494,11 +506,11 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                 && muSubLeadingPtCorr.Pt()>6 && muSubLeadingPtIso<0.5 && muSubLeadingPt_tight
                 && muLeadingPt_charge != muSubLeadingPt_charge
                 && muLeadingPt_dxy < 0.2 && muSubLeadingPt_dxy < 0.2
+                && muLeadingPt_dz < 0.5 && muSubLeadingPt_dz < 0.5
                 // && noTrgExtraMuonsLeadingPt<10
                 ){
               // full ID and tight requirements on the muon
               // if(MuPosIsTightAndIso && MuPosRelIso<0.12 && MuPos_dxy<0.02){
-                
                 if(true){ // for the momet remove jet pt cut
                   // if(Jet_leading_pt<30){
                   
@@ -508,7 +520,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                   #ifdef LHAPDF_ON
                   weight_old = !sampleName.Contains("DATA") ? (LHAPDF::xfx(1,parton1_x,scalePDF,parton1_pdgId)*LHAPDF::xfx(1,parton2_x,scalePDF,parton2_pdgId)) : 1;
                   #endif
-                  
+
                   for(int h=0; h<WMass::PDF_members; h++){
                     if(!sampleName.Contains("DATA") && WMass::PDF_sets>0 && WMass::PDF_sets!=generated_PDF_set && WMass::PDF_members!=generated_PDF_member){
                       double weight_new = 1;
@@ -522,7 +534,6 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                         lha_weight, 1, h_1d, 1000,0,2
                         );
                     }
-                                        
                     common_stuff::plot1D(Form("log_evt_gen_evt_weight_NoEff_over_gen_evt_weight_Eff_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
                                          TMath::Log10(gen_evt_weight_NoEff/gen_evt_weight_Eff), 1, h_1d, 
                                          200, -10, 10 );
@@ -538,7 +549,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                                          nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
                     common_stuff::plot1D(Form("ZMass_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
                                          Zcorr.M(), evt_weight_Eff, h_1d, 
-                                         nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
+                                         300,50,200 );
                     common_stuff::plot1D(Form("Zpt_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
                                          Zcorr.Pt(), evt_weight_Eff, h_1d, 
                                          100, 0, 600 );
@@ -573,7 +584,6 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                                            // 100, 0, 600, 100, 0, 600 );
                                            nbins_zpt_CMS, bins_zpt_CMS, nbins_zpt_CMS, bins_zpt_CMS );
                     }
-                    
                     // common_stuff::plot1D(Form("logPhiStarEta_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
                                          // logphistar, evt_weight_Eff, h_1d, nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
                     // common_stuff::plot1D(Form("logZpt_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
@@ -723,7 +733,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
                   h_2d, 100,0,25,250,-50,50 );
                 }
             }else{
-              
+            
               // // Iso and dxy for muons which fail either tight requirement, isolation or dxy cut
               // if(pfmetWlikePos>25 && WlikePos_pt<20){
                 // // if( (TMath::Abs(wmass1 - WMass::WMassCentral_MeV) > 1)) continue;
@@ -866,17 +876,17 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
               
               
               // START E-MU SELECTION
-              SelectBestElMuPair();
-              AssignRecoLeadingAndSubleadingMuonLabels(useMomentumCorr, IS_MC_CLOSURE_TEST, isMCorDATA, smearRochCorrByNsigma);
-              ComputeHXVarAndPhiStarEta();
-              
-              common_stuff::plot1D(Form("logPhiStarEta_emu_ATLASbin_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
-                                   logphistar, evt_weight_Eff, h_1d, 
-                                   nbins_phistar_ATLAS, bins_phistar_ATLAS_log );              
-              common_stuff::plot1D(Form("ZMass_emu_pdf%d_%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,toys_str.Data(),eta_str.Data()),
-                     Zcorr.M(), evt_weight_Eff, h_1d, 
-                     nbins_phistar_ATLAS, bins_phistar_ATLAS_log );
-
+              if(SelectBestElMuPair()){
+                AssignRecoLeadingAndSubleadingMuonLabels(useMomentumCorr, IS_MC_CLOSURE_TEST, isMCorDATA, smearRochCorrByNsigma);
+                ComputeHXVarAndPhiStarEta();
+                common_stuff::plot1D(Form("logPhiStarEta_emu_ATLASbin_eta%s",eta_str.Data()),
+                                     logphistar, evt_weight_Eff, h_1d, 
+                                     nbins_phistar_ATLAS, bins_phistar_ATLAS_log );     
+                                     
+                common_stuff::plot1D(Form("ZMass_emu_eta%s",eta_str.Data()),
+                       Zcorr.M(), evt_weight_Eff, h_1d, 
+                       300,50,200 );
+              }
               
               
             } // end else for muon cuts (sig or qcd enriched)
@@ -891,7 +901,7 @@ void PhiStarEtaAnalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString ou
   
   outTXTfile.close();
   
-  TFile*fout = new TFile(Form("%s/PhiStarEtaAnalysis.root",outputdir.Data()),"RECREATE");
+  TFile*fout = new TFile(Form("%s/PhiStarEtaAnalysis%s.root",outputdir.Data(),chunk_str.Data()),"RECREATE");
 
     for(int i=0; i<WMass::etaMuonNSteps; i++){
       TString eta_str = Form("%.1f",WMass::etaMaxMuons[i]); eta_str.ReplaceAll(".","p");
@@ -966,6 +976,9 @@ void PhiStarEtaAnalysis::AssignRecoLeadingAndSubleadingMuonLabels(int useMomentu
   }
   
   //Set TLorentzVector of mu, and mubar
+  if(MuNeg_pt<0 || MuPos_pt<0) return;
+  // cout << MuPos_pt << " " << MuPos_eta << " " << MuPos_phi << " " << MuPos_mass << endl;
+  // cout << MuNeg_pt << " " << MuNeg_eta << " " << MuNeg_phi << " " << MuNeg_mass << endl;
   if(MuPos_pt>MuNeg_pt){
     muLeadingPtCorr.SetPtEtaPhiM(MuPos_pt,MuPos_eta,MuPos_phi,MuPos_mass);
     muLeadingPt_trg = MuPosTrg;
@@ -973,6 +986,7 @@ void PhiStarEtaAnalysis::AssignRecoLeadingAndSubleadingMuonLabels(int useMomentu
     muLeadingPt_charge = MuPos_charge;
     muLeadingPtIso = MuPosRelIso;
     muLeadingPt_dxy = MuPos_dxy;
+    muLeadingPt_dz = MuPos_dz;
     muSubLeadingPtCorr.SetPtEtaPhiM(MuNeg_pt,MuNeg_eta,MuNeg_phi,MuNeg_mass);
     muSubLeadingPt_charge = MuNeg_charge;
     muSubLeadingPtIso = MuNegRelIso;
@@ -984,7 +998,8 @@ void PhiStarEtaAnalysis::AssignRecoLeadingAndSubleadingMuonLabels(int useMomentu
     muLeadingPt_tight = MuNegIsTight;
     muLeadingPt_charge = MuNeg_charge;
     muLeadingPtIso = MuNegRelIso;
-    muLeadingPt_dxy = MuNeg_dxy;
+    muLeadingPt_dxy = TMath::Abs(MuNeg_dxy);
+    muLeadingPt_dz = TMath::Abs(MuNeg_dz);
     muSubLeadingPtCorr.SetPtEtaPhiM(MuPos_pt,MuPos_eta,MuPos_phi,MuPos_mass);
     muSubLeadingPt_charge = MuPos_charge;
     muSubLeadingPtIso = MuPosRelIso;
@@ -995,15 +1010,22 @@ void PhiStarEtaAnalysis::AssignRecoLeadingAndSubleadingMuonLabels(int useMomentu
   muSubLeadingPtNoCorr = muSubLeadingPtCorr;
   ZNocorr = muLeadingPtNoCorr + muSubLeadingPtNoCorr;
 
+  // cout << "debug before, useMomentumCorr=" << useMomentumCorr << endl;
   if(useMomentumCorr==1){ // use rochester corrections if required
     if(IS_MC_CLOSURE_TEST || isMCorDATA==0){
+      // cout << "debug in useMomentumCorr==1 mc" << endl;
       rmcor44X->momcor_mc(muLeadingPtCorr, muLeadingPt_charge, smearRochCorrByNsigma);
       rmcor44X->momcor_mc(muSubLeadingPtCorr, muSubLeadingPt_charge, smearRochCorrByNsigma);
+      // cout << "debug end useMomentumCorr==1 mc" << endl;
       // musclefit_data
     }
     else{
+      // cout << "debug in useMomentumCorr==1 data" << endl;
+      // muLeadingPtCorr.Print();
+      // muSubLeadingPtCorr.Print();
       rmcor44X->momcor_data(muLeadingPtCorr, muLeadingPt_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
       rmcor44X->momcor_data(muSubLeadingPtCorr, muSubLeadingPt_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
+      // cout << "debug end useMomentumCorr==1 data" << endl;
     }
   }else if(useMomentumCorr==2){ // use Momentum scale corrections if required
     corrector->applyPtCorrection(muLeadingPtCorr,muLeadingPt_charge);
@@ -1044,6 +1066,8 @@ void PhiStarEtaAnalysis::ComputeHXVarAndPhiStarEta(){
   }
   
   // RECO
+  if(MuPos_pt<0 || MuNeg_pt<0) return;
+  
   if(MuPos_pt>MuNeg_pt){
     GoToHXframe->TransformToHelicityFrame(muLeadingPtCorr,muSubLeadingPtCorr);
   }else{
@@ -1240,6 +1264,8 @@ bool PhiStarEtaAnalysis::ElectronTest(const Int_t& i)
 
 bool PhiStarEtaAnalysis::SelectBestElMuPair()
 {
+  // cout << "cmgelectrons_number: "  <<  cmgelectrons_number << " cmgmuons_number: "  <<  cmgmuons_number << endl; 
+
   if(cmgmuons_number<1||cmgelectrons_number<1) return false;
   
   Int_t muIndex=-1;
@@ -1256,42 +1282,43 @@ bool PhiStarEtaAnalysis::SelectBestElMuPair()
   
   int IndexEl =  cmgelectrons_number;
   if(cmgelectrons_number>8) IndexEl=9;
+  // cout << "cmgelectrons_number: "  <<  cmgelectrons_number << endl; 
 
 
   for(Int_t i=0;i<Index;i++)
+  {
+    // cout << "HSW:DEBUG  muon_i: "  <<  i << "  " << cmgmuons_pt[i] << "  " << cmgmuons_eta[i] << "  " << cmgmuons_phi[i] << endl; 
+    if(LeadMuIdTrg(i))// selected leading muons
     {
-      //            cout << "HSW:DEBUG  i: "  <<  i << "  " << cmgmuons_pt[i] << "  " << cmgmuons_eta[i] << "  " << cmgmuons_phi[i] << endl; 
-      if(LeadMuIdTrg(i))// selected leading muons
-	{
-	  //the muons are sorted in pt
-	  for(Int_t j=0;j<IndexEl;j++)
-	    {
-	      //		    cout << "HSW:DEBUG  phi electron:  " << cmgelectrons_phi[j] << endl;
-	      if(cmgelectrons_charge[j]!=cmgmuons_charge[i]) {
-		if(ElectronTest(j))
-		  {
+      //the muons are sorted in pt
+      for(Int_t j=0;j<IndexEl;j++){
+      
+        // cout << "HSW:DEBUG  phi electron:  " << cmgelectrons_phi[j] << endl;
+        if(cmgelectrons_charge[j]!=cmgmuons_charge[i]) {
+          if(ElectronTest(j))
+          {
 
-		    if(cmgelectrons_charge[j]==1) {
-		      // if(fabs(MuPos_pt - cmgmuons_pt[j])<0.0001 && fabs(MuNeg_pt - cmgmuons_pt[i])<0.001) continue;
-		      HMuPos_lv.SetPtEtaPhiM(cmgelectrons_pt[j],cmgelectrons_eta[j],cmgelectrons_phi[j],0.0005);
-		      HMuNeg_lv.SetPtEtaPhiM(cmgmuons_pt[i],cmgmuons_eta[i],cmgmuons_phi[i],0.10566);
-		    }
-		    else {
-		      //  if(fabs(MuPos_pt - cmgmuons_pt[i])<0.0001 && fabs(MuNeg_pt - cmgmuons_pt[j])<0.001) continue;
-		      HMuPos_lv.SetPtEtaPhiM(cmgmuons_pt[i],cmgmuons_eta[i],cmgmuons_phi[i],0.10566);
-		      HMuNeg_lv.SetPtEtaPhiM(cmgelectrons_pt[j],cmgelectrons_eta[j],cmgelectrons_phi[j],0.0005);
-		    }
-		    HZ_lv = HMuPos_lv + HMuNeg_lv;
-		    if(fabs(HZ_lv.M()-91.1876) < dZmass_ref) {
-		      dZmass_ref = fabs(HZ_lv.M()-91.1876);
-		      muIndex = i;
-		      elIndex = j;
-		    }
-		  }
-	      }
-	    }
-	}
+            if(cmgelectrons_charge[j]==1) {
+              // if(fabs(MuPos_pt - cmgmuons_pt[j])<0.0001 && fabs(MuNeg_pt - cmgmuons_pt[i])<0.001) continue;
+              HMuPos_lv.SetPtEtaPhiM(cmgelectrons_pt[j],cmgelectrons_eta[j],cmgelectrons_phi[j],0.0005);
+              HMuNeg_lv.SetPtEtaPhiM(cmgmuons_pt[i],cmgmuons_eta[i],cmgmuons_phi[i],0.10566);
+            }
+            else {
+              //  if(fabs(MuPos_pt - cmgmuons_pt[i])<0.0001 && fabs(MuNeg_pt - cmgmuons_pt[j])<0.001) continue;
+              HMuPos_lv.SetPtEtaPhiM(cmgmuons_pt[i],cmgmuons_eta[i],cmgmuons_phi[i],0.10566);
+              HMuNeg_lv.SetPtEtaPhiM(cmgelectrons_pt[j],cmgelectrons_eta[j],cmgelectrons_phi[j],0.0005);
+            }
+            HZ_lv = HMuPos_lv + HMuNeg_lv;
+            if(fabs(HZ_lv.M()-91.1876) < dZmass_ref) {
+              dZmass_ref = fabs(HZ_lv.M()-91.1876);
+              muIndex = i;
+              elIndex = j;
+            }
+          }
+        }
+      }
     }
+  }
 
   if (muIndex==-1) return false;
 
