@@ -1,5 +1,5 @@
 // UNCOMMENT TO USE PDF REWEIGHTING
-//#define LHAPDF_ON
+#define LHAPDF_ON
 
 #ifdef LHAPDF_ON
   #include "LHAPDF/LHAPDF.h"
@@ -219,7 +219,6 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
   int jetMult = 0; // set to zero;
   //for the lepPt, lepPhi, 2: lepton is on leg2;
   
-  
   Long64_t first_entry = 0;
   Long64_t nentries = fChain->GetEntriesFast();
   if(IS_MC_CLOSURE_TEST==1 && isMCorDATA==1) first_entry=nentries/2; // in case of closure test, DATA runs from N/2 to N
@@ -238,20 +237,74 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
     corrector = new MuScleFitCorrector(fitParametersFile);
   }
 
+  TFile *ffpdf=new TFile("pdf_w.root","RECREATE");
+  TH1D*hpdf_w[100];
+  TH1D*hpdf_wlha[100];
+  TH2D*hpdf_wlha_vs_w[100];
+  TH1D*hpdf_w_mean = new TH1D("hpdf_w_mean","hpdf_w_mean",100,0,2);
+  TH1D*hpdf_wlha_mean = new TH1D("hpdf_wlha_mean","hpdf_wlha_mean",100,0,2);
+  // cout << "contains_PDF_reweight " << contains_PDF_reweight << endl;
+  if(contains_PDF_reweight){
+    for(int i_weight=0; i_weight< 100; i_weight++){
+      hpdf_w[i_weight]=new TH1D(Form("hpdf_w_%d",i_weight),Form("hpdf_w_%d",i_weight),100,0,2);
+      hpdf_wlha[i_weight]=new TH1D(Form("hpdf_wlha_%d",i_weight),Form("hpdf_wlha_%d",i_weight),100,0,2);
+      hpdf_wlha_vs_w[i_weight]=new TH2D(Form("hpdf_wlha_vs_w_%d",i_weight),Form("hpdf_wlha_vs_w_%d",i_weight),100,0,2,100,0,2);
+    }
+  }
+  
   Long64_t nbytes = 0, nb = 0;
   // for (Long64_t jentry=first_entry; jentry<nentries;jentry++) {
-    for (Long64_t jentry=0; jentry<1e5;jentry++) {
+    for (Long64_t jentry=0; jentry<2e6;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
-    if(jentry%250000==0) cout <<"Analyzed entry "<<jentry<<"/"<<nentries<<endl;
+    // if(jentry%250000==0) cout <<"Analyzed entry "<<jentry<<"/"<<nentries<<endl;
+    if(jentry%1000==0) cout <<"Analyzed entry "<<jentry<<"/"<<nentries<<endl;
     if(jentry%50000==0){
       time_t now = time(0);
       TString dt = ctime(&now); dt.ReplaceAll("\n"," ");
       outTXTfile << dt << "\t - \t Analyzed entry "<<jentry<<"/"<<nentries<<endl;
     }
+            
+    if(Z_mass<60 || Z_mass>120 || MuPos_pt<20 || MuNeg_pt<20 || TMath::Abs(MuPos_eta)>2.1 || TMath::Abs(MuNeg_eta)>2.1) continue;
+    
+    if(contains_PDF_reweight){
+      for(int i_weight=0; i_weight< 100; i_weight++){
+        // cout << " " 
+        // << i_weight << " "
+        // << LHE_weight[i_weight+7] << " "
+        // << LHE_ren[i_weight+7] << " "
+        // << LHE_fac[i_weight+7] << " "
+        // << LHE_pdf[i_weight+7] 
+        // << endl;
+        
+        hpdf_w[i_weight]->Fill(LHE_weight[i_weight+7]);
 
+      }
+    }
+    
+    double lha_weight = 1;
+    double weight_old = 1;
+    #ifdef LHAPDF_ON
+      weight_old = !sampleName.Contains("DATA") ? (LHAPDF::xfx(1,parton1_x,scalePDF,parton1_pdgId)*LHAPDF::xfx(1,parton2_x,scalePDF,parton2_pdgId)) : 1;
+    #endif
+    
+    for(int h=0; h<WMass::PDF_members; h++){
+      if(!sampleName.Contains("DATA") && WMass::PDF_sets>0 && WMass::PDF_sets!=generated_PDF_set && WMass::PDF_members!=generated_PDF_member){
+        double weight_new = 1;
+        #ifdef LHAPDF_ON
+          LHAPDF::usePDFMember(0,h);
+          weight_new = (LHAPDF::xfx(0,parton1_x,scalePDF,parton1_pdgId)*LHAPDF::xfx(0,parton2_x,scalePDF,parton2_pdgId));
+        #endif
+        lha_weight = weight_new/weight_old;
+        // cout << lha_weight << endl;
+        hpdf_wlha[h]->Fill(lha_weight);
+        hpdf_wlha_vs_w[h]->Fill(LHE_weight[h+7],lha_weight);
+      }    
+    }
+    continue;
+    
     // if(!(IS_MC_CLOSURE_TEST || isMCorDATA==0) && run>175832) continue; // TO TEST ROCHESTER CORRECTIONS ONLY ON RUN2011A
     // if(!(IS_MC_CLOSURE_TEST || isMCorDATA==0) && run<175832) continue; // TO TEST ROCHESTER CORRECTIONS ONLY ON RUN2011B
     
@@ -913,6 +966,30 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
     } // end muon eta loop
         
   } // end event loop
+
+  TGraph *tigre = new TGraph();
+  tigre->SetName("tigre");
+  tigre->SetTitle("tigre");
+  
+  TGraph *tigre2 = new TGraph();
+  tigre2->SetName("tigre2");
+  tigre2->SetTitle("tigre2");
+  
+  if(contains_PDF_reweight){
+    for(int i_weight=0; i_weight< 100; i_weight++){
+      tigre->SetPoint(i_weight,i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1)/hpdf_wlha_vs_w[i_weight]->GetMean(2));
+      tigre2->SetPoint(i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1),hpdf_wlha_vs_w[i_weight]->GetMean(2));
+      hpdf_wlha_mean->Fill(hpdf_wlha[i_weight]->GetMean());
+      hpdf_w_mean->Fill(hpdf_w[i_weight]->GetMean());
+    }
+    ffpdf->cd();
+    tigre->Write();
+    tigre2->Write();
+  }
+  
+  ffpdf->Write();
+  ffpdf->Close();
+  return;
   
   outTXTfile.close();
   
