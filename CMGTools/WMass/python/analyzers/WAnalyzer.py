@@ -113,9 +113,11 @@ class WAnalyzer( Analyzer ):
         event.selJets = copy.copy(event.jets)
 
         # check if the event is MC and if genp must be saved
-        event.savegenpW=True
-        if not (self.cfg_ana.savegenp and self.cfg_comp.isMC):
-          event.savegenpW=False
+        event.savegenpW=False
+        # event.savegenpW=True
+        # if not (self.cfg_ana.savegenp and self.cfg_comp.isMC):
+          # event.savegenpW=False
+        # print 'event.savegenpW 1 ',event.savegenpW
         
         # save genp only for signal events
         # i.e. only one W is present and daughters are muon plus neutrino
@@ -137,111 +139,119 @@ class WAnalyzer( Analyzer ):
         event.genNu = []
         event.genWLept = []
 
-        if len(genW_dummy)==1:
-#        if len(genW_dummy)>0:
-          event.genW = [ genp for genp in genW_dummy if \
-                               ( \
-                                ( math.fabs(genW_dummy[0].daughter(0).pdgId())==13 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(1).pdgId())==13 ) \
-                                ) ]
-          if len(event.genW)==1:
+        if self.cfg_ana.savegenp and self.cfg_comp.isMC:
+        
+          if len(genW_dummy)==1:
+  #        if len(genW_dummy)>0:
+            event.genW = [ genp for genp in genW_dummy if \
+                                 ( \
+                                  ( math.fabs(genW_dummy[0].daughter(0).pdgId())==13 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(1).pdgId())==13 ) \
+                                  ) ]
+            if len(event.genW)==1:
 
-            event.savegenpW=True
-            event.genW_mt = mT(self,event.genW[0].daughter(0).p4() , event.genW[0].daughter(1).p4())
-            event.muGenDeltaRgenP=1e6
+              event.savegenpW=True
+              event.genW_mt = mT(self,event.genW[0].daughter(0).p4() , event.genW[0].daughter(1).p4())
+              event.muGenDeltaRgenP=1e6
 
-            event.genWLept.append(event.genW[0])
-            if [ math.fabs(event.genW[0].daughter(0).pdgId())==13 ]:
-              event.genMu.append(event.genW[0].daughter(0))
-              event.genNu.append(event.genW[0].daughter(1))
-            else:
-              event.genMu.append(event.genW[0].daughter(1))
-              event.genNu.append(event.genW[0].daughter(0))
-            
-            if(len(event.genMu) >0):
-              if(math.fabs(event.genW[0].mother(0).pdgId())!=6):
-                event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+              event.genWLept.append(event.genW[0])
+              if [ math.fabs(event.genW[0].daughter(0).pdgId())==13 ]:
+                event.genMu.append(event.genW[0].daughter(0))
+                event.genNu.append(event.genW[0].daughter(1))
               else:
-                event.genMuStatus1.append(event.genMu[0])
+                event.genMu.append(event.genW[0].daughter(1))
+                event.genNu.append(event.genW[0].daughter(0))
+              
+              if(len(event.genMu) >0):
+                if(math.fabs(event.genW[0].mother(0).pdgId())!=6):
+                  event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+                else:
+                  event.genMuStatus1.append(event.genMu[0])
 
 
-        if len(genW_dummy)>1:
-          event.genW = [ genp for genp in genW_dummy if \
-                               ( \
-                                ( math.fabs(genW_dummy[0].daughter(0).pdgId())==11 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(1).pdgId())==11 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(0).pdgId())==13 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(1).pdgId())==13 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(0).pdgId())==15 ) or \
-                                ( math.fabs(genW_dummy[0].daughter(1).pdgId())==15 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(0).pdgId())==11 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(1).pdgId())==11 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(0).pdgId())==13 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(1).pdgId())==13 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(0).pdgId())==15 ) or \
-                                ( math.fabs(genW_dummy[1].daughter(1).pdgId())==15 ) \
-                                ) ]
+          if len(genW_dummy)>1:
+            event.genW = [ genp for genp in genW_dummy if \
+                                 ( \
+                                  ( math.fabs(genW_dummy[0].daughter(0).pdgId())==11 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(1).pdgId())==11 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(0).pdgId())==13 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(1).pdgId())==13 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(0).pdgId())==15 ) or \
+                                  ( math.fabs(genW_dummy[0].daughter(1).pdgId())==15 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(0).pdgId())==11 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(1).pdgId())==11 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(0).pdgId())==13 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(1).pdgId())==13 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(0).pdgId())==15 ) or \
+                                  ( math.fabs(genW_dummy[1].daughter(1).pdgId())==15 ) \
+                                  ) ]
 
-          if len(event.genW)==2:
-            if ( math.fabs(event.genW[0].daughter(0).pdgId())==13. or math.fabs(event.genW[0].daughter(0).pdgId())==15. or math.fabs(event.genW[0].daughter(0).pdgId())==11. ):
-                event.savegenpW=False
-#                print 'found leptonic W0 a'
-                event.genWLept.append(event.genW[0])
-                if ( math.fabs(event.genW[0].daughter(0).pdgId())==13 ):
-                    event.genMu.append(event.genW[0].daughter(0))
-                    event.genNu.append(event.genW[0].daughter(1))
-                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
-                    event.muGenDeltaRgenP=1e6
-                    if(len(event.genMu) >0):
-                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
-                    event.savegenpW=True
+            if len(event.genW)==2:
+              if ( math.fabs(event.genW[0].daughter(0).pdgId())==13. or math.fabs(event.genW[0].daughter(0).pdgId())==15. or math.fabs(event.genW[0].daughter(0).pdgId())==11. ):
+                  # print 'event.savegenpW 2 ',event.savegenpW
+                  event.savegenpW=False
+  #                print 'found leptonic W0 a'
+                  event.genWLept.append(event.genW[0])
+                  if ( math.fabs(event.genW[0].daughter(0).pdgId())==13 ):
+                      event.genMu.append(event.genW[0].daughter(0))
+                      event.genNu.append(event.genW[0].daughter(1))
+                      event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
+                      event.muGenDeltaRgenP=1e6
+                      if(len(event.genMu) >0):
+                          event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+                      event.savegenpW=True
 
-            if ( math.fabs(event.genW[0].daughter(1).pdgId())==13. or math.fabs(event.genW[0].daughter(1).pdgId())==15. or math.fabs(event.genW[0].daughter(1).pdgId())==11. ):
-                event.savegenpW=False
-#                print 'found leptonic W0 b'
-                event.genWLept.append(event.genW[0])
-                if ( math.fabs(event.genW[0].daughter(1).pdgId())==13 ):
-                    event.genMu.append(event.genW[0].daughter(1))
-                    event.genNu.append(event.genW[0].daughter(0))
-                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
-                    event.muGenDeltaRgenP=1e6
-                    if(len(event.genMu) >0):
-                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
-                    event.savegenpW=True
-                    
-            if ( math.fabs(event.genW[1].daughter(0).pdgId())==13. or math.fabs(event.genW[1].daughter(0).pdgId())==15. or math.fabs(event.genW[1].daughter(0).pdgId())==11. ):
-                event.savegenpW=False
-#                print 'found leptonic W1 c'
-                event.genWLept.append(event.genW[1])
-                if ( math.fabs(event.genW[1].daughter(0).pdgId())==13 ):
-                    event.genMu.append(event.genW[1].daughter(0))
-                    event.genNu.append(event.genW[1].daughter(1))
-                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
-                    event.muGenDeltaRgenP=1e6
-                    if(len(event.genMu) >0):
-                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
-                    event.savegenpW=True
-                    
-            if ( math.fabs(event.genW[1].daughter(1).pdgId())==13. or math.fabs(event.genW[1].daughter(1).pdgId())==15. or math.fabs(event.genW[1].daughter(1).pdgId())==11. ):
-                event.savegenpW=False
-#                print 'found leptonic W1 d'
-                event.genWLept.append(event.genW[1])
-                if ( math.fabs(event.genW[1].daughter(1).pdgId())==13 ):
-                    event.genMu.append(event.genW[1].daughter(1))
-                    event.genNu.append(event.genW[1].daughter(0))
-                    event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
-                    event.muGenDeltaRgenP=1e6
-                    if(len(event.genMu) >0):
-                        event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
-                    event.savegenpW=True
-                    
-            # if the genp is not signal, don't save genp but do not exit 
-            # -----> events which will pass the reconstruction but are not signal
-            # can be considered as background (for example, in W+Jets, from W decaying into electrons, taus)
+              if ( math.fabs(event.genW[0].daughter(1).pdgId())==13. or math.fabs(event.genW[0].daughter(1).pdgId())==15. or math.fabs(event.genW[0].daughter(1).pdgId())==11. ):
+                  # print 'event.savegenpW 3 ',event.savegenpW
+                  event.savegenpW=False
+  #                print 'found leptonic W0 b'
+                  event.genWLept.append(event.genW[0])
+                  if ( math.fabs(event.genW[0].daughter(1).pdgId())==13 ):
+                      event.genMu.append(event.genW[0].daughter(1))
+                      event.genNu.append(event.genW[0].daughter(0))
+                      event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())
+                      event.muGenDeltaRgenP=1e6
+                      if(len(event.genMu) >0):
+                          event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+                      # print 'event.savegenpW 4 ',event.savegenpW
+                      event.savegenpW=True
+                      
+              if ( math.fabs(event.genW[1].daughter(0).pdgId())==13. or math.fabs(event.genW[1].daughter(0).pdgId())==15. or math.fabs(event.genW[1].daughter(0).pdgId())==11. ):
+                  # print 'event.savegenpW 5 ',event.savegenpW
+                  event.savegenpW=False
+  #                print 'found leptonic W1 c'
+                  event.genWLept.append(event.genW[1])
+                  if ( math.fabs(event.genW[1].daughter(0).pdgId())==13 ):
+                      event.genMu.append(event.genW[1].daughter(0))
+                      event.genNu.append(event.genW[1].daughter(1))
+                      event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
+                      event.muGenDeltaRgenP=1e6
+                      if(len(event.genMu) >0):
+                          event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+                      event.savegenpW=True
+                      
+              if ( math.fabs(event.genW[1].daughter(1).pdgId())==13. or math.fabs(event.genW[1].daughter(1).pdgId())==15. or math.fabs(event.genW[1].daughter(1).pdgId())==11. ):
+                  # print 'event.savegenpW 6 ',event.savegenpW
+                  event.savegenpW=False
+  #                print 'found leptonic W1 d'
+                  event.genWLept.append(event.genW[1])
+                  if ( math.fabs(event.genW[1].daughter(1).pdgId())==13 ):
+                      event.genMu.append(event.genW[1].daughter(1))
+                      event.genNu.append(event.genW[1].daughter(0))
+                      event.genW_mt = mT(self,event.genMu[0].p4() , event.genNu[0].p4())                
+                      event.muGenDeltaRgenP=1e6
+                      if(len(event.genMu) >0):
+                          event.genMuStatus1.append(returnMuonDaughterStatus1(self,event.genMu[0]))
+                      event.savegenpW=True
+                      
+              # if the genp is not signal, don't save genp but do not exit 
+              # -----> events which will pass the reconstruction but are not signal
+              # can be considered as background (for example, in W+Jets, from W decaying into electrons, taus)
 
-        else:
-          ## here put false for fully hadronic WW  
-          event.savegenpW=False
+          # else:
+            # ## here put false for fully hadronic WW  
+            # print 'event.savegenpW 7 ',event.savegenpW
+            # event.savegenpW=False
                 
 #        print 'genW found ', len(genW_dummy)
 #        print 'genWLeptonic found ', len(event.genWLept)
