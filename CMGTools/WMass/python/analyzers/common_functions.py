@@ -68,13 +68,13 @@ def testLegKine(self, leg, ptcut, etacut ):
            abs(leg.eta()) < etacut 
    
 
-def BestZMuonPair(self, ZselNoTriggeredMuons):
+def BestZMuonPair(self, Zmuons):
   mZpole = 91.1876
   mZ=1e10
   bestmu1=0
   bestmu2=0
-  for lep1 in ZselNoTriggeredMuons:
-    for lep2 in ZselNoTriggeredMuons:
+  for lep1 in Zmuons:
+    for lep2 in Zmuons:
       # if( lep1 != lep2 and lep1.charge() != lep2.charge() ):
       if( lep1 != lep2 ):
         if(math.fabs((lep1.p4()+lep2.p4()).M()-mZpole) < math.fabs(mZ-mZpole) ):
@@ -85,6 +85,32 @@ def BestZMuonPair(self, ZselNoTriggeredMuons):
 
   return mZ, bestmu1, bestmu2
 
+# def BestZMuonPair(self, ZselTriggeredMuons, ZselNoTriggeredMuons):
+    # mZpole = 91.1876
+    # mZ=1e10
+    # bestmu1=0
+    # bestmu2=0
+    # mu2hastriggered=0
+    # for lep1 in ZselTriggeredMuons:
+      # for lep2 in ZselTriggeredMuons:
+        # # if( lep1 != lep2 and lep1.charge() != lep2.charge() ):
+        # if( lep1 != lep2 ):
+          # if(math.fabs((lep1.p4()+lep2.p4()).M()-mZpole) < math.fabs(mZ-mZpole) ):
+            # mZ=(lep1.p4()+lep2.p4()).M()
+            # bestmu1=lep1
+            # bestmu2=lep2
+            # mu2hastriggered=1
+    # for lep1 in ZselTriggeredMuons:
+      # for lep2 in ZselNoTriggeredMuons:
+        # # if( lep1 != lep2 and lep1.charge() != lep2.charge() ): # charge check removed to allow same sign pairs for background studies
+        # if( lep1 != lep2 ):
+          # if(math.fabs((lep1.p4()+lep2.p4()).M()-mZpole) < math.fabs(mZ-mZpole) ):
+            # mZ=(lep1.p4()+lep2.p4()).M()
+            # bestmu1=lep1
+            # bestmu2=lep2
+            # mu2hastriggered=0
+
+    # return mZ, bestmu1, bestmu2, mu2hastriggered
 
 
 def mT(self, leg1, leg2):
@@ -98,19 +124,21 @@ def mT(self, leg1, leg2):
 def trigMatched(self, event, leg):
     '''Returns true if the leg is matched to a trigger object as defined in the
     triggerMap parameter'''
-    #print 'ok '
+    # print 'inside trigMatched'
     if not event.passedTriggerAnalyzer:
+        # print 'not event.passedTriggerAnalyzer'
         return False
     if not hasattr( self.cfg_ana, 'triggerMap'):
-     #   print 'seofnio'
+        # print 'not hasattr( self.cfg_ana, \'triggerMap\')'
         return True
     path = event.hltPath
-   # print 'seofniwergrero', event.triggerObjects
+    # print 'path ', path
     triggerObjects = event.triggerObjects
-    #print 'ok i' 
+    # print 'triggerObjects ',triggerObjects
     filters = self.cfg_ana.triggerMap[ path ]
+    # print 'filters ',filters
     # the dR2Max value is 0.1^2
-    #print 'ok 2' 
+    # print 'triggerMatched ',triggerMatched(leg, triggerObjects, path, filters,dR2Max=0.01,pdgIds=None )
     return triggerMatched(leg, triggerObjects, path, filters,
                           dR2Max=0.01,
                           pdgIds=None )

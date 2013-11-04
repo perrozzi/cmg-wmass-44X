@@ -72,6 +72,19 @@ def bookElectrons( tree, pName ):
     tree.vars['{pName}_IsPromt'.format(pName=pName)]= my_n.zeros(10, dtype=float)
     tree.tree.Branch('{pName}_IsPromt'.format(pName=pName),tree.vars['{pName}_IsPromt'.format(pName=pName)] ,'{pName}_IsPromt'.format(pName=pName)+'[10]/D' )
 
+# def bookcmgPFcands( tree, pName ):
+    # var(tree, '{pName}_number'.format(pName=pName),int)
+    # tree.vars['{pName}_pt'.format(pName=pName)]= my_n.zeros(5000, dtype=float)
+    # tree.tree.Branch('{pName}_pt'.format(pName=pName),tree.vars['{pName}_pt'.format(pName=pName)] ,'{pName}_pt'.format(pName=pName)+'[5000]/D' )
+    # tree.vars['{pName}_eta'.format(pName=pName)]= my_n.zeros(5000, dtype=float)
+    # tree.tree.Branch('{pName}_eta'.format(pName=pName),tree.vars['{pName}_eta'.format(pName=pName)] ,'{pName}_eta'.format(pName=pName)+'[5000]/D' )
+    # tree.vars['{pName}_phi'.format(pName=pName)]= my_n.zeros(5000, dtype=float)
+    # tree.tree.Branch('{pName}_phi'.format(pName=pName),tree.vars['{pName}_phi'.format(pName=pName)] ,'{pName}_phi'.format(pName=pName)+'[5000]/D' )
+    # tree.vars['{pName}_pdgId'.format(pName=pName)]= my_n.zeros(5000, dtype=float)
+    # tree.tree.Branch('{pName}_pdgId'.format(pName=pName),tree.vars['{pName}_pdgId'.format(pName=pName)] ,'{pName}_pdgId'.format(pName=pName)+'[5000]/D' )
+    # tree.vars['{pName}_fromPV'.format(pName=pName)]= my_n.zeros(5000, dtype=float)
+    # tree.tree.Branch('{pName}_fromPV'.format(pName=pName),tree.vars['{pName}_fromPV'.format(pName=pName)] ,'{pName}_fromPV'.format(pName=pName)+'[5000]/D' )
+
 def bookMuonCovMatrix( tree, pName ):
     tree.vars['{pName}CovMatrix'.format(pName=pName)]= my_n.zeros(9, dtype=float)
     tree.tree.Branch('{pName}CovMatrix'.format(pName=pName),tree.vars['{pName}CovMatrix'.format(pName=pName)] ,'{pName}CovMatrix'.format(pName=pName)+'[9]/D' )
@@ -157,6 +170,15 @@ def fillElectrons( tree, pName, particles,event ):
         tree.vars['{pName}_TightIso'.format(pName=pName)][i] = event.ZElTightIso[i]
         tree.vars['{pName}_charge'.format(pName=pName)][i] = particles[i].charge()
 
+# def fillcmgPFcands( tree, pName, particles,event ):
+    # fill(tree, '{pName}_number'.format(pName=pName),len(particles))
+    # for i in range(0, min(len(particles),2000)):
+        # tree.vars['{pName}_pt'.format(pName=pName)][i] = particles[i].pt()
+        # tree.vars['{pName}_eta'.format(pName=pName)][i] = particles[i].eta()
+        # tree.vars['{pName}_phi'.format(pName=pName)][i] = particles[i].phi()
+        # tree.vars['{pName}_pdgId'.format(pName=pName)][i] = particles[i].pdgId()
+        # tree.vars['{pName}_fromPV'.format(pName=pName)][i] = particles[i].fromPV()
+
 def fillMuonCovMatrix( tree, pName, covMatrix,event ):
     for i in range(0,9):
         tree.vars['{pName}CovMatrix'.format(pName=pName)][i] = covMatrix[i]
@@ -181,6 +203,8 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       self.handles['pfMetForRegression'] = AutoHandle('pfMetForRegression','std::vector<reco::PFMET>')
       self.handles['puMet'] = AutoHandle('puMet','std::vector<reco::PFMET>')
       self.handles['tkMet'] = AutoHandle('tkMet','std::vector<reco::PFMET>')
+      
+      # self.handles['cmgCandidates'] = AutoHandle('cmgCandidates','std::vector<cmg::Candidate>')
               
       self.handles['muons'] = AutoHandle(
             'cmgMuonSel',
@@ -223,7 +247,7 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       var( tr, 'npu', int)
       var( tr, 'evtHasGoodVtx', int)
       var( tr, 'Vtx_ndof', int)
-      var( tr, 'firstVtxIsGood', int)
+      # var( tr, 'firstVtxIsGood', int)
       var( tr, 'evtHasTrg', int)
       var( tr, 'evtZSel', int)
       
@@ -296,6 +320,7 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       bookJetCollections(tr,'cmgjets' )
       bookLeptonCollections(tr,'cmgmuons' )
       bookElectrons(tr,'cmgelectrons' )
+      # bookcmgPFcands(tr,'cmgCandidates' )
      # print 'booked stuff'
 
     def process(self, iEvent, event):
@@ -308,6 +333,8 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
 
         fillMuons(tr, 'cmgmuons', event.ZallMuons, event)
         fillElectrons( tr,'cmgelectrons' ,event.ZselElectrons ,event)
+        # cmgPFcands = self.handles['cmgCandidates'].product()
+        # fillcmgPFcands( tr,'cmgCandidates' ,cmgPFcands ,event)
         fillJets(tr, 'cmgjets', event.ZselJets)
         fill( tr, 'run', event.run) 
         fill( tr, 'lumi',event.lumi)
