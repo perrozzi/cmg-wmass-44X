@@ -1,66 +1,85 @@
 #!/bin/sh
 
 echo "merging chunks (if they exist)"
-nchunks=$(ls ${1}/test_numbers_DATA/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_DATA/WanalysisOnDATA.root ${1}/test_numbers_DATA/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_DATA/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_WJetsSig/WanalysisOnDATA.root ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_WJetsFake/WanalysisOnDATA.root ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_DYJetsSig/WanalysisOnDATA.root ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_DYJetsFake/WanalysisOnDATA.root ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_TTJets/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_TTJets/WanalysisOnDATA.root ${1}/test_numbers_TTJets/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_TTJets/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_ZZJets/WanalysisOnDATA.root ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_WZJets/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_WZJets/WanalysisOnDATA.root ${1}/test_numbers_WZJets/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_WZJets/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_WWJets/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_WWJets/WanalysisOnDATA.root ${1}/test_numbers_WWJets/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_WWJets/Wanalysis_chunk*.root 
-fi
-nchunks=$(ls ${1}/test_numbers_QCD/Wanalysis_chunk*.root |wc -l)
-if [ $nchunks -gt 0 ]
-then
-  hadd -f ${1}/test_numbers_QCD/WanalysisOnDATA.root ${1}/test_numbers_QCD/Wanalysis_chunk*.root 
-  rm ${1}/test_numbers_QCD/Wanalysis_chunk*.root 
-fi
+
+samples=("DATA" "WJetsSig" "WJetsFake" "DYJetsSig" "DYJetsFake" "TTJets" "ZZJets" "WZJets" "WWJets" "QCD")
+analyses=("Wanalysis" "Zanalysis" "PhiStarEtaAnalysis")
+
+for (( id_sample=0; id_sample<${#samples[@]}; id_sample++ ))
+  do
+  for (( id_ana=0; id_ana<${#analyses[@]}; id_ana++ ))
+    do
+    
+    nchunks=$(ls ${1}/test_numbers_${samples[id_sample]}/${analyses[id_ana]}_chunk*.root |wc -l)
+    if [ $nchunks -gt 0 ]
+    then
+      hadd -f ${1}/test_numbers_${samples[id_sample]}/${analyses[id_ana]}OnDATA.root ${1}/test_numbers_${samples[id_sample]}/${analyses[id_ana]}_chunk*.root 
+      rm ${1}/test_numbers_${samples[id_sample]}/${analyses[id_ana]}_chunk*.root 
+    fi
+    
+  done
+done
+
+# nchunks=$(ls ${1}/test_numbers_DATA/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_DATA/WanalysisOnDATA.root ${1}/test_numbers_DATA/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_DATA/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_WJetsSig/WanalysisOnDATA.root ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_WJetsSig/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_WJetsFake/WanalysisOnDATA.root ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_WJetsFake/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_DYJetsSig/WanalysisOnDATA.root ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_DYJetsSig/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_DYJetsFake/WanalysisOnDATA.root ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_DYJetsFake/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_TTJets/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_TTJets/WanalysisOnDATA.root ${1}/test_numbers_TTJets/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_TTJets/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_ZZJets/WanalysisOnDATA.root ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_ZZJets/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_WZJets/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_WZJets/WanalysisOnDATA.root ${1}/test_numbers_WZJets/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_WZJets/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_WWJets/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_WWJets/WanalysisOnDATA.root ${1}/test_numbers_WWJets/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_WWJets/Wanalysis_chunk*.root 
+# fi
+# nchunks=$(ls ${1}/test_numbers_QCD/Wanalysis_chunk*.root |wc -l)
+# if [ $nchunks -gt 0 ]
+# then
+  # hadd -f ${1}/test_numbers_QCD/WanalysisOnDATA.root ${1}/test_numbers_QCD/Wanalysis_chunk*.root 
+  # rm ${1}/test_numbers_QCD/Wanalysis_chunk*.root 
+# fi
 
 echo 'EWK ONLY (EWK)'
 # EWK ONLY
