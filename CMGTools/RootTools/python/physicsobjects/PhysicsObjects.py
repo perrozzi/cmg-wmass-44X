@@ -14,6 +14,7 @@ from CMGTools.RootTools.physicsobjects.Jet import Jet, GenJet
 from CMGTools.RootTools.physicsobjects.Lepton import Lepton
 from CMGTools.RootTools.physicsobjects.Photon import Photon
 from CMGTools.RootTools.physicsobjects.Muon import Muon
+from CMGTools.RootTools.physicsobjects.Candidate import Candidate
 from CMGTools.RootTools.physicsobjects.Electron import Electron
 from CMGTools.RootTools.physicsobjects.Tau import Tau, isTau
 from CMGTools.RootTools.physicsobjects.GenParticle import GenParticle,GenLepton
