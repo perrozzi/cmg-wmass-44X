@@ -224,7 +224,7 @@ def testElectronIDTight(self, leg):
 def RetrieveMuonMatrixIntoVector(self,muon,matrix):
     for i in range(0,3):
         for j in range(0,3):
-            matrix.append(muon.covarianceMatrix()(i,j))
+            matrix.append(muon.covarianceMatrix()(i+3,j+3))
             # matrix[offset+i][offset+j] = muon.covarianceMatrix()(i+3,j+3)
                             
 
