@@ -192,7 +192,7 @@ void common_stuff::makeRatioHisto1D(std::string title1, std::string title2, std:
   std::map<std::string, TH1D*>::iterator iter2= allhistos.find(title2);
   std::map<std::string, TH1D*>::iterator iter_ratio= allhistos.find(title_ratio);
   
-  if(iter_ratio == allhistos.end()) //no histo for this yet, so make a new  one
+  if(iter_ratio == allhistos.end() && iter1 != allhistos.end() && iter2 != allhistos.end()) //no histo for this yet, so make a new  one
   {
     std::string histoName = (std::string) (common_stuff::getCompleteTitleReturnName(title_ratio)).Data();
     TH1D* currentHisto= (TH1D*)(*iter1).second->Clone(histoName.c_str());
@@ -207,7 +207,7 @@ void common_stuff::makeRatioHisto1D(std::string title1, std::string title2, std:
     allhistos.insert(std::pair<std::string, TH1D*> (histoName,currentHisto) );
   }else{
     
-    std::cout << "Can't create histo " << title_ratio << " as the ratio of 2 histos, already existing!" << std::endl;
+    std::cout << "Can't create histo " << title_ratio << " as " << title1 << " and/or " << title2 << " don't exist and/or the ratio of 2 histos already exists!" << std::endl;
     
   }
 
