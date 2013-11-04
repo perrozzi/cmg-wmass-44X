@@ -266,10 +266,10 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       bookMET(tr, 'tkmet')
       var(tr, 'pfmet_sumEt')
 
-      # var( tr, 'pfmetcov00')
-      # var( tr, 'pfmetcov01')
-      # var( tr, 'pfmetcov10')
-      # var( tr, 'pfmetcov11')
+      var( tr, 'pfmetcov00')
+      var( tr, 'pfmetcov01')
+      var( tr, 'pfmetcov10')
+      var( tr, 'pfmetcov11')
 
       bookMET(tr, 'pfmetWlikeNeg')
       bookMET(tr, 'pfmetWlikePos')
@@ -320,7 +320,8 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
       bookJetCollections(tr,'cmgjets' )
       bookLeptonCollections(tr,'cmgmuons' )
       bookElectrons(tr,'cmgelectrons' )
-      # bookcmgPFcands(tr,'cmgCandidates' )
+      if hasattr(self.cfg_ana,'storeNeutralCMGcandidates'):
+        bookcmgPFcands(tr,'cmgCandidates' )
      # print 'booked stuff'
 
     def process(self, iEvent, event):
@@ -333,8 +334,9 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
 
         fillMuons(tr, 'cmgmuons', event.ZallMuons, event)
         fillElectrons( tr,'cmgelectrons' ,event.ZselElectrons ,event)
-        # cmgPFcands = self.handles['cmgCandidates'].product()
-        # fillcmgPFcands( tr,'cmgCandidates' ,cmgPFcands ,event)
+        if hasattr(self.cfg_ana,'storeNeutralCMGcandidates'):
+          cmgPFcands = self.handles['cmgCandidates'].product()
+          fillcmgPFcands( tr,'cmgCandidates' ,cmgPFcands ,event)
         fillJets(tr, 'cmgjets', event.ZselJets)
         fill( tr, 'run', event.run) 
         fill( tr, 'lumi',event.lumi)
@@ -430,10 +432,10 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
           # event.pfmet2 = self.handles['pfMet'].product()[0]
           event.pfmetraw = self.handles['pfMetraw'].product()[0]
           pfMetSignificance = self.handles['pfMetSignificance'].product().significance()
-          # fill( tr, 'pfmetcov00', pfMetSignificance(0,0))
-          # fill( tr, 'pfmetcov01', pfMetSignificance(0,1))
-          # fill( tr, 'pfmetcov10', pfMetSignificance(1,0))
-          # fill( tr, 'pfmetcov11', pfMetSignificance(1,1))
+          fill( tr, 'pfmetcov00', pfMetSignificance(0,0))
+          fill( tr, 'pfmetcov01', pfMetSignificance(0,1))
+          fill( tr, 'pfmetcov10', pfMetSignificance(1,0))
+          fill( tr, 'pfmetcov11', pfMetSignificance(1,1))
 
           event.nopumet = self.handles['nopuMet'].product()[0]
           event.pucmet = self.handles['pucMet'].product()[0]
