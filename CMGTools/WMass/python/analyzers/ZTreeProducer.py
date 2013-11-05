@@ -418,7 +418,8 @@ class ZTreeProducer( TreeAnalyzerNumpy ):
         if (event.savegenpZ and self.cfg_comp.isMC) or event.ZGoodEvent:
           
           fill( tr, 'njets', len(event.ZselJets))
-          fill( tr, 'Vtx_ndof', event.goodVertices[0].ndof())
+          if(event.passedVertexAnalyzer):
+            fill( tr, 'Vtx_ndof', event.goodVertices[0].ndof())
           # fill( tr, 'firstVtxIsGood', event.firstVtxIsGoodVertices) # REQUIRES DEFINITION IN CMGTools/RootTools/python/analyzers/VertexAnalyzer.py
           fill( tr, 'nMuons', len(event.ZallMuons))
           fill( tr, 'nTrgMuons', len(event.ZselTriggeredMuons))
