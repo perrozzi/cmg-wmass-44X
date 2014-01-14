@@ -112,7 +112,7 @@ float getPhiCorrMET(bool iType) {
 
 
 
-void load(TTree *iTree, int type) { 
+void load(TTree *iTree, int type) {
 
   fWeight = 1;
   iTree->ResetBranchAddresses();
@@ -476,7 +476,7 @@ double getError(double iVal,TF1 *iWFit,TF1 *iZDatFit,TF1 *iZMCFit,bool iRescale=
   return sqrt(lVal);//+(iZMCFit->Eval(iVal)-iWFit->Eval(iVal);
 }
 
-void computeFitErrors(TF1 *iFit,TFitResultPtr &iFPtr,TF1 *iTrueFit,bool iPol0=false) {  
+void computeFitErrors(TF1 *iFit,TFitResultPtr &iFPtr,TF1 *iTrueFit,bool iPol0=false) {
 
   bool lPol0 = iPol0;
   bool lPol2 = (iTrueFit->GetParError(2) != 0);
@@ -667,7 +667,7 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   //RooFit Build a double Gaussian                                                                                                                        
   TRandom lRand(0xDEADBEEF);
   RooRealVar    lRWeight("weight","weight",0,10);
-  ////  RooRealVar lRPt  ("pt","Z_{p_{T}}",10,1000);                                                                                                      
+  ////  RooRealVar lRPt  ("pt","Z_{p_{T}}",10,1000);
   RooRealVar lRPt  ("pt","Z_{p_{T}}",0,fZPtMax);
 
   RooRealVar lRXVar("XVar","(U_{1}(Z_{p_{T}})-x_{i})/#sigma_{U1} (Z_{p_{T}})",0,-5,5);
@@ -706,9 +706,9 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   RooRealVar    lR1Sigma("Rsigma1","RSigma1",1. ,0,40);
   RooRealVar    lR2Sigma("Rsigma2","RSigma2",12.,1,40);
   RooRealVar    lR1Frac ("Rfrac"  ,"Rfrac"  ,0.5,0.,1.0);
-  RooRealVar    lR2Mean ("Rmean",  "Rmean",0,-10,10); // lR2Mean.setConstant(kTRUE); //                                                                   
+  RooRealVar    lR2Mean ("Rmean",  "Rmean",0,-10,10); lR2Mean.setConstant(kTRUE); //                                                                   
 
-  // ===> This is the model for the 1D                                                                                                                    
+  // ===> This is the model for the 1D
   RooGaussian   lRGaus1("Rgaus1","Rgaus1",lRXVar,lR2Mean,lR1Sigma);
   RooGaussian   lRGaus2("Rgaus2","Rgaus2",lRXVar,lR2Mean,lR2Sigma);
   RooAddPdf     lRGAdd ("RAdd"  ,"RAdd",lRGaus1,lRGaus2,lR1Frac);
@@ -716,10 +716,10 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   if(iRMS){   
     for(int iev=0; iev<lXVals_all.at(0).at(0).size(); iev++){
       // pVal = (lPar - iMeanFit->Eval(fZPt));
-      double temp = vlYVals_all[lPar!=fU1][iRMS][iev];
+      double temp = vlYVals_all[lPar!=fU1][iRMS][iev]; // 
       if(iMeanFit != 0) temp = vlYVals_all[lPar!=fU1][iRMS][iev] - iMeanFit->Eval(vlXVals_all[lPar!=fU1][iRMS][iev]);
-      vlYVals_all[lPar!=fU1][iRMS][iev] = abs(temp);
-      vlYTVals_all[lPar!=fU1][iRMS][iev] = temp; 
+      vlYVals_all[lPar!=fU1][iRMS][iev] = abs(temp); // absolute value of residuals
+      vlYTVals_all[lPar!=fU1][iRMS][iev] = temp;  // residuals
     }
   }
 
@@ -777,7 +777,7 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   std::string lType     = "pol3"; if(iPol1) lType = "pol2"; //pol1 -->higgs 
   if(iType == 1)  lType = "pol3"; 
 
-  lType     = "pol1";
+  lType     = "pol2";
   //http://root.cern.ch/root/html/TGraph.html
   //"EX0" When fitting a TGraphErrors or TGraphAsymErrors do not consider errors in the coordinate
   //"R"   Use the Range specified in the function range
@@ -789,7 +789,7 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   //  TFitResultPtr  lFitPtr = pGraphA->Fit(lFit,"SR","EXO",fZPtMin,fZPtMax); //"EXO"
   TFitResultPtr  lFitPtr = pGraphA->Fit(lFit,"SRE","",fZPtMin,fZPtMax); 
   computeFitErrors(iFit,lFitPtr,lFit,iRMS);
-  pGraphA->Draw("ap");
+  pGraphA->Draw("ap"); // use colz for colorful plot
   drawErrorBands(iFit,fZPtMax);
 
   if(lPar==fU1) pGraphA->GetYaxis()->SetTitle("U1"); 
@@ -855,23 +855,23 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   int lNBins = 25;
   for(int i0  = 0; i0 < lNBins; i0++) { 
     RooDataSet lData(pSS.str().c_str(),pSS.str().c_str(),RooArgSet(lRXVar)); 
-    //    lRPt.setBins(500);
-    //    lRPt.setBins(fZPtMax);
-    lRPt.setBins(lNBins);
-    lResidVals.push_back(lData); 
+    lResidVals.push_back(lData); // binned (1D)
   }
-  lResidVals2D.push_back(lData2D);
+  // lRPt.setBins(500);
+  // lRPt.setBins(fZPtMax);
+  lRPt.setBins(fZPtMax*50);
+  lResidVals2D.push_back(lData2D); // unbinned (2D)
   std::vector<float> lX3SVals; std::vector<float> lXE3SVals; std::vector<float> lY3SVals; std::vector<float> lYE3SVals; //Events with sigma > 3
   std::vector<float> lX4SVals; std::vector<float> lXE4SVals; std::vector<float> lY4SVals; std::vector<float> lYE4SVals; //Events with sigma > 3
   
-  for(unsigned int i0 = 0; i0 < lXVals_all.at(0).at(0).size(); i0++) { 
+  for(unsigned int i0 = 0; i0 < lXVals_all.at(0).at(0).size(); i0++) {  // for all the data points
     double lYTest = lFit->Eval(vlXVals_all[lPar!=fU1][iRMS][i0])*sqrt(2*3.14159265)/2.;
-    lRXVar.setVal(vlYTVals_all[lPar!=fU1][iRMS][i0]/(lYTest));
+    lRXVar.setVal(vlYTVals_all[lPar!=fU1][iRMS][i0]/(lYTest)); // pull on RMS
     lRPt.setVal(vlXVals_all[lPar!=fU1][iRMS][i0]);
     lRWeight.setVal(1./vlYEVals_all[lPar!=fU1][iRMS][i0]/vlYEVals_all[lPar!=fU1][iRMS][i0]);
     int pId = int(vlXVals_all[lPar!=fU1][iRMS][i0]/(fZPtMax/lNBins)); if(pId > lNBins-1) pId = lNBins-1; 
-    lResidVals[pId].add(RooArgSet(lRXVar));//,lRWeight.getVal()); //Fill the Double Gaussian
-    lResidVals2D[0].add(RooArgSet(lRXVar,lRPt));//,lRWeight.getVal()); //Fill the Double Gaussian
+    lResidVals[pId].add(RooArgSet(lRXVar));//,lRWeight.getVal()); //Fill the Double Gaussian 1D
+    lResidVals2D[0].add(RooArgSet(lRXVar,lRPt));//,lRWeight.getVal()); //Fill the Double Gaussian 2D
   }
   lGAdd.mustBeExtended();
   RooFitResult *pFR = lGAdd.fitTo(lResidVals2D[0],Save(kTRUE),ConditionalObservables(lRPt),NumCPU(2),Minos());//,Minos());//,Minos()); //Double Gaussian fit
@@ -898,9 +898,9 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
     double *myFracE = new double[lNBins];
     double *myMeanE = new double[lNBins];
 
-    for(int i0  = 0; i0 < lNBins; i0++) { 
+    for(int i0  = 0; i0 < lNBins; i0++) {
       lRGAdd.fitTo(lResidVals[i0],Save(kTRUE),NumCPU(2));//,Minos());//,Minos()); //Double Gaussian fit
-      lRPt.setRange(i0*10,i0*10+10);
+      // lRPt.setRange(i0*10,i0*10+10);
       RooPlot *lFrame1 = lRXVar.frame(Title("XXX")) ;
       //lResidVals2D[0].plotOn(lFrame1);
       lResidVals [i0].plotOn(lFrame1,RooFit::MarkerColor(kRed));
@@ -926,16 +926,16 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
       //cin.get();    
       lX[i0] = (fZPtMax/lNBins)*i0;
       lEX[i0] = (fZPtMax/lNBins)/10;
-      lY0[i0] = (lR1Frac .getVal()*lR1Sigma.getVal() + (1.-lR1Frac.getVal())*lR2Sigma.getVal())/sqrt(2*3.14159265)*2.;
-      lY1[i0] = lR1Sigma.getVal()/sqrt(2*3.14159265)*2.;
-      lY2[i0] = lR2Sigma.getVal()/sqrt(2*3.14159265)*2.;
+      lY0[i0] = (lR1Frac .getVal()*lR1Sigma.getVal() + (1.-lR1Frac.getVal())*lR2Sigma.getVal())/* /sqrt(2*3.14159265)*2. */;
+      lY1[i0] = lR1Sigma.getVal()/* /sqrt(2*3.14159265)*2. */;
+      lY2[i0] = lR2Sigma.getVal()/* /sqrt(2*3.14159265)*2. */;
       lEY0[i0]  = lR1Frac .getError()*lR1Sigma.getVal()  * lR1Frac .getError()*lR1Sigma.getVal();
       lEY0[i0] += lR1Frac .getVal()  *lR1Sigma.getError()* lR1Frac .getVal()  *lR1Sigma.getError();
       lEY0[i0] += lR1Frac .getError()*lR2Sigma.getVal()  * lR1Frac .getError()*lR2Sigma.getVal();
       lEY0[i0] += (1-lR1Frac .getVal())*lR2Sigma.getError()* (1-lR1Frac .getVal())  *lR2Sigma.getError();
-      lEY0[i0] = sqrt(lEY0[i0])/sqrt(2*3.14159265)*2.;
-      lEY1[i0] = lR1Sigma.getError()/sqrt(2*3.14159265)*2.;
-      lEY2[i0] = lR2Sigma.getError()/sqrt(2*3.14159265)*2.;
+      lEY0[i0] = sqrt(lEY0[i0])/* /sqrt(2*3.14159265)*2. */;
+      lEY1[i0] = lR1Sigma.getError()/* /sqrt(2*3.14159265)*2. */;
+      lEY2[i0] = lR2Sigma.getError()/* /sqrt(2*3.14159265)*2. */;
       
       //    if(doPrintAll) {
       
@@ -1256,7 +1256,9 @@ void fitRecoil1(TTree * iTree, /*float &iVPar,*/ double &iVPar,
 	       TF1 *iMFit, TF1 *iMRMSFit, TF1 *iRMS1Fit, TF1 *iRMS2Fit,int iType) { 
   TCanvas *lXC1 = new TCanvas("C1","C1",800,600); lXC1->cd(); 
 
+  // fit scale
   fitGraph(iTree,fTTbar,lXC1,iVPar,iMFit   ,0       ,0       ,0    ,true ,false,iType);
+  // fit RMS (uses scale fit info)
   fitGraph(iTree,fTTbar,lXC1,iVPar,iMRMSFit,iRMS1Fit,iRMS2Fit,iMFit,false,true ,iType);
 
 }
@@ -1436,14 +1438,14 @@ void fitRecoilMET(TTree *iTree,std::string iName,int type, int fId) {
   std::stringstream PUstring;
   PUstring << fId;
 
-  TF1 *lU1Fit     = new TF1((lPrefix+"u1Mean_"+PUstring.str()).c_str(),   "pol1");
-  TF1 *lU1MRMSFit = new TF1((lPrefix+"u1MeanRMS_"+PUstring.str()).c_str(),"pol1");
-  TF1 *lU1RMS1Fit = new TF1((lPrefix+"u1RMS1_"+PUstring.str()).c_str(),   "pol1");
-  TF1 *lU1RMS2Fit = new TF1((lPrefix+"u1RMS2_"+PUstring.str()).c_str(),   "pol1");
-  TF1 *lU2Fit     = new TF1((lPrefix+"u2Mean_"+PUstring.str()).c_str(),   "pol1");  
-  TF1 *lU2MRMSFit = new TF1((lPrefix+"u2MeanRMS_"+PUstring.str()).c_str(),"pol1");
-  TF1 *lU2RMS1Fit = new TF1((lPrefix+"u2RMS1_"+PUstring.str()).c_str(),   "pol1");
-  TF1 *lU2RMS2Fit = new TF1((lPrefix+"u2RMS2_"+PUstring.str()).c_str(),   "pol1");
+  TF1 *lU1Fit     = new TF1((lPrefix+"u1Mean_"+PUstring.str()).c_str(),   "pol2");
+  TF1 *lU1MRMSFit = new TF1((lPrefix+"u1MeanRMS_"+PUstring.str()).c_str(),"pol2");
+  TF1 *lU1RMS1Fit = new TF1((lPrefix+"u1RMS1_"+PUstring.str()).c_str(),   "pol2");
+  TF1 *lU1RMS2Fit = new TF1((lPrefix+"u1RMS2_"+PUstring.str()).c_str(),   "pol2");
+  TF1 *lU2Fit     = new TF1((lPrefix+"u2Mean_"+PUstring.str()).c_str(),   "pol2");  
+  TF1 *lU2MRMSFit = new TF1((lPrefix+"u2MeanRMS_"+PUstring.str()).c_str(),"pol2");
+  TF1 *lU2RMS1Fit = new TF1((lPrefix+"u2RMS1_"+PUstring.str()).c_str(),   "pol2");
+  TF1 *lU2RMS2Fit = new TF1((lPrefix+"u2RMS2_"+PUstring.str()).c_str(),   "pol2");
 
   //  cout << "doing U1 " << endl;
   fitRecoil1(iTree,fU1,lU1Fit,lU1MRMSFit,lU1RMS1Fit,lU1RMS2Fit,type);
