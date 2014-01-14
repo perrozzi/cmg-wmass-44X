@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------
 RecoilCorrector::RecoilCorrector(string iNameZDat,std::string iPrefix, int iSeed) {
 
-  fRandom = new TRandom1(iSeed);
+  fRandom = new TRandom3(iSeed);
 
   // get fits for Z data
   readRecoil(fF1U1Fit,fF1U1RMSSMFit,fF1U1RMS1Fit,fF1U1RMS2Fit,fF1U2Fit,fF1U2RMSSMFit,fF1U2RMS1Fit,fF1U2RMS2Fit,iNameZDat,iPrefix);
@@ -14,7 +14,7 @@ RecoilCorrector::RecoilCorrector(string iNameZDat,std::string iPrefix, int iSeed
 
 RecoilCorrector::RecoilCorrector(string iNameZ, int iSeed) {
 
-  fRandom = new TRandom1(iSeed);
+  fRandom = new TRandom3(iSeed);
   // get fits for Z data
   readRecoil(fF1U1Fit,fF1U1RMSSMFit,fF1U1RMS1Fit,fF1U1RMS2Fit,fF1U2Fit,fF1U2RMSSMFit,fF1U2RMS1Fit,fF1U2RMS2Fit,iNameZ,"PF");
   readRecoil(fF2U1Fit,fF2U1RMSSMFit,fF2U1RMS1Fit,fF2U1RMS2Fit,fF2U2Fit,fF2U2RMSSMFit,fF2U2RMS1Fit,fF2U2RMS2Fit,iNameZ,"TK");
@@ -252,7 +252,7 @@ void RecoilCorrector::readCorr(std::string iName,
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void RecoilCorrector::metDistribution(double &iMet,double &iMPhi,double iGenPt,double iGenPhi,
-		                      double iLepPt,double iLepPhi,TRandom1 *iRand,
+		                      double iLepPt,double iLepPhi,TRandom3 *iRand,
 		                      TF1 *iU1RZDatFit,
 		                      TF1 *iU1MSZDatFit, 
 		                      TF1 *iU1S1ZDatFit,
@@ -327,7 +327,7 @@ void RecoilCorrector::metDistribution(double &iMet,double &iMPhi,double iGenPt,d
 }
 
 void RecoilCorrector::metDistributionType1(double &iMet,double &iMPhi,double iGenPt,double iGenPhi,
-					   double iLepPt,double iLepPhi,TRandom1 *iRand,
+					   double iLepPt,double iLepPhi,TRandom3 *iRand,
 					   TF1 *iU1RZDatFit,  TF1 *iU1RZMCFit,
 					   TF1 *iU1MSZDatFit, TF1 *iU1MSZMCFit, 
 					   TF1 *iU2MSZDatFit, TF1 *iU2MSZMCFit, 		   		   
@@ -341,7 +341,7 @@ void RecoilCorrector::metDistributionType1(double &iMet,double &iMPhi,double iGe
   double pU1       = iU1RZDatFit->Eval(iGenPt)/iU1RZMCFit->Eval(iGenPt);
   double pU2       = 0; //Right guys are for cumulants => code deleted
   double pFrac1    = max( iU1MSZDatFit->Eval(iGenPt)*iU1MSZDatFit->Eval(iGenPt)
-			  -iU1MSZMCFit->Eval(iGenPt)*iU1MSZMCFit ->Eval(iGenPt),0.);
+			  -(pU1*pU1)*iU1MSZMCFit->Eval(iGenPt)*iU1MSZMCFit ->Eval(iGenPt),0.);
   double pFrac2    = max( iU2MSZDatFit->Eval(iGenPt)*iU2MSZDatFit->Eval(iGenPt)
 			  -iU2MSZMCFit->Eval(iGenPt)*iU2MSZMCFit ->Eval(iGenPt),0.);
   pFrac1 = sqrt(pFrac1)*lRescale;
@@ -541,7 +541,7 @@ void RecoilCorrector::metDistributionType2(double &iMet,double &iMPhi,double iGe
 
 void RecoilCorrector::metDistribution(double &iPFMet,double &iPFMPhi,double &iTKMet,double &iTKMPhi,
 				      double iGenPt,double iGenPhi,
-		                      double iLepPt,double iLepPhi,TRandom1 *iRand,
+		                      double iLepPt,double iLepPhi,TRandom3 *iRand,
 		                      TF1 *iU1RPFFit,   TF1 *iU1RTKFit,
 		                      TF1 *iU1MSPFFit,  TF1 *iU1MSTKFit, 
 		                      TF1 *iU1S1PFFit,  TF1 *iU1S1TKFit,

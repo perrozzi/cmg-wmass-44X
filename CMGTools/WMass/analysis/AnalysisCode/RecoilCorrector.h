@@ -14,7 +14,7 @@
 #include "TProfile.h"
 #include "TF1.h"
 #include "TMath.h"
-#include "TRandom1.h"
+#include "TRandom3.h"
 
 //
 // ** apply phil's recoil corrections **
@@ -76,7 +76,7 @@ protected:
 		std::vector<TF1*> &iF1F2U1U2Corr,std::vector<TF1*> &iF1F2U2U1Corr,int iType=2);
 
   void metDistribution(double &iMet,double &iMPhi,double iGenPt,double iGenPhi,
-		       double iLepPt,double iLepPhi,TRandom1 *iRand,
+		       double iLepPt,double iLepPhi,TRandom3 *iRand,
 		       TF1 *iU1RZFit, 
 		       TF1 *iU1MSZFit, 
 		       TF1 *iU1S1ZFit,
@@ -89,7 +89,7 @@ protected:
 
   void metDistribution(double &iPFMet,double &iPFMPhi,double &iTKMet,double &iTKMPhi,
 		       double iGenPt,double iGenPhi,
-		       double iLepPt,double iLepPhi,TRandom1 *iRand,
+		       double iLepPt,double iLepPhi,TRandom3 *iRand,
 		       TF1 *iU1RZPFFit,  TF1 *iU1RZTKFit, 
 		       TF1 *iU1MSZPFFit, TF1 *iU1MSZTKFit, 
 		       TF1 *iU1S1ZPFFit, TF1 *iU1S1ZTKFit,
@@ -103,7 +103,7 @@ protected:
 		       double &iU1,double &iU2,double iFluc=0,double iScale=0);
 
   void metDistributionType1(double &iMet,double &iMPhi,double iGenPt,double iGenPhi,
-			    double iLepPt,double iLepPhi,TRandom1 *iRand,
+			    double iLepPt,double iLepPhi,TRandom3 *iRand,
 			    TF1 *iU1RZDatFit,  TF1 *iU1RZMCFit,
 			    TF1 *iU1MSZDatFit, TF1 *iU1MSZMCFit, 
 			    TF1 *iU2MSZDatFit, TF1 *iU2MSZMCFit,
@@ -135,7 +135,7 @@ protected:
   double CorrVal(double iPt,double iVal,Recoil iType);
   //void   Correct(double &met, double &metphi, double lGenPt, double lGenPhi, double lepPt, double lepPhi,double iFluc,int njet);
 
-  TRandom1 *fRandom; 
+  TRandom3 *fRandom; 
   vector<TF1*> fF1U1Fit; vector<TF1*> fF1U1RMSSMFit; vector<TF1*> fF1U1RMS1Fit; vector<TF1*> fF1U1RMS2Fit; 
   vector<TF1*> fF1U2Fit; vector<TF1*> fF1U2RMSSMFit; vector<TF1*> fF1U2RMS1Fit; vector<TF1*> fF1U2RMS2Fit; 
   vector<TF1*> fF2U1Fit; vector<TF1*> fF2U1RMSSMFit; vector<TF1*> fF2U1RMS1Fit; vector<TF1*> fF2U1RMS2Fit; 
