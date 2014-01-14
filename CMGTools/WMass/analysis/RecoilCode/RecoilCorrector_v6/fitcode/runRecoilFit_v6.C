@@ -441,7 +441,8 @@ bool passId(int iId) {
     if(lId == 17) {if(fNPV !=17              ) {return false; } {return true;}}
     if(lId == 18) {if(fNPV !=18              ) {return false; } {return true;}}
     if(lId == 19) {if(fNPV !=19              ) {return false; } {return true;}}
-    if(lId >= 20) {if(fNPV !=20              ) {return false; } {return true;}} // include the vtx>20
+    ///    if(lId >= 20) {if(fNPV !=20              ) {return false; } {return true;}} // include the vtx>20                                              
+    if(lId >= 20) {if(fNPV <20              ) {return false; } {return true;}} // include the vtx>20         
 
   }
 
@@ -662,33 +663,52 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
 	      double &lPar, TF1 *iFit, TF1 *iFitS1=0, TF1 *iFitS2=0, TF1* iMeanFit=0,
 	      bool iPol1 = false, 
 	      bool iRMS  = false, int iType = 0) { 
-  //RooFit Build a double Gaussian
+
+  //RooFit Build a double Gaussian                                                                                                                        
   TRandom lRand(0xDEADBEEF);
   RooRealVar    lRWeight("weight","weight",0,10);
-  RooRealVar lRPt  ("pt","Z_{p_{T}}",10,1000);
-  RooRealVar    lA1Sig("a1sig","a1sig",0.8,0,1); 
-  RooRealVar    lB1Sig("b1sig","b1sig",0. ,-0.1,0.1); 
-  RooRealVar    lC1Sig("c1sig","c1sig",0. ,-0.1,0.1);  //lC1Sig.setConstant(kTRUE);
-  RooRealVar    lD1Sig("d1sig","d1sig",0. ,-0.1,0.1);  lD1Sig.setConstant(kTRUE);
-  RooRealVar    lA2Sig("a2sig","a2sig",1.4,1,3); 
-  RooRealVar    lB2Sig("b2sig","b2sig",0.0 ,-0.1,0.1); 
-  RooRealVar    lC2Sig("c2sig","c2sig",0.0 ,-0.1,0.1);  //lC2Sig.setConstant(kTRUE);
-  RooRealVar    lD2Sig("d2sig","d2sig",0.0 ,-0.1,0.1);  lD2Sig.setConstant(kTRUE);
-  RooFormulaVar l1Sigma("sigma1","@0+@1*@3+@2*@3*@3+@4*@3*@3*@3",RooArgSet(lA1Sig,lB1Sig,lC1Sig,lRPt,lD1Sig));
-  RooFormulaVar l2Sigma("sigma2","@0+@1*@3+@2*@3*@3+@4*@3*@3*@3",RooArgSet(lA2Sig,lB2Sig,lC2Sig,lRPt,lD2Sig));
-  RooFormulaVar lFrac  ("frac"  ,"(@1-1.)/(@1-@0)",RooArgSet(l1Sigma,l2Sigma));
-  RooRealVar lR1Mean("mean","mean",0,-10,10); lR1Mean.setConstant(kTRUE);
-  //RooRealVar lFrac  ("frac","frac",0.8,0.,1);
+  ////  RooRealVar lRPt  ("pt","Z_{p_{T}}",10,1000);                                                                                                      
+  RooRealVar lRPt  ("pt","Z_{p_{T}}",0,fZPtMax);
+
   RooRealVar lRXVar("XVar","(U_{1}(Z_{p_{T}})-x_{i})/#sigma_{U1} (Z_{p_{T}})",0,-5,5);
   if(lPar!=fU1) lRXVar.SetTitle("(U_{2}(Z_{p_{T}})-x_{i})/#sigma_{U2} (Z_{p_{T}})");
 
+  // this for the 2D Fit (is a cubic function to take into account the correlation with the pt)                                                           
+
+  ////// those are the 2D histograms                                                                                                                      
+  // ===> Those are the variable fitted                                                                                                                   
+  // lA1Sig,lB1Sig,lC1Sig,lA2Sig,lB2Sig,lC2Sig,                                                                                                           
+  // those are set constant (0) lD1Sig, lD2Sig, lR1Mean    
+  RooRealVar    lA1Sig("a1sig","a1sig",0.8,0,1);
+  RooRealVar    lB1Sig("b1sig","b1sig",0. ,-0.1,0.1);
+  RooRealVar    lC1Sig("c1sig","c1sig",0. ,-0.1,0.1);  lC1Sig.setConstant(kTRUE);
+  RooRealVar    lD1Sig("d1sig","d1sig",0. ,-0.1,0.1);  lD1Sig.setConstant(kTRUE);
+  RooRealVar    lA2Sig("a2sig","a2sig",1.4,1,3);
+  RooRealVar    lB2Sig("b2sig","b2sig",0.0 ,-0.1,0.1);
+  RooRealVar    lC2Sig("c2sig","c2sig",0.0 ,-0.1,0.1);  lC2Sig.setConstant(kTRUE);
+  RooRealVar    lD2Sig("d2sig","d2sig",0.0 ,-0.1,0.1);  lD2Sig.setConstant(kTRUE);
+  RooRealVar    lR1Mean("mean","mean",0,-10,10); lR1Mean.setConstant(kTRUE); //                                                                           
+
+  // ===> This is the model for the 2D                                                                                                                    
+  RooFormulaVar l1Sigma("sigma1","@0+@1*@3+@2*@3*@3+@4*@3*@3*@3",RooArgSet(lA1Sig,lB1Sig,lC1Sig,lRPt,lD1Sig));
+  RooFormulaVar l2Sigma("sigma2","@0+@1*@3+@2*@3*@3+@4*@3*@3*@3",RooArgSet(lA2Sig,lB2Sig,lC2Sig,lRPt,lD2Sig));
+  RooFormulaVar lFrac  ("frac"  ,"(@1-1.)/(@1-@0)",RooArgSet(l1Sigma,l2Sigma));
   RooGaussian   lGaus1("gaus1","gaus1",lRXVar,lR1Mean,l1Sigma);
   RooGaussian   lGaus2("gaus2","gaus2",lRXVar,lR1Mean,l2Sigma);
   RooAddPdf     lGAdd("Add","Add",lGaus1,lGaus2,lFrac);
-  RooRealVar    lR1Sigma("Rsigma1","RSigma1",8. ,0,40);
+
+  ////// those are the 1D histograms                                                                                                                      
+  // ===> Those are the variable fitted                                                                                                                   
+  // Rfrac, Rmean, Rsigma1, Rsigma2                                                                                                                       
+  //   RooRealVar    lR1Sigma("Rsigma1","RSigma1",8. ,0,40);                                                                                              
+  //   RooRealVar    lR2Sigma("Rsigma2","RSigma2",12.,1,40);                                                                                              
+  //   RooRealVar    lR1Frac ("Rfrac"  ,"Rfrac"  ,0.5,0,1);                                                                                               
+  RooRealVar    lR1Sigma("Rsigma1","RSigma1",1. ,0,40);
   RooRealVar    lR2Sigma("Rsigma2","RSigma2",12.,1,40);
-  RooRealVar    lR1Frac ("Rfrac"  ,"Rfrac"  ,0.5,0,1);
-  RooRealVar    lR2Mean("Rmean",      "Rmean",0,-80,80); 
+  RooRealVar    lR1Frac ("Rfrac"  ,"Rfrac"  ,0.5,0.,1.0);
+  RooRealVar    lR2Mean ("Rmean",  "Rmean",0,-10,10); // lR2Mean.setConstant(kTRUE); //                                                                   
+
+  // ===> This is the model for the 1D                                                                                                                    
   RooGaussian   lRGaus1("Rgaus1","Rgaus1",lRXVar,lR2Mean,lR1Sigma);
   RooGaussian   lRGaus2("Rgaus2","Rgaus2",lRXVar,lR2Mean,lR2Sigma);
   RooAddPdf     lRGAdd ("RAdd"  ,"RAdd",lRGaus1,lRGaus2,lR1Frac);
@@ -831,11 +851,13 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
   std::vector<RooDataHist> lResidVals2D; 
   std::stringstream pSS; pSS << "Crapsky" << 0;
   pSS << "2D"; RooDataHist lData2D(pSS.str().c_str(),pSS.str().c_str(),RooArgSet(lRXVar,lRPt));
-  int lNBins = 10;
+  //  int lNBins = 10;
+  int lNBins = 25;
   for(int i0  = 0; i0 < lNBins; i0++) { 
     RooDataSet lData(pSS.str().c_str(),pSS.str().c_str(),RooArgSet(lRXVar)); 
     //    lRPt.setBins(500);
-    lRPt.setBins(fZPtMax);
+    //    lRPt.setBins(fZPtMax);
+    lRPt.setBins(lNBins);
     lResidVals.push_back(lData); 
   }
   lResidVals2D.push_back(lData2D);
@@ -851,46 +873,71 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
     lResidVals[pId].add(RooArgSet(lRXVar));//,lRWeight.getVal()); //Fill the Double Gaussian
     lResidVals2D[0].add(RooArgSet(lRXVar,lRPt));//,lRWeight.getVal()); //Fill the Double Gaussian
   }
+  lGAdd.mustBeExtended();
   RooFitResult *pFR = lGAdd.fitTo(lResidVals2D[0],Save(kTRUE),ConditionalObservables(lRPt),NumCPU(2),Minos());//,Minos());//,Minos()); //Double Gaussian fit
 
-  //Plot it all
-  lRXVar.setBins(100); // MARIA how this Bin matters ????
+  //// AFTER here set up for the 1D fit                                                                                                                    
+  if(doPrintAll) {
 
-  double *lX   = new double[lNBins];
-  double *lY0  = new double[lNBins];
-  double *lY1  = new double[lNBins];
-  double *lY2  = new double[lNBins];
+    //Plot it all
+    lRXVar.setBins(100); // Bins of the binned Pull
+    
+    double *lX   = new double[lNBins];
+    double *lY0  = new double[lNBins];
+    double *lY1  = new double[lNBins];
+    double *lY2  = new double[lNBins];
+    
+    double *lEX  = new double[lNBins];
+    double *lEY0 = new double[lNBins];
+    double *lEY1 = new double[lNBins];
+    double *lEY2 = new double[lNBins];
 
-  double *lEX  = new double[lNBins];
-  double *lEY0 = new double[lNBins];
-  double *lEY1 = new double[lNBins];
-  double *lEY2 = new double[lNBins];
-  for(int i0  = 0; i0 < lNBins; i0++) { 
-    lRGAdd.fitTo(lResidVals[i0],Save(kTRUE),NumCPU(2));//,Minos());//,Minos()); //Double Gaussian fit
-    lRPt.setRange(i0*10,i0*10+10);
-    RooPlot *lFrame1 = lRXVar.frame(Title("XXX")) ;
-    //lResidVals2D[0].plotOn(lFrame1);
-    lResidVals [i0].plotOn(lFrame1,RooFit::MarkerColor(kRed));
-    lRGAdd.plotOn(lFrame1);
-    lRGAdd.plotOn(lFrame1,RooFit::Components(lRGaus1),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed));
-    lRGAdd.plotOn(lFrame1,RooFit::Components(lRGaus2),RooFit::LineStyle(kDashed),RooFit::LineColor(kViolet));
-    iC->cd(); lFrame1->Draw();
+    double *lchi2  = new double[lNBins];
+    double *myFrac = new double[lNBins];
+    double *myMean = new double[lNBins];
+    double *myFracE = new double[lNBins];
+    double *myMeanE = new double[lNBins];
 
-    //cin.get();    
-    lX[i0] = (fZPtMax/lNBins)*i0;
-    lEX[i0] = (fZPtMax/lNBins)/10;
-    lY0[i0] = (lR1Frac .getVal()*lR1Sigma.getVal() + (1.-lR1Frac.getVal())*lR2Sigma.getVal())/sqrt(2*3.14159265)*2.;
-    lY1[i0] = lR1Sigma.getVal()/sqrt(2*3.14159265)*2.;
-    lY2[i0] = lR2Sigma.getVal()/sqrt(2*3.14159265)*2.;
-    lEY0[i0]  = lR1Frac .getError()*lR1Sigma.getVal()  * lR1Frac .getError()*lR1Sigma.getVal();
-    lEY0[i0] += lR1Frac .getVal()  *lR1Sigma.getError()* lR1Frac .getVal()  *lR1Sigma.getError();
-    lEY0[i0] += lR1Frac .getError()*lR2Sigma.getVal()  * lR1Frac .getError()*lR2Sigma.getVal();
-    lEY0[i0] += (1-lR1Frac .getVal())*lR2Sigma.getError()* (1-lR1Frac .getVal())  *lR2Sigma.getError();
-    lEY0[i0] = sqrt(lEY0[i0])/sqrt(2*3.14159265)*2.;
-    lEY1[i0] = lR1Sigma.getError()/sqrt(2*3.14159265)*2.;
-    lEY2[i0] = lR2Sigma.getError()/sqrt(2*3.14159265)*2.;
+    for(int i0  = 0; i0 < lNBins; i0++) { 
+      lRGAdd.fitTo(lResidVals[i0],Save(kTRUE),NumCPU(2));//,Minos());//,Minos()); //Double Gaussian fit
+      lRPt.setRange(i0*10,i0*10+10);
+      RooPlot *lFrame1 = lRXVar.frame(Title("XXX")) ;
+      //lResidVals2D[0].plotOn(lFrame1);
+      lResidVals [i0].plotOn(lFrame1,RooFit::MarkerColor(kRed));
+      lRGAdd.plotOn(lFrame1);
+      lRGAdd.plotOn(lFrame1,RooFit::Components(lRGaus1),RooFit::LineStyle(kDashed),RooFit::LineColor(kRed));
+      lRGAdd.plotOn(lFrame1,RooFit::Components(lRGaus2),RooFit::LineStyle(kDashed),RooFit::LineColor(kViolet));
+      iC->cd(); lFrame1->Draw();
+      
+      Double_t chi21D = lFrame1->chiSquare();
+      TString chi2str = "chi2 = ";
+      chi2str += chi21D;
+      latexLabel.DrawLatex(0.75, 0.8, chi2str);
+      TString frac1str = "frac = ";
+      frac1str += lR1Frac.getVal();
+      latexLabel.DrawLatex(0.75, 0.7, frac1str);
 
-    if(doPrintAll) {
+      lchi2[i0]=chi21D;
+      myFrac[i0] = lR1Frac.getVal();
+      myMean[i0] = lR2Mean.getVal();
+      myFracE[i0] = lR1Frac.getError();
+      myMeanE[i0] = lR2Mean.getError();
+
+      //cin.get();    
+      lX[i0] = (fZPtMax/lNBins)*i0;
+      lEX[i0] = (fZPtMax/lNBins)/10;
+      lY0[i0] = (lR1Frac .getVal()*lR1Sigma.getVal() + (1.-lR1Frac.getVal())*lR2Sigma.getVal())/sqrt(2*3.14159265)*2.;
+      lY1[i0] = lR1Sigma.getVal()/sqrt(2*3.14159265)*2.;
+      lY2[i0] = lR2Sigma.getVal()/sqrt(2*3.14159265)*2.;
+      lEY0[i0]  = lR1Frac .getError()*lR1Sigma.getVal()  * lR1Frac .getError()*lR1Sigma.getVal();
+      lEY0[i0] += lR1Frac .getVal()  *lR1Sigma.getError()* lR1Frac .getVal()  *lR1Sigma.getError();
+      lEY0[i0] += lR1Frac .getError()*lR2Sigma.getVal()  * lR1Frac .getError()*lR2Sigma.getVal();
+      lEY0[i0] += (1-lR1Frac .getVal())*lR2Sigma.getError()* (1-lR1Frac .getVal())  *lR2Sigma.getError();
+      lEY0[i0] = sqrt(lEY0[i0])/sqrt(2*3.14159265)*2.;
+      lEY1[i0] = lR1Sigma.getError()/sqrt(2*3.14159265)*2.;
+      lEY2[i0] = lR2Sigma.getError()/sqrt(2*3.14159265)*2.;
+      
+      //    if(doPrintAll) {
       
       latexLabel.DrawLatex(0.25, 0.8, leg1);
       
@@ -947,37 +994,42 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
       iC->SaveAs(test.Data());
       
     }
-  }
+    //  }
 
-  TGraphErrors *lG0 = new TGraphErrors(lNBins,lX,lY0,lEX,lEY0); lG0->SetMarkerStyle(kFullCircle);
-  TGraphErrors *lG1 = new TGraphErrors(lNBins,lX,lY1,lEX,lEY1); lG1->SetMarkerStyle(kFullCircle);
-  TGraphErrors *lG2 = new TGraphErrors(lNBins,lX,lY2,lEX,lEY2); lG2->SetMarkerStyle(kFullCircle);
- 
-  if(lPar==fU1) lG0->GetYaxis()->SetTitle("U1 #sigma_{mean}"); 
-  if(lPar!=fU1) lG0->GetYaxis()->SetTitle("U2 #sigma_{mean}"); 
-  lG0->GetYaxis()->SetRangeUser(0.5,1.1);
-  lG1->GetYaxis()->SetRangeUser(0.,2.0);
-  lG2->GetYaxis()->SetRangeUser(0.,2.0);
-  lG1->GetYaxis()->SetTitle("#sigma_{1}"); 
-  lG2->GetYaxis()->SetTitle("#sigma_{2}"); 
 
-  lG0->GetXaxis()->SetTitle("Z p_{T}"); 
-  lG1->GetXaxis()->SetTitle("Z p_{T}"); 
-  lG2->GetXaxis()->SetTitle("Z p_{T}"); 
- 
-  //////
-  //// cin.get();
-  //////
-
-  if(doPrintAll) {
+    TGraphErrors *lM0 = new TGraphErrors(lNBins,lX,myMean,lEX,lEY0); lM0->SetMarkerStyle(kFullCircle);
+    TGraphErrors *lG0 = new TGraphErrors(lNBins,lX,lY0,lEX,lEY0); lG0->SetMarkerStyle(kFullCircle);
+    TGraphErrors *lG1 = new TGraphErrors(lNBins,lX,lY1,lEX,lEY1); lG1->SetMarkerStyle(kFullCircle);
+    TGraphErrors *lG2 = new TGraphErrors(lNBins,lX,lY2,lEX,lEY2); lG2->SetMarkerStyle(kFullCircle);
+    
+    if(lPar==fU1) lM0->GetYaxis()->SetTitle("U1 mean");
+    if(lPar!=fU1) lM0->GetYaxis()->SetTitle("U2 mean");
+    if(lPar==fU1) lG0->GetYaxis()->SetTitle("U1 #sigma_{mean}");
+    if(lPar!=fU1) lG0->GetYaxis()->SetTitle("U2 #sigma_{mean}");
+    lG1->GetYaxis()->SetTitle("#sigma_{1}");
+    lG2->GetYaxis()->SetTitle("#sigma_{2}");
+    
+    lM0->GetYaxis()->SetRangeUser(-0.5,0.5);
+    lG0->GetYaxis()->SetRangeUser(0.5,1.5);
+    lG1->GetYaxis()->SetRangeUser(0.,2.0);
+    lG2->GetYaxis()->SetRangeUser(0.,2.0);
+    
+    lM0->GetXaxis()->SetTitle("Z p_{T}");
+    lG0->GetXaxis()->SetTitle("Z p_{T}");
+    lG1->GetXaxis()->SetTitle("Z p_{T}");
+    lG2->GetXaxis()->SetTitle("Z p_{T}");
+    
+    //////
+    //// cin.get();
+    //////
+    
+    //  if(doPrintAll) {
     
     iC->cd();
-    //    TFitResultPtr  lFitPtr0 = lG0->Fit(lFit,"SR","EXO",0,fZPtMax); //"EXO"
-    TFitResultPtr  lFitPtr0 = lG0->Fit(lFit,"SRE","", fZPtMin, fZPtMax); //"EXO"
-    //    TF1 *iFitPull  = new TF1("iFitPull",   "pol6");
-    TF1 *iFitPull  = new TF1("iFitPull",   "pol1" );
-    //    TF1 *iFitPull  = new TF1("iFitPull",   "pol2" );
-    computeFitErrors(iFitPull,lFitPtr0,lFit,iRMS);
+    TF1 *lFitPull  = new TF1("lFitPull",   "pol2");
+    TF1 *iFitPull  = new TF1("iFitPull",   "pol2");
+    TFitResultPtr  lFitPtr0 = lG0->Fit(lFitPull,"SRE","", fZPtMin, fZPtMax); //"EXO"                                                                       
+    computeFitErrors(iFitPull,lFitPtr0,lFitPull,iRMS);
     lG0->Draw("ape");
     drawErrorBands(iFitPull,fZPtMax);
     lG0->Draw("pe");
@@ -1005,6 +1057,8 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
     
     iC->SaveAs(pSS0.Data());
 
+
+
     /*
     stringstream pSS0;
     if(lPar==fU1) { 
@@ -1017,6 +1071,57 @@ void fitGraph(TTree *iTree,TTree *iTree1, TCanvas *iC,
 
     iC->SaveAs(pSS0.str().c_str());
     */
+
+    ///////                                                                                                                                                
+
+
+    /*
+    stringstream pSS0;
+    if(lPar==fU1) { 
+      if(fData) pSS0 << "G0_U1" << "_data_" << fNJetSelect << "_"<< fId << ".png";
+      if(!fData) pSS0 << "G0_U1" << "_MC_" << fNJetSelect << "_"<< fId << ".png";
+    } else {
+      if(fData) pSS0 << "G0_U2" << "_data_" << fNJetSelect << "_"<< fId << ".png";
+      if(!fData) pSS0 << "G0_U2" << "_MC_" << fNJetSelect << "_"<< fId << ".png";
+    }
+
+    iC->SaveAs(pSS0.str().c_str());
+    */
+
+    ///////                                                                                                                                                
+    ///////                                                                                                                                                
+
+    TF1 *lFitPullMean  = new TF1("lFitPullMean",   "pol2");
+    TF1 *iFitPullMean  = new TF1("iFitPullMean",   "pol2");
+    TFitResultPtr  lFitPtrM0 = lM0->Fit(lFitPullMean,"SRE","", fZPtMin, fZPtMax); //"EXO"                                                                  
+    computeFitErrors(iFitPullMean,lFitPtrM0,lFitPullMean,iRMS);
+    lM0->Draw("ape");
+    drawErrorBands(iFitPullMean,fZPtMax);
+    lM0->Draw("pe");
+
+    latexLabel.DrawLatex(0.25, 0.8, leg1);
+    latexLabel.DrawLatex(0.25, 0.25, legDATA);
+    latexLabel.DrawLatex(0.25, 0.3, legU1U2);
+
+    TString pMM0="M0";
+
+    if(lPar==fU1) pMM0 += "_U1";
+    if(lPar!=fU1) pMM0 += "_U2";
+
+    if(fData) pMM0 += "_data";
+    if(!fData) pMM0 += "_MC";
+
+    if(doPosW) pMM0 += "_Wpos";
+    if(doNegW) pMM0 += "_Wneg";
+
+    pMM0 += "_";
+    pMM0 += fNJetSelect;
+    pMM0 += "_";
+    pMM0 += fId;
+    pMM0 += ".png";
+
+    iC->SaveAs(pMM0.Data());
+
 
     //////
     //// cin.get();
@@ -1209,7 +1314,7 @@ void loopOverTree(TTree *iTree) {
 
     // this is for the W selection
     if(doPosW && (!runWSelection(true))) continue;
-    //   if(doNegW && (!runWSelection(false))) continue;
+    if(doNegW && (!runWSelection(false))) continue;
     
     //    cout << "passed selection " << endl;
 
