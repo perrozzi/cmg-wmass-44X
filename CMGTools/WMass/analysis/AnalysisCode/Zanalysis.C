@@ -1,5 +1,5 @@
 // UNCOMMENT TO USE PDF REWEIGHTING
-#define LHAPDF_ON
+//#define LHAPDF_ON
 
 #ifdef LHAPDF_ON
   #include "LHAPDF/LHAPDF.h"
@@ -253,8 +253,8 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
   }
   
   Long64_t nbytes = 0, nb = 0;
-  // for (Long64_t jentry=first_entry; jentry<nentries;jentry++) {
-    for (Long64_t jentry=0; jentry<2e6;jentry++) {
+  for (Long64_t jentry=first_entry; jentry<nentries;jentry++) {
+    // for (Long64_t jentry=0; jentry<2e6;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -267,22 +267,22 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
       outTXTfile << dt << "\t - \t Analyzed entry "<<jentry<<"/"<<nentries<<endl;
     }
             
-    if(Z_mass<60 || Z_mass>120 || MuPos_pt<20 || MuNeg_pt<20 || TMath::Abs(MuPos_eta)>2.1 || TMath::Abs(MuNeg_eta)>2.1) continue;
+    // if(Z_mass<60 || Z_mass>120 || MuPos_pt<20 || MuNeg_pt<20 || TMath::Abs(MuPos_eta)>2.1 || TMath::Abs(MuNeg_eta)>2.1) continue;
     
-    if(contains_PDF_reweight){
-      for(int i_weight=0; i_weight< 100; i_weight++){
-        // cout << " " 
-        // << i_weight << " "
-        // << LHE_weight[i_weight+7] << " "
-        // << LHE_ren[i_weight+7] << " "
-        // << LHE_fac[i_weight+7] << " "
-        // << LHE_pdf[i_weight+7] 
-        // << endl;
+    // if(contains_PDF_reweight){
+      // for(int i_weight=0; i_weight< 100; i_weight++){
+        // // cout << " " 
+        // // << i_weight << " "
+        // // << LHE_weight[i_weight+7] << " "
+        // // << LHE_ren[i_weight+7] << " "
+        // // << LHE_fac[i_weight+7] << " "
+        // // << LHE_pdf[i_weight+7] 
+        // // << endl;
         
-        hpdf_w[i_weight]->Fill(LHE_weight[i_weight+7]);
+        // hpdf_w[i_weight]->Fill(LHE_weight[i_weight+7]);
 
-      }
-    }
+      // }
+    // }
     
     double lha_weight = 1;
     double weight_old = 1;
@@ -303,7 +303,7 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
         hpdf_wlha_vs_w[h]->Fill(LHE_weight[h+7],lha_weight);
       }    
     }
-    continue;
+    // continue;
     
     // if(!(IS_MC_CLOSURE_TEST || isMCorDATA==0) && run>175832) continue; // TO TEST ROCHESTER CORRECTIONS ONLY ON RUN2011A
     // if(!(IS_MC_CLOSURE_TEST || isMCorDATA==0) && run<175832) continue; // TO TEST ROCHESTER CORRECTIONS ONLY ON RUN2011B
@@ -967,33 +967,34 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
         
   } // end event loop
 
-  TGraph *tigre = new TGraph();
-  tigre->SetName("tigre");
-  tigre->SetTitle("tigre");
+  // TGraph *tigre = new TGraph();
+  // tigre->SetName("tigre");
+  // tigre->SetTitle("tigre");
   
-  TGraph *tigre2 = new TGraph();
-  tigre2->SetName("tigre2");
-  tigre2->SetTitle("tigre2");
+  // TGraph *tigre2 = new TGraph();
+  // tigre2->SetName("tigre2");
+  // tigre2->SetTitle("tigre2");
   
-  if(contains_PDF_reweight){
-    for(int i_weight=0; i_weight< 100; i_weight++){
-      tigre->SetPoint(i_weight,i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1)/hpdf_wlha_vs_w[i_weight]->GetMean(2));
-      tigre2->SetPoint(i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1),hpdf_wlha_vs_w[i_weight]->GetMean(2));
-      hpdf_wlha_mean->Fill(hpdf_wlha[i_weight]->GetMean());
-      hpdf_w_mean->Fill(hpdf_w[i_weight]->GetMean());
-    }
-    ffpdf->cd();
-    tigre->Write();
-    tigre2->Write();
-  }
+  // if(contains_PDF_reweight){
+    // for(int i_weight=0; i_weight< 100; i_weight++){
+      // tigre->SetPoint(i_weight,i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1)/hpdf_wlha_vs_w[i_weight]->GetMean(2));
+      // tigre2->SetPoint(i_weight,hpdf_wlha_vs_w[i_weight]->GetMean(1),hpdf_wlha_vs_w[i_weight]->GetMean(2));
+      // hpdf_wlha_mean->Fill(hpdf_wlha[i_weight]->GetMean());
+      // hpdf_w_mean->Fill(hpdf_w[i_weight]->GetMean());
+    // }
+    // ffpdf->cd();
+    // tigre->Write();
+    // tigre2->Write();
+  // }
   
-  ffpdf->Write();
-  ffpdf->Close();
-  return;
+  // ffpdf->Write();
+  // ffpdf->Close();
   
   outTXTfile.close();
   
   TFile*fout = new TFile(Form("%s/Zanalysis.root",outputdir.Data()),"RECREATE");
+  fout->cd();
+
 
   if(!sampleName.Contains("DYJetsSig")){
     for(int i=0; i<WMass::etaMuonNSteps; i++){
@@ -1031,9 +1032,7 @@ void Zanalysis::Loop(int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, 
   }
   
   common_stuff::writeOutHistos( fout, h_1d, h_2d );
-  
-  fout->cd();
-  
+    
   fout->Write();
   fout->Close();
 

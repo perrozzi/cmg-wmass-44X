@@ -15,8 +15,8 @@ useLHAPDF = False # DEFAULT IS False, before to switch to True follow https://tw
 # foldername = "test_RecoilCorr_scale1";
 # foldername = "test_RecoilCorrNewFiles";
 # foldername = "test_NoPUmet_recoil15";
-# foldername = "test_TKmet";
-foldername = "test_PhiStarEta";
+foldername = "test_TKmet";
+# foldername = "test_PhiStarEta";
 
 ntuple_folder = "root://eoscms//eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
 # ntuple_folder = "root://eoscms//eos/cms/store/cmst3/user/perrozzi/CMG/ntuples_2012_12_20/";
@@ -49,19 +49,19 @@ useAlsoGenPforSig= 1;
 ZMass = "91.188"; # 91.1876
 WMassCentral_MeV = "80419"; # 80385
 WMassStep_MeV = "10"; # 15
-# WMassNSteps = "5"; # 60
-WMassNSteps = "0"; # 60
+WMassNSteps = "5"; # 60
+# WMassNSteps = "0"; # 60
 # WMassNSteps = "0"; # 60
 etaMuonNSteps = "1"; # 5
 etaMaxMuons = "2.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
 # etaMaxMuons = "2.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
 
-parallelize = 0;
-resumbit_sample = "DYJetsSig " # DATA , WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD
+parallelize = 1;
+resumbit_sample = "" # DATA , WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD
 
-runPhiStarEta = 1;
+runPhiStarEta = 0;
 runWanalysis = 0;
-runZanalysis = 0;
+runZanalysis = 1;
 controlplots = 0;
 
 mergeSigEWKbkg = 0;
@@ -73,7 +73,7 @@ run_BuildSimpleTemplates= 0;
 
 ## PERFORM W MASS FIT
 runPrepareDataCards = 0;
-DataCards_systFromFolder="test_NoPUmet_recoil15_RochCorr_RecoilCorr_EffSFCorr_PileupSFCorr" # evaluate systematics wrt folder (or leave it empty)
+DataCards_systFromFolder="" # evaluate systematics wrt folder (or leave it empty)
 
 ## NEW FIT
 print "if it doesn't work, try with this first: cd /afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_5_3_3_patch3/src; SCRAM_ARCH slc5_amd64_gcc462;cmsenv; cd -";
