@@ -10,13 +10,13 @@ jsonAna = cfg.Analyzer(
 
 triggerAna = cfg.Analyzer(
     'TriggerAnalyzer',
-     keepFailingEvents = True    
+     keepFailingEvents = False    
     )
 
 vertexAna = cfg.Analyzer(
     'VertexAnalyzer',
     fixedWeight = 1.,
-    keepFailingEvents = True    
+    keepFailingEvents = False    
     )
 
 WAna = cfg.Analyzer(
@@ -29,7 +29,8 @@ WAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = True,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False    
     )
 
 WtreeProducer = cfg.Analyzer(
@@ -46,7 +47,8 @@ ZAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = True,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False    
     )
 
 ZtreeProducer = cfg.Analyzer(

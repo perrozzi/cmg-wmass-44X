@@ -1,23 +1,24 @@
 void copytreeW() {
 
-  TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
+  // TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
+  TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_10_15/";
   TString fWana_str[7] = {
     "root://eoscms//"+root_folder+"WJets/WTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"DYJetsLL/WTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"TTJets/WTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"VVJets/ZZ/WTreeProducer_tree.root",
-    "root://eoscms//"+root_folder+"VVJets/WW/WTreeProducer_tree.root",
+    "root://eoscms//"+root_folder+"VVJets/WWJetsTo2L2Nu/WTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"VVJets/WZ/WTreeProducer_tree.root",
-    "root://eoscms//"+root_folder+"DATA_RelVal53X/WTreeProducer_tree.root"
+    "root://eoscms//"+root_folder+"DATA/WTreeProducer_tree.root"
   };  
   TString fWana_RecoSkimmed_str[7] = {
     root_folder+"WJets/WTreeProducer_tree_RecoSkimmed.root",
     root_folder+"DYJetsLL/WTreeProducer_tree_RecoSkimmed.root",
     root_folder+"TTJets/WTreeProducer_tree_RecoSkimmed.root",
     root_folder+"VVJets/ZZ/WTreeProducer_tree_RecoSkimmed.root",
-    root_folder+"VVJets/WW/WTreeProducer_tree_RecoSkimmed.root",
+    root_folder+"VVJets/WWJetsTo2L2Nu/WTreeProducer_tree_RecoSkimmed.root",
     root_folder+"VVJets/WZ/WTreeProducer_tree_RecoSkimmed.root",
-    root_folder+"DATA_RelVal53X/WTreeProducer_tree_RecoSkimmed.root"
+    root_folder+"DATA/WTreeProducer_tree_RecoSkimmed.root"
   };  
 
   // int sample = 0;
@@ -26,7 +27,7 @@ void copytreeW() {
   // for(int sample=5; sample<6; sample++){
 
     // if(sample!=1) continue;
-    if(!fWana_RecoSkimmed_str[sample].Contains("DATA_RelVal53X")) continue;
+    if(!fWana_RecoSkimmed_str[sample].Contains("TTJets")) continue;
     // if(sample==0 || sample==6) continue;
     // cout << fZana_str[sample]<< endl;
     // cout << fZana_RecoSkimmed_str[sample]<< endl;
@@ -112,7 +113,7 @@ void copytreeW() {
     newtreeSig->AutoSave();
     delete newfileSig;
     // continue;
-    gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.2.30/bin/eos.select cp W_tree_temp.root %s",filenameoutSig.Data()));
+    gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp W_tree_temp.root %s",filenameoutSig.Data()));
     gROOT->ProcessLine(Form(".! rm W_tree_temp.root"));
 
     if(sample<2){
@@ -154,7 +155,7 @@ void copytreeW() {
       // newtreeFake->Print();
       newtreeFake->AutoSave();
       delete newfileFake;
-      gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.2.30/bin/eos.select cp W_tree_temp2.root %s",filenameoutFake.Data()));
+      gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp W_tree_temp2.root %s",filenameoutFake.Data()));
       gROOT->ProcessLine(Form(".! rm W_tree_temp2.root"));
     }
     

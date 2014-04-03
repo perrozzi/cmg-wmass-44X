@@ -29,7 +29,8 @@ WAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = False,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False
     )
 
 WtreeProducer = cfg.Analyzer(
@@ -46,7 +47,8 @@ ZAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = False,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False
     )
 
 ZtreeProducer = cfg.Analyzer(
@@ -82,6 +84,10 @@ TTJets.triggers = ["HLT_IsoMu24_v1","HLT_IsoMu24_v2","HLT_IsoMu24_v3","HLT_IsoMu
 selectedComponents = [TTJets]
 
 TTJets.splitFactor = 750
+
+# TEST
+# TTJets.splitFactor = 1
+# TTJets.files = TTJets.files[0:2]
 
 config = cfg.Config( components = selectedComponents,
                      sequence = sequence )

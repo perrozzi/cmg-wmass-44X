@@ -37,6 +37,10 @@ def bookJet( tree, pName ):
     var(tree, '{pName}_eta'.format(pName=pName))
     var(tree, '{pName}_phi'.format(pName=pName))
 
+def bookLHE_weight( tree, pName ):
+    tree.vars['{pName}_weight'.format(pName=pName)]= my_n.zeros(400, dtype=float)
+    tree.tree.Branch('{pName}_weight'.format(pName=pName),tree.vars['{pName}_weight'.format(pName=pName)] ,'{pName}_weight'.format(pName=pName)+'[400]/D' )
+    
 def bookMuonCovMatrix( tree, pName ):
     tree.vars['{pName}CovMatrix'.format(pName=pName)]= my_n.zeros(9, dtype=float)
     tree.tree.Branch('{pName}CovMatrix'.format(pName=pName),tree.vars['{pName}CovMatrix'.format(pName=pName)] ,'{pName}CovMatrix'.format(pName=pName)+'[9]/D' )
@@ -69,6 +73,11 @@ def fillJet( tree, pName, particle ):
 def fillMuonCovMatrix( tree, pName, covMatrix,event ):
     for i in range(0,9):
         tree.vars['{pName}CovMatrix'.format(pName=pName)][i] = covMatrix[i]
+
+def fillLHE_weight( tree, pName, LHE_weight,event ):
+    for i in range(0,min(len(LHE_weight),400)):
+        # print 'filling ',i,'with ',LHE_weight[i]
+        tree.vars['{pName}_weight'.format(pName=pName)][i] = LHE_weight[i]
 
 
 
@@ -142,8 +151,8 @@ class WTreeProducer( TreeAnalyzerNumpy ):
       bookMET( tr, 'tkmet')
       bookMET( tr, 'pumet')
       bookMET( tr, 'pucmet')
-      bookMET2( tr, 'pfMetForRegression')
-      bookMET2( tr, 'pfmetraw')
+      bookMET( tr, 'pfMetForRegression')
+      bookMET( tr, 'pfmetraw')
 
       var( tr, 'pfmetcov00')
       var( tr, 'pfmetcov01')
@@ -176,6 +185,10 @@ class WTreeProducer( TreeAnalyzerNumpy ):
       
       bookMuonCovMatrix(tr,'Mu' )
       
+      if (hasattr(self.cfg_ana,'storeLHE_weight') and self.cfg_ana.storeLHE_weight):
+        # print "booking tree"
+        bookLHE_weight(tr,'LHE' )
+      
       bookJet(tr, 'Jet_leading')
 
       var(tr, 'genWLept')
@@ -200,6 +213,11 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           fillParticle(tr, 'MuGenStatus1', event.genMuStatus1[0])      
           fill(tr, 'MuDRGenP',event.muGenDeltaRgenP)
           fillParticle(tr, 'NuGen', event.genNu[0])
+          
+          if (hasattr(self.cfg_ana,'storeLHE_weight') and self.cfg_ana.storeLHE_weight):
+            # print "filling tree"
+            fillLHE_weight( tr,'LHE' ,event.LHE_weights ,event)
+
 
 
         if event.WGoodEvent == True :
@@ -220,7 +238,7 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           fill(tr, 'phi_vis', event.selMuons[0].phi())
           
           fillMuonCovMatrix( tr,'Mu' ,event.covMatrixMuon ,event)
-          
+                    
         if (event.savegenpW and self.cfg_comp.isMC) or event.WGoodEvent:
           fill( tr, 'run', event.run) 
           fill( tr, 'lumi',event.lumi)
@@ -247,6 +265,7 @@ class WTreeProducer( TreeAnalyzerNumpy ):
             
           fill( tr, 'nMuons', event.nMuons)
           fill( tr, 'nTrgMuons', len(event.selMuons))
+          # if len(event.selMuons): print 'len(event.selMuons) ?!?!?'
           if len(event.NoTriggeredMuonsLeadingPt) > 0 :
             fill( tr, 'noTrgMuonsLeadingPt', event.NoTriggeredMuonsLeadingPt[0].pt())
           fill( tr, 'evtHasGoodVtx', event.passedVertexAnalyzer)
@@ -267,12 +286,12 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           event.pfMetForRegression = self.handles['pfMetForRegression'].product()[0]
           event.pumet = self.handles['puMet'].product()[0]
           event.tkmet = self.handles['tkMet'].product()[0]
-          fillMET2(tr, 'nopumet', event.nopumet.p4())
-          fillMET2(tr, 'tkmet', event.tkmet.p4())
-          fillMET2(tr, 'pucmet', event.pucmet.p4())
-          fillMET2(tr, 'pumet', event.pumet.p4())
-          fillMET2(tr, 'pfMetForRegression', event.pfMetForRegression.p4())
-          fillMET2(tr, 'pfmetraw', event.pfmetraw.p4())
+          fillMET(tr, 'nopumet', event.nopumet)
+          fillMET(tr, 'tkmet', event.tkmet)
+          fillMET(tr, 'pucmet', event.pucmet)
+          fillMET(tr, 'pumet', event.pumet)
+          fillMET(tr, 'pfMetForRegression', event.pfMetForRegression)
+          fillMET(tr, 'pfmetraw', event.pfmetraw)
 
           if len(event.selJets)>0:
             fillJet(tr, 'Jet_leading', event.selJets[0])

@@ -13,7 +13,7 @@ namespace WMass{
   static const int WMassStep_MeV = 10;
   static const int WMassNSteps = 0;
   static const int etaMuonNSteps = 1;
-  static const float etaMaxMuons[etaMuonNSteps] = { 0.6 };
+  static const float etaMaxMuons[etaMuonNSteps] = { 1.1 };
   static const int nSigOrQCD = 2;
   TString nSigOrQCD_str[nSigOrQCD] = {"Sig","QCD"};
   static const int NFitVar = 3;
@@ -22,8 +22,14 @@ namespace WMass{
   static const int PDF_members = 1;
   static const int NtoysMomCorr = 1;
   
-  static const double fit_xmin[3]={30, 60,25};
-  static const double fit_xmax[3]={60,120,60};
+  static const int WpTcut = 15;
+  
+  // static const double sel_xmin[3]={30,  60, 30};
+  static const double sel_xmin[3]={30,  60, 30};
+  static const double sel_xmax[3]={55, 100, 55};
+  
+  static const double fit_xmin[3]={32,  65, 32};
+  static const double fit_xmax[3]={45,  90, 45};
 
 
   // bool isGood_WGenPos_1_Gen(double WGen_m,

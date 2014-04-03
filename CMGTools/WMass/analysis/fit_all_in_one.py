@@ -4,16 +4,17 @@ import urllib, urlparse, string, time, os, shutil, sys, subprocess
 from subprocess import Popen, PIPE
 
 # scale_variations=[(0,0),(1,0),(-1,0),(0,1),(0,-1)]
-scale_variations=[(-1,0)]
+scale_variations=[(0,0)]
+# scale_variations=[(1,0)]
 
 
 # infile_run='launch_analysis.py'
 infile_run='launch_analysis_testSplit.py'
 
-os.system("cp launch_analysis_testSplit_bkp.py "+infile_run);
 
 for (resol,scale) in scale_variations:
     
+    os.system("cp launch_analysis_testSplit_bkp.py "+infile_run);
     ###################################
     print('## RUN W AND Z ANALYSES ##')
     ###################################

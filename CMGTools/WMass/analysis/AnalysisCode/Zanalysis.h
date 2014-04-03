@@ -44,6 +44,12 @@ class Zanalysis {
   Double_t        pfmet;
   Double_t        pfmet_phi;
   Double_t        pfmet_sumEt;
+  Double_t        nopumet;
+  Double_t        nopumet_phi;
+  Double_t        nopumet_sumEt;
+  Double_t        tkmet;
+  Double_t        tkmet_phi;
+  Double_t        tkmet_sumEt;
   Double_t        pfmetWlikeNeg;
   Double_t        pfmetWlikeNeg_phi;
   Double_t        pfmetWlikePos;
@@ -101,6 +107,7 @@ class Zanalysis {
   Double_t        Jet_leading_pt;
   Double_t        Jet_leading_eta;
   Double_t        Jet_leading_phi;
+  Double_t        FSRWeight;
   Double_t        LHE_weight[200];
   Double_t        LHE_ren[200];
   Double_t        LHE_fac[200];
@@ -127,6 +134,12 @@ class Zanalysis {
   TBranch        *b_pfmet;   //!
   TBranch        *b_pfmet_phi;   //!
   TBranch        *b_pfmet_sumEt;   //!
+  TBranch        *b_nopumet;   //!
+  TBranch        *b_nopumet_phi;   //!
+  TBranch        *b_nopumet_sumEt;   //!
+  TBranch        *b_tkmet;   //!
+  TBranch        *b_tkmet_phi;   //!
+  TBranch        *b_tkmet_sumEt;   //!
   TBranch        *b_pfmetWlikeNeg;   //!
   TBranch        *b_pfmetWlikeNeg_phi;   //!
   TBranch        *b_pfmetWlikePos;   //!
@@ -184,6 +197,7 @@ class Zanalysis {
   TBranch        *b_Jet_leading_pt;   //!
   TBranch        *b_Jet_leading_eta;   //!
   TBranch        *b_Jet_leading_phi;   //!
+  TBranch        *b_FSRWeight;   //!
   TBranch        *b_LHE_weight;   //!
   TBranch        *b_LHE_ren;   //!
   TBranch        *b_LHE_fac;   //!
@@ -195,8 +209,9 @@ class Zanalysis {
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
+  virtual Long64_t NumEntries();
   virtual void     Init(TTree *tree);
-  virtual void     Loop(int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int buildTemplates=0, int useMomentumCorr=0, int smearRochCorrByNsigma=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1);
+  virtual void     Loop(int chunk=0, int Entry_ini=0, int Entry_fin=0, int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int buildTemplates=0, int useMomentumCorr=0, int smearRochCorrByNsigma=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1, int usePhiMETCorr=0, int useRecoilCorr=0, int RecoilCorrResolutionNSigma=0, int RecoilCorrScaleNSigma=0, int use_PForNoPUorTKmet=0, int use_syst_ewk_Alcaraz=0);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
   
@@ -250,6 +265,10 @@ Long64_t Zanalysis::LoadTree(Long64_t entry)
   }
   return centry;
 }
+Long64_t Zanalysis::NumEntries(){
+
+  return fChain->GetEntries();
+};
 
 void Zanalysis::Init(TTree *tree)
 {
@@ -287,6 +306,12 @@ void Zanalysis::Init(TTree *tree)
   fChain->SetBranchAddress("pfmet", &pfmet, &b_pfmet);
   fChain->SetBranchAddress("pfmet_phi", &pfmet_phi, &b_pfmet_phi);
   fChain->SetBranchAddress("pfmet_sumEt", &pfmet_sumEt, &b_pfmet_sumEt);
+  fChain->SetBranchAddress("nopumet", &nopumet, &b_nopumet);
+  fChain->SetBranchAddress("nopumet_phi", &nopumet_phi, &b_nopumet_phi);
+  fChain->SetBranchAddress("nopumet_sumEt", &nopumet_sumEt, &b_nopumet_sumEt);
+  fChain->SetBranchAddress("tkmet", &tkmet, &b_tkmet);
+  fChain->SetBranchAddress("tkmet_phi", &tkmet_phi, &b_tkmet_phi);
+  fChain->SetBranchAddress("tkmet_sumEt", &tkmet_sumEt, &b_tkmet_sumEt);
   fChain->SetBranchAddress("pfmetWlikeNeg", &pfmetWlikeNeg, &b_pfmetWlikeNeg);
   fChain->SetBranchAddress("pfmetWlikeNeg_phi", &pfmetWlikeNeg_phi, &b_pfmetWlikeNeg_phi);
   fChain->SetBranchAddress("pfmetWlikePos", &pfmetWlikePos, &b_pfmetWlikePos);
@@ -327,6 +352,7 @@ void Zanalysis::Init(TTree *tree)
   fChain->SetBranchAddress("Jet_leading_pt", &Jet_leading_pt, &b_Jet_leading_pt);
   fChain->SetBranchAddress("Jet_leading_eta", &Jet_leading_eta, &b_Jet_leading_eta);
   fChain->SetBranchAddress("Jet_leading_phi", &Jet_leading_phi, &b_Jet_leading_phi);
+  fChain->SetBranchAddress("FSRWeight", &FSRWeight, &b_FSRWeight);
   fChain->SetBranchAddress("LHE_weight", LHE_weight, &b_LHE_weight);
   fChain->SetBranchAddress("LHE_ren", LHE_ren, &b_LHE_ren);
   fChain->SetBranchAddress("LHE_fac", LHE_fac, &b_LHE_fac);

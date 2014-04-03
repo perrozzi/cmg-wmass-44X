@@ -1,4 +1,5 @@
 import operator
+import ROOT
 import numpy as my_n
 import copy
 import math, os
@@ -84,6 +85,23 @@ def BestZMuonPair(self, Zmuons):
 
 
   return mZ, bestmu1, bestmu2
+
+def BestJPsiMuonPair(self, JPsimuons):
+  mJPsipole = 3.096916
+  mJPsi=1e10
+  bestmu1=0
+  bestmu2=0
+  for lep1 in JPsimuons:
+    for lep2 in JPsimuons:
+      # if( lep1 != lep2 and lep1.charge() != lep2.charge() ):
+      if( lep1 != lep2 ):
+        if(math.fabs((lep1.p4()+lep2.p4()).M()-mJPsipole) < math.fabs(mJPsi-mJPsipole) ):
+          mJPsi=(lep1.p4()+lep2.p4()).M()
+          bestmu1=lep1
+          bestmu2=lep2
+
+
+  return mJPsi, bestmu1, bestmu2
 
 # def BestZMuonPair(self, ZselTriggeredMuons, ZselNoTriggeredMuons):
     # mZpole = 91.1876
@@ -255,7 +273,95 @@ def RetrieveMuonMatrixIntoVector(self,muon,matrix):
             matrix.append(muon.covarianceMatrix()(i+3,j+3))
             # matrix[offset+i][offset+j] = muon.covarianceMatrix()(i+3,j+3)
                             
+def ComputeMetFromCMGCandidatesWithCuts(self,collection,pdgId,ptmin,etamin,etamax,selectedPV,fromPV,dZfromPVcut):
+    if len(collection) < 1: return [-1,-1,-1]
+    met_x = 0
+    met_y = 0
+    sumet = 0
+    met4v = ROOT.ROOT.Math.LorentzVector('ROOT::Math::PxPyPzM4D<double>')()
+    # print 'starting ', met_x, met_y, sumet
+    # REMINDER fromPV: 0 (doesn't check) ; 1 (selectedFromPV) ; 2 (selectedFromPUPV) ; 
+    for candidate in collection:
+      if -1 in pdgId or math.fabs(candidate.pdgId()) in pdgId:
+        if(math.fabs(candidate.pdgId())==1 or math.fabs(candidate.pdgId())==2):
+          etamin_loop = 2.0+etamin
+          etamax_loop = 2.0+etamax
+        else:
+          etamin_loop = etamin
+          etamax_loop = etamax
+        if(math.fabs(candidate.eta()) > etamin_loop and math.fabs(candidate.eta()) < etamax_loop)\
+           and candidate.pt() > ptmin \
+           and ( \
+                # doesn't check
+                fromPV==0 \
+                # only from selected PV passing the dz cut
+                or (fromPV==1 and candidate.fromPV()==True and math.fabs(candidate.vertex().z()-selectedPV.z()) < dZfromPVcut) \
+                # from pileup PV 
+                or (fromPV==2 and candidate.fromPV()==False) \
+                # plus candidates from selected PV failing the dz cut
+                or (fromPV==2 and candidate.fromPV()==True and math.fabs(candidate.vertex().z()-selectedPV.z()) > dZfromPVcut) \
+                ):
 
+          # print candidate.pdgId(), candidate.pt(), candidate.eta(), candidate.fromPV(), math.fabs(candidate.vertex().z()-selectedPV.z())
+          met_x = met_x - candidate.px()
+          met_y = met_y - candidate.py()
+          sumet = sumet + candidate.pt()
+          # print met_x, met_y, sumet
+        # else: print pdgId,etamin_loop,etamax_loop,'NOT USING',candidate.pdgId(), candidate.pt(), candidate.eta(), candidate.fromPV(), math.fabs(candidate.vertex().z()-selectedPV.z())
+      # else: print pdgId,(-1 in pdgId or math.fabs(candidate.pdgId()) in pdgId),'NOT USING',candidate.pdgId(), candidate.pt(), candidate.eta(), candidate.fromPV(), math.fabs(candidate.vertex().z()-selectedPV.z())
+    met4v.SetCoordinates(met_x,met_y,0,0)
+    # print 'ending ', met_x, met_y, sumet, 'met4v ptm phi: ', met4v.Pt(), met4v.Phi()
+    return [met4v, sumet]
+
+def computeMetFromCMGCandidatesWithCuts_FAST(self,collection,v_flavor,v_ptmin,v_etamin,v_etamax,selectedPV,fromPV,dZfromPVcut):
+
+    # [iFlavor][iPtMin][jEta][met_i] where met_i = [met_4v, sumet]
+    customMet_FAST = [[[[ROOT.ROOT.Math.LorentzVector('ROOT::Math::PxPyPzM4D<double>')(), 0] for x in xrange(len(v_etamax))] for x in xrange(len(v_ptmin))] for x in xrange(len(v_flavor))]
+    
+    if len(collection) < 1: return
+    
+    # event.customMetFlavor_str =    [ 'h' ,  'h0','gamma','hf' ,'ele','mu']
+    # event.customMetFlavor =        [[211], [130],  [22] ,[1,2],[11] ,[13]]
+    # event.customMetPtMin =     [0.0,  0.5,  1.0,  1.5,  2.0]
+    # event.customMetEtaMin =     [ 0.0,  1.4,  2.1,  2.5,  3.0]
+    # event.customMetEtaMax =     [ 1.4,  2.1,  2.5,  3.0,  5.0]
+
+    # REMINDER fromPV: 0 (doesn't check) ; 1 (selectedFromPV) ; 2 (selectedFromPUPV) ; 
+    
+    for candidate in collection:
+      
+      candidate_4v = ROOT.ROOT.Math.LorentzVector('ROOT::Math::PxPyPzM4D<double>')()
+      candidate_4v.SetCoordinates(candidate.px(),candidate.py(),0,0)
+      # print 'new candidate, pdg %.d, pt %.2f, eta %.2f'%(candidate.pdgId(), candidate.pt(), candidate.eta()), '*************************'
+      
+      # met definitions
+      for iFlavor in xrange(len(v_flavor)):
+        # print "probing flavor bin ",v_flavor[iFlavor]
+        if( math.fabs(candidate.pdgId()) in v_flavor[iFlavor] or v_flavor[iFlavor] == -1 ):
+          # print "passed flavor bin ",v_flavor[iFlavor]
+        
+          for iPtMin in xrange(len(v_ptmin)):
+            # print "probing pt bin ",v_ptmin[iPtMin]
+            if( candidate.pt() > v_ptmin[iPtMin]):
+              # print "passed pt bin ",v_ptmin[iPtMin]
+            
+              for jEta in xrange(len(v_etamin)):
+                # print "probing eta bin ",v_etamin[jEta],v_etamax[jEta]
+                etamin_loop = v_etamin[jEta]
+                etamax_loop = v_etamax[jEta]
+                if( math.fabs(candidate.pdgId()) == 1 or math.fabs(candidate.pdgId()) == 2 ):
+                  etamin_loop = etamin_loop + 2
+                  etamax_loop = etamax_loop + 2
+                if( math.fabs(candidate.eta()) > etamin_loop and math.fabs(candidate.eta()) < etamax_loop):
+                  # print "passed eta bin ",v_etamin[jEta],v_etamax[jEta]
+
+                  customMet_FAST[iFlavor][iPtMin][jEta][0] = customMet_FAST[iFlavor][iPtMin][jEta][0] - candidate_4v
+                  customMet_FAST[iFlavor][iPtMin][jEta][1] = customMet_FAST[iFlavor][iPtMin][jEta][1] + candidate_4v.Pt()
+                  # print "********** fits bin ",v_flavor[iFlavor], "%.1f"%v_ptmin[iPtMin], "%.1f"%v_etamin[jEta], "%.1f"%v_etamax[jEta], "met %.1f"%customMet_FAST[iFlavor][iPtMin][jEta][0].Pt(), "sumet %.1f"%customMet_FAST[iFlavor][iPtMin][jEta][1]
+    
+    return customMet_FAST
+    
+    
                             
                             
 # FROM W

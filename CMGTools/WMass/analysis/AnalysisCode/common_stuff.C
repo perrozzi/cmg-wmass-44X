@@ -349,10 +349,10 @@ void common_stuff::plotAndSaveHisto1D_stack(TString LegendEvTypeTeX, TFile*fMCsi
   leg->SetFillColor(0);
   leg->SetFillStyle(1001);
   leg->AddEntry(hDATA,"DATA","pl");
-  leg->AddEntry(hMCsig,Form("%s (%.1f \%)",LegendEvTypeTeX.Data(), fsig),"f");
-  leg->AddEntry(hMCEWK,Form("EWK (%.1f \%)",fewk),"f");
-  leg->AddEntry(hMCQCD,Form("QCD (%.1f \%)",fqcd),"f");
-  leg->AddEntry(hMCTT,Form("TT (%.1f \%)",ftt),"f");
+  leg->AddEntry(hMCsig,Form("%s (%.1f \%%)",LegendEvTypeTeX.Data(), fsig),"f");
+  leg->AddEntry(hMCEWK,Form("EWK (%.1f \%%)",fewk),"f");
+  leg->AddEntry(hMCQCD,Form("QCD (%.1f \%%)",fqcd),"f");
+  leg->AddEntry(hMCTT,Form("TT (%.1f \%%)",ftt),"f");
   leg->Draw();
   
   t->DrawLatex(0.15,0.85,Form("norm chi2= %.2f, prob %.3e",(chi2/ndf),TMath::Prob(chi2,ndf)));

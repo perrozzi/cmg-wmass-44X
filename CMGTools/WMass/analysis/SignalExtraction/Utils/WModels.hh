@@ -81,6 +81,54 @@ public:
   RooHistPdf  *model;
 };
 
+class RhhCruijffPdf
+{
+public:
+  RhhCruijffPdf():model(0){}
+  RhhCruijffPdf(const char *name, RooRealVar &x);
+  ~RhhCruijffPdf() {
+    delete m0;
+    delete sigmaL;
+    delete sigmaR;
+    delete alphaL;
+    delete alphaR;
+    delete model;
+  }
+  RooAbsReal *m0, *sigmaL, *sigmaR, *alphaL, *alphaR;
+  // RooRealVar *a0, *a1, *a2, *a3;
+  RooGenericPdf *model;
+};
+
+class TsallisPdf
+{
+public:
+  TsallisPdf():model(0){}
+  TsallisPdf(const char *name, RooRealVar &x);
+  ~TsallisPdf() {
+    delete Cq;
+    delete q;
+    delete T;
+  }
+  RooRealVar *Cq, *q, *T;
+  // RooRealVar *a0, *a1, *a2, *a3;
+  RooGenericPdf *model;
+};
+
+class ExpPdf
+{
+public:
+  ExpPdf():model(0){}
+  ExpPdf(const char *name, RooRealVar &x);
+  ~ExpPdf() {
+    delete Cq;
+    delete q;
+    // delete T;
+  }
+  RooRealVar *Cq, *q/* , *T */;
+  // RooRealVar *a0, *a1, *a2, *a3;
+  RooGenericPdf *model;
+};
+
 //--------------------------------------------------------------------------------------------------
 CLucaModel0::CLucaModel0(const char *name, RooRealVar &x)
 {
@@ -237,4 +285,65 @@ CHistModel::CHistModel(const char *name, RooRealVar &x, TH1D* hist, int intOrder
   sprintf(vname,"inHist_%s",name);   inHist   = (TH1D*)hist->Clone(vname);  
   sprintf(vname,"dataHist_%s",name); dataHist = new RooDataHist(vname,vname,RooArgSet(x),inHist);
   sprintf(vname,"histPdf_%s",name);  model    = new RooHistPdf(vname,vname,x,*dataHist,intOrder); 
+}
+
+//--------------------------------------------------------------------------------------------------
+RhhCruijffPdf::RhhCruijffPdf(const char *name, RooRealVar &x)
+{
+  // char mName[50]; sprintf(mName, "m_%s", name); m = new RooRealVar(mName,mName,5,0,10);
+  char m0Name[50]; sprintf(m0Name, "m0_%s", name); m0 = new RooRealVar(m0Name,m0Name,67,65,75);
+  char sigmaLName[50]; sprintf(sigmaLName, "sigmaL_%s", name); sigmaL = new RooRealVar(sigmaLName,sigmaLName,3,0.1,10);
+  char sigmaRName[50]; sprintf(sigmaRName, "sigmaR_%s", name); sigmaR = new RooRealVar(sigmaRName,sigmaRName,7,0.1,10);
+  char alphaLName[50]; sprintf(alphaLName, "alphaL_%s", name); alphaL = new RooRealVar(alphaLName,alphaLName,1e-2,1e-6,1);
+  char alphaRName[50]; sprintf(alphaRName, "alphaR_%s", name); alphaR = new RooRealVar(alphaRName,alphaRName,0.1,0.0001,1);
+  
+  TString dx = Form("(%s-%s)",x.GetName(),m0Name) ;
+  TString sigma = Form("(%s<0 ? %s: %s)",dx.Data(),sigmaLName,sigmaRName) ;
+  TString alpha = Form("(%s<0 ? %s: %s)",dx.Data(),alphaLName,alphaRName) ;
+  TString f = Form("(2*%s*%s + %s*%s*%s)",sigma.Data(),sigma.Data(),alpha.Data(),dx.Data(),dx.Data()) ;
+  // return exp(-dx*dx/f) ;
+  TString formula = Form("exp(-%s*%s/%s)",dx.Data(),dx.Data(),f.Data());
+      
+  cout << formula << endl;
+  
+  char vname[50];
+  sprintf(vname,"CruijffPdf_%s",name);  
+  model = new RooGenericPdf(vname,vname,formula.Data(),RooArgSet(x,*m0,*sigmaL,*sigmaR,*alphaL,*alphaR));
+}
+
+//--------------------------------------------------------------------------------------------------
+TsallisPdf::TsallisPdf(const char *name, RooRealVar &x)
+{
+  // char mName[50]; sprintf(mName, "m_%s", name); m = new RooRealVar(mName,mName,5,0,10);
+  char CqName[50]; sprintf(CqName, "Cq_%s", name); Cq = new RooRealVar(CqName,CqName,9,0,10);
+  char qName[50]; sprintf(qName, "q_%s", name); q = new RooRealVar(qName,qName,5,0.001,10);
+  char TName[50]; sprintf(TName, "T_%s", name); T = new RooRealVar(TName,TName,1,0.01,5);
+
+  TString formula = Form("%s*pow(1-(1-%s)*%s/%s,1/(1-%s))",CqName,qName,x.GetName(),TName,qName);
+      
+  cout << formula << endl;
+  
+  char vname[50];
+  sprintf(vname,"CruijffPdf_%s",name);  
+  model = new RooGenericPdf(vname,vname,formula.Data(),RooArgSet(x,*Cq,*q,*T));
+}
+
+
+//--------------------------------------------------------------------------------------------------
+ExpPdf::ExpPdf(const char *name, RooRealVar &x)
+{
+  // char mName[50]; sprintf(mName, "m_%s", name); m = new RooRealVar(mName,mName,5,0,10);
+  // char CqName[50]; sprintf(CqName, "Cq_%s", name); Cq = new RooRealVar(CqName,CqName,9,8.9,9.1);
+  // char qName[50]; sprintf(qName, "q_%s", name); q = new RooRealVar(qName,qName,0.18,0.15,0.2);
+  char CqName[50]; sprintf(CqName, "Cq_%s", name); Cq = new RooRealVar(CqName,CqName,9,5,15);
+  char qName[50]; sprintf(qName, "q_%s", name); q = new RooRealVar(qName,qName,0.18,0.01,0.5);
+  // char TName[50]; sprintf(TName, "T_%s", name); T = new RooRealVar(TName,TName,1,0.01,5);
+
+  TString formula = Form("%s*exp(-%s*%s)",CqName,qName,x.GetName());
+      
+  cout << formula << endl;
+  
+  char vname[50];
+  sprintf(vname,"ExpPdf_%s",name);  
+  model = new RooGenericPdf(vname,vname,formula.Data(),RooArgSet(x,*Cq,*q/* ,*T */));
 }

@@ -90,11 +90,14 @@ class ZAnalyzer( Analyzer ):
           event.pucmet = self.handles['pucmet'].product()[0]
           event.pfMetForRegression = self.handles['pfMetForRegression'].product()[0]
           event.nJetsPtGt1H = self.handles['nJetsPtGt1'].product()[0]
-          
+        
+        if hasattr(self.cfg_ana,'storeNeutralCMGcandidates') or hasattr(self.cfg_ana,'storeCMGcandidates'):
+          event.cmgPFcands = self.handles['cmgCandidates'].product()
+
         # access genP
         event.genParticles = []
         event.LHEweights = []
-        if self.cfg_comp.isMC :
+        if self.cfg_comp.isMC and self.cfg_ana.savegenp :
           event.genParticles = self.buildGenParticles( self.mchandles['genpart'].product(), event )
           event.LHEweights = self.mchandles['LHEweights'].product()
         # define good event bool
@@ -108,11 +111,11 @@ class ZAnalyzer( Analyzer ):
         
         # retrieve collections of interest (muons and jets)
         
-        # retrieve LHE weights if requested
-        if hasattr(self.cfg_ana,'hasLHEweights') and self.cfg_comp.isMC :
-          print event.LHEweights.comments_size()
-          for i in range(0,event.LHEweights.comments_size()):
-            print i, event.LHEweights.getComment(i).split()
+        # # retrieve LHE weights if requested
+        # if hasattr(self.cfg_ana,'hasLHEweights') and self.cfg_comp.isMC and self.cfg_ana.savegenp :
+          # print event.LHEweights.comments_size()
+          # for i in range(0,event.LHEweights.comments_size()):
+            # print i, event.LHEweights.getComment(i).split()
 
         # loop over electrons 
         event.ZselElectrons = [electron for electron in event.ZElectrons if \
@@ -197,7 +200,7 @@ class ZAnalyzer( Analyzer ):
             event.savegenpZ=False
 
 
-        if self.cfg_comp.isMC:
+        if self.cfg_comp.isMC and self.cfg_ana.savegenp:
             if len(event.ZallMuons)>0:
                 for i in range(0, min(len(event.ZallMuons),9)):
                     if( (matchPromt(self,event,event.ZallMuons[i],-13*event.ZallMuons[i].charge())+ matchPromtTau(self,event,event.ZallMuons[i],-13*event.ZallMuons[i].charge()))>0):
@@ -269,10 +272,16 @@ class ZAnalyzer( Analyzer ):
         
         # reco events must have good reco vertex and trigger fired...                          
         if not (event.passedVertexAnalyzer):
-          return True
+          if hasattr(self.cfg_ana,'keepFailingEvents') and not self.cfg_ana.keepFailingEvents:
+            return False
+          else:
+            return True
         # ...and at lest two reco muons...
         if len(event.ZallMuons) < 2 :
-            return True
+            if hasattr(self.cfg_ana,'keepFailingEvents') and not self.cfg_ana.keepFailingEvents:
+              return False
+            else:
+              return True
         if fillCounter : self.counters.counter('ZAna').inc('Z >= 2 lepton')
         
         # check if the event is triggered according to cfg_ana
@@ -304,7 +313,10 @@ class ZAnalyzer( Analyzer ):
         # check that a good muon pair exists, otherwise reject reco event
         if event.BestZMuonPairList[0] > 1e6 :
           # return True, 'good muon pair not found (probably same charge)'
-          return True, 'good muon pair not found'
+          if hasattr(self.cfg_ana,'keepFailingEvents') and not self.cfg_ana.keepFailingEvents:
+            return False
+          else:
+            return True, 'good muon pair not found'
         else:
             if fillCounter : self.counters.counter('ZAna').inc('Z good muon pair found')          
         
@@ -492,9 +504,96 @@ class ZAnalyzer( Analyzer ):
         # event is fully considered as good
         # self.counters.counter('ZAna').inc('Z pass')
         event.ZGoodEvent = True
+        
+        if hasattr(self.cfg_ana,'keepFailingEvents') and not self.cfg_ana.keepFailingEvents:
+          if( \
+            not event.passedVertexAnalyzer or not event.passedTriggerAnalyzer or not event.Z4V.M()>70 or not event.Z4V.M()<110 \
+            or not event.BestZPosMuon.charge() != event.BestZNegMuon.charge() \
+            or not event.BestZPosMuonIsTight == 1 or not event.BestZNegMuonIsTight == 1 \
+            or not event.BestZPosMuon.pt() > 6 or not math.fabs(event.BestZNegMuon.pt()) > 6 \
+            or not event.BestZPosMuon.relIso(0.5) < 0.5 or not event.BestZNegMuon.relIso(0.5) < 0.5 \
+            or not math.fabs(event.BestZPosMuon.eta()) < 2.1 or not math.fabs(event.BestZNegMuon.eta()) < 2.1 \
+            or not math.fabs(event.BestZPosMuon.dxy()) < 0.2 or not math.fabs(event.BestZNegMuon.dxy()) < 0.2 \
+            or not math.fabs(event.BestZPosMuon.dz()) < 0.5 or not math.fabs(event.BestZNegMuon.dz()) < 0.5 \
+          ):
+            return False
+          # && 
+          # (
+            # (
+              # MuPos_pt>25 && MuPosRelIso<0.12 && MuPosTrg
+              # && MuNegRelIso<0.5
+            # )
+            # ||
+            # (
+              # MuNeg_pt>25 && MuNegRelIso<0.12 && MuNegTrg
+              # && MuPosIsTight
+            # )
+
       #  print 'must be true'
        # if event.BestZNegMuonHasTriggered+event.BestZPosMuonHasTriggered==0 :
        #     print 'must be true' 
+        
+        # # case h:     return thecharge*211; // pi+
+        # # case h0:    return 130; // K_L0
+        # # case gamma: return 22;
+        # # case h_HF:         return 1; // dummy pdg code 
+        # # case egamma_HF:    return 2;  // dummy pdg code
+        # # case e:     return thecharge*(-11);
+        # # case mu:    return thecharge*(-13);
+        # # case X: 
+        # # default:    return 0;
+        
+        # # fromPV: 0 (doesn't check) ; 1 (selectedFromPV) ; 2 (selectedFromPUPV) ; 
+        # # event.customMetPdgId = [[211],[130],[22],[1,2],[11],[13]]
+        
+        # # event.customMetFlavor =        [[211], [130],  [22] ,[1,2],[11] ,[13]]
+        # # event.customMetFlavor_str =    [ 'h' ,  'h0','gamma','hf' ,'ele','mu']
+        # # event.customMetPtMin =     [0.0,  0.5,  1.0,  1.5,  2.0]
+        # # event.customMetPtMin_str = ['0p0','0p5','1p0','1p5','2p0']
+        # # event.customMetEtaMin =     [ 0.0,  1.4,  2.1,  2.5,  3.0]
+        # # event.customMetEtaMin_str = ['0p0','1p4','2p1','2p5','3p0']
+        # # event.customMetEtaMax =     [ 1.4,  2.1,  2.5,  3.0,  5.0]
+        # # event.customMetEtaMax_str = ['1p4','2p1','2p5','3p0','5p0']
+        # event.customMetFlavor =        [[130],  [22] ,[1,2]]
+        # event.customMetFlavor_str =    ['h0','gamma','hf']
+        # event.customMetPtMin =     [0.0,  1.0, 2.0]
+        # event.customMetPtMin_str = ['0p0','1p0','2p0']
+        # event.customMetEtaMin =     [ 0.0,  1.4,  2.5,  3.0]
+        # event.customMetEtaMin_str = ['0p0','1p4','2p5','3p0']
+        # event.customMetEtaMax =     [ 1.4,  2.5,  3.0,  5.0]
+        # event.customMetEtaMax_str = ['1p4','2p5','3p0','5p0']
+        
+        # # event.meth = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # # event.meth0 = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # # event.metgamma = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # # event.methf = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # # event.metele = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # # event.metmu = [[0 for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))]
+        # event.customMet = [[[[ROOT.ROOT.Math.LorentzVector('ROOT::Math::PxPyPzM4D<double>')(),0] for x in xrange(len(event.customMetEtaMax))] for x in xrange(len(event.customMetPtMin))] for x in xrange(len(event.customMetFlavor))]
+        
+        # for iFlavor in xrange(len(event.customMetFlavor)):
+          # for iPtMin in xrange(len(event.customMetPtMin)):
+            # for jEta in xrange(len(event.customMetEtaMax)):
+
+              # if event.customMetFlavor[iFlavor]=='ele' or event.customMetFlavor[iFlavor]=='mu':
+                # met4v = ROOT.ROOT.Math.LorentzVector('ROOT::Math::PxPyPzM4D<double>')()
+                # event.customMet[iFlavor][iPtMin][jEta] = [met4v,0]
+              # else:
+                # # print event.customMetFlavor_str[iFlavor], event.customMetPtMin[iPtMin], event.customMetEtaMin[jEta], event.customMetEtaMax[jEta]
+                # event.customMet[iFlavor][iPtMin][jEta]  = ComputeMetFromCMGCandidatesWithCuts(self,\
+                                                          # event.cmgPFcands,event.customMetFlavor[iFlavor],\
+                                                          # event.customMetPtMin[iPtMin],event.customMetEtaMin[jEta],event.customMetEtaMax[jEta],\
+                                                          # event.goodVertices[0],1,0.1\
+                                                          # )
+            
+        
+        # # event.customMet  = computeMetFromCMGCandidatesWithCuts_FAST(self,\
+                                                  # # event.cmgPFcands,event.customMetFlavor,\
+                                                        # # event.customMetPtMin,event.customMetEtaMin,event.customMetEtaMax,\
+                                                        # # event.goodVertices[0],1,0.1\
+                                                  # # )
+            
+        
         return True
          
         
@@ -503,6 +602,9 @@ class ZAnalyzer( Analyzer ):
         self.handles['cmgTriggerObjectSel'] =  AutoHandle('cmgTriggerObjectSel','std::vector<cmg::TriggerObject>')
         self.handles['Zmuons'] = AutoHandle('cmgMuonSel','std::vector<cmg::Muon>')
         self.handles['Zjets'] = AutoHandle('cmgPFJetSel','std::vector<cmg::PFJet>')
+        # self.handles['kt6PFJets'] = AutoHandle('kt6PFJets','std::vector<reco::PFJet>')
+        if hasattr(self.cfg_ana,'storeNeutralCMGcandidates') or hasattr(self.cfg_ana,'storeCMGcandidates'):
+          self.handles['cmgCandidates'] = AutoHandle('cmgCandidates','std::vector<cmg::Candidate>')
         self.handles['pfmet'] = AutoHandle('cmgPFMET','std::vector<cmg::BaseMET>' )
         self.handles['ZElectrons'] = AutoHandle('cmgElectronSel','std::vector<cmg::Electron>')
         self.mchandles['genpart'] =  AutoHandle('genParticlesPruned','std::vector<reco::GenParticle>')

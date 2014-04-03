@@ -87,6 +87,7 @@ class WAnalyzer( Analyzer ):
         # access genP
         event.genParticles = []
         event.LHEweights = []
+        event.LHE_weights = []
         if self.cfg_comp.isMC :
           event.genParticles = self.buildGenParticles( self.mchandles['genpart'].product(), event )        
           event.LHEweights = self.mchandles['LHEweights'].product()
@@ -100,10 +101,17 @@ class WAnalyzer( Analyzer ):
 
         if fillCounter: self.counters.counter('WAna').inc('W all events')
 
-        # if self.cfg_comp.isMC :
-          # print event.LHEweights.comments_size()
-          # for i in range(0,event.LHEweights.comments_size()):
-            # print i, event.LHEweights.getComment(i).split()
+        if self.cfg_comp.isMC :
+          if (hasattr(self.cfg_ana,'storeLHE_weight') and self.cfg_ana.storeLHE_weight):
+            # print event.LHEweights.comments_size()
+            for i in range(0,event.LHEweights.comments_size()):
+              # print 'i',i,event.LHEweights.getComment(i).split()[0]
+              if not "rwgt" in event.LHEweights.getComment(i).split()[0]:
+                event.LHE_weights.append(float(event.LHEweights.getComment(i).split()[1])/float(event.LHEweights.getComment(206).split()[1])) # CHECK THE 216 FOR THE SAMPLE IN USE !!!
+                # print len(event.LHE_weights)-1, event.LHEweights.getComment(i).split()[0], float(event.LHEweights.getComment(i).split()[1])/float(event.LHEweights.getComment(206).split()[1]), event.LHEweights.getComment(i).split()[2], event.LHEweights.getComment(i).split()[3], event.LHEweights.getComment(i).split()[4], event.LHEweights.getComment(i).split()[5]
+        
+        # print len(event.LHE_weights)
+            
         
         # retrieve collections of interest (muons and jets)
         event.allMuons = copy.copy(event.muons)
@@ -265,13 +273,19 @@ class WAnalyzer( Analyzer ):
                                         and jet.looseJetId() and jet.pt()>30 \
                                         )
                         ]
-
+        keepFailingEvents = True
+        if hasattr(self.cfg_ana,'keepFailingEvents') and not self.cfg_ana.keepFailingEvents:
+            # print 'hasattr(self.cfg_ana,\'keepFailingEvents\') and not self.cfg_ana.keepFailingEvents'
+            keepFailingEvents = False
+        # print 'keepFailingEvents',keepFailingEvents
+        
+            
         # reco events must have good reco vertex and trigger fired...
         if not (event.passedVertexAnalyzer and event.passedTriggerAnalyzer):
-          return True
+          return keepFailingEvents
         # ...and at lest one reco muon...
         if len(event.selMuons) == 0:
-            return True
+            return keepFailingEvents
         if fillCounter: self.counters.counter('WAna').inc('W ev trig, good vertex and >= 1 lepton')
         
         #check if the event is triggered according to cfg_ana
@@ -281,7 +295,7 @@ class WAnalyzer( Analyzer ):
                             trigMatched(self, event, lep)]
             # exit if there are no triggered muons
             if len(event.selMuons) == 0:
-                return True, 'trigger matching failed'
+                return keepFailingEvents, 'trigger matching failed'
             else:
                 if fillCounter: self.counters.counter('WAna').inc('W at least 1 lep trig matched')
                 
@@ -289,10 +303,14 @@ class WAnalyzer( Analyzer ):
         # the number of triggering lepton is checked on the whole lepton collection
         # before any cut, otherwise could be a Z!!!
         if len(event.selMuons) != 1:
-          return True, 'more than 1 lep trig matched'
+          # print 'len(event.selMuons) != 1, returning ', keepFailingEvents
+          return keepFailingEvents, 'more than 1 lep trig matched'
         else:
             if fillCounter: self.counters.counter('WAna').inc('W only 1 lep trig matched')
 
+        # print 'len(event.selMuons) = ',len(event.selMuons)
+        # if len(event.selMuons)!= 1: print 'BUT CONTINUING!'
+        
         # store muons that did not fire the trigger
         event.NoTriggeredMuonsLeadingPt = [lep for lep in event.allMuons if \
                         not trigMatched(self, event, lep) ]
@@ -303,7 +321,7 @@ class WAnalyzer( Analyzer ):
         if len(event.NoTriggeredMuonsLeadingPt) > 0:
           if event.NoTriggeredMuonsLeadingPt[0].pt()>10:
             # if (event.NoTriggeredMuonsLeadingPt[0].pt()<10): print "ESISTE UN LEPTONE NON TRIGGERING WITH PT>10, event.NoTriggeredMuonsLeadingPt[0].pt() = ",event.NoTriggeredMuonsLeadingPt[0].pt()
-            return True, 'rejecting event with non triggering lepton with pT > 10 GeV'
+            return keepFailingEvents, 'rejecting event with non triggering lepton with pT > 10 GeV'
           else:
               if fillCounter: self.counters.counter('WAna').inc('W non trg leading lepton pT < 10 GeV')
         else:

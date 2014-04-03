@@ -14,6 +14,7 @@ pathsAndFilters = {
     "HLT_IsoMu24_v12": ("hltSingleMuL2QualIsoL3IsoFiltered24"),
     "HLT_IsoMu24_v13": ("hltSingleMuL2QualIsoL3IsoFiltered24"),
     "HLT_IsoMu24_v14": ("hltSingleMuL2QualIsoL3IsoFiltered24"),
+    
     # 2011 Mu Iso24_eta2p1
     "HLT_IsoMu24_eta2p1_v1": ("hltL3fL1sMu14Eta2p1L1f0L2f14QL3Filtered24"),
     "HLT_IsoMu24_eta2p1_v2": ("hltL3IsoL1sMu14Eta2p1L1f0L2f14QL2IsoL3f24L3IsoFiltered"),
@@ -24,6 +25,14 @@ pathsAndFilters = {
     "HLT_IsoMu24_eta2p1_v7": ("hltL3IsoL1sMu14Eta2p1L1f0L2f14QL2IsoL3f24L3IsoFiltered"),
     "HLT_IsoMu24_eta2p1_v8": ("hltL3IsoL1sMu14Eta2p1L1f0L2f14QL2IsoL3f24L3IsoFiltered"),
     
+    # 2011 MuOnia Dimuon10_Jpsi_Barrel
+    "HLT_Dimuon10_Jpsi_Barrel_v1": ("hltVertexmumuFilterJpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v2": ("hltVertexmumuFilterJpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v3": ("hltVertexmumuFilterJpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v5": ("hltVertexmumuFilterJpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v6": ("hltVertexmumuFilterDimuon10JpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v9": ("hltVertexmumuFilterDimuon10JpsiBarrel"),
+    "HLT_Dimuon10_Jpsi_Barrel_v10": ("hltVertexmumuFilterDimuon10JpsiBarrel"),
   }
     
 

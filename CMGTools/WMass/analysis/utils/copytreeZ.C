@@ -1,6 +1,7 @@
 void copytreeZ() {
 
-  TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
+  // TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
+  TString root_folder="/eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_10_15/";
   TString fZana_str[7] = {
     "root://eoscms//"+root_folder+"WJets/ZTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"DYJetsTT/ZTreeProducer_tree.root",
@@ -8,7 +9,7 @@ void copytreeZ() {
     "root://eoscms//"+root_folder+"VVJets/ZZ/ZTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"VVJets/WW/ZTreeProducer_tree.root",
     "root://eoscms//"+root_folder+"VVJets/WZ/ZTreeProducer_tree.root",
-    "root://eoscms//"+root_folder+"DATA_RelVal53X/ZTreeProducer_tree.root"
+    "root://eoscms//"+root_folder+"DATA/ZTreeProducer_tree.root"
   };  
   TString fZana_RecoSkimmed_str[7] = {
     root_folder+"WJets/ZTreeProducer_tree_RecoSkimmed.root",
@@ -17,7 +18,7 @@ void copytreeZ() {
     root_folder+"VVJets/ZZ/ZTreeProducer_tree_RecoSkimmed.root",
     root_folder+"VVJets/WW/ZTreeProducer_tree_RecoSkimmed.root",
     root_folder+"VVJets/WZ/ZTreeProducer_tree_RecoSkimmed.root",
-    root_folder+"DATA_RelVal53X/ZTreeProducer_tree_RecoSkimmed.root"
+    root_folder+"DATA/ZTreeProducer_tree_RecoSkimmed.root"
   };  
 
   // int sample = 0;
@@ -25,10 +26,10 @@ void copytreeZ() {
   // for(int sample=3; sample<6; sample++){
   
     // if(sample!=1 && sample!=6) continue;
-    // if(sample!=0) continue;
+    // if(sample!=6) continue;
     // if(sample==1 || sample==6) continue;
     // cout << fZana_str[sample]<< endl;
-    if(!fZana_RecoSkimmed_str[sample].Contains("DATA")) continue;
+    if(!fZana_RecoSkimmed_str[sample].Contains("TTJets")) continue;
     // cout << fZana_RecoSkimmed_str[sample]<< endl;
     // continue;
       
@@ -130,7 +131,7 @@ void copytreeZ() {
     newfileSig->Close();
     delete newfileSig;
     // continue;
-    gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.2.30/bin/eos.select cp Z_tree_temp.root %s",filenameoutSig.Data()));
+    gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp Z_tree_temp.root %s",filenameoutSig.Data()));
     gROOT->ProcessLine(Form(".! rm Z_tree_temp.root"));
 
     if(sample<2){
@@ -173,7 +174,7 @@ void copytreeZ() {
       // newtreeFake->Print();
       newtreeFake->AutoSave();
       newfileFake->Close();
-      gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.2.30/bin/eos.select cp Z_tree_temp2.root %s",filenameoutFake.Data()));
+      gROOT->ProcessLine(Form(".! /afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select cp Z_tree_temp2.root %s",filenameoutFake.Data()));
       gROOT->ProcessLine(Form(".! rm Z_tree_temp2.root"));
 
     }

@@ -22,8 +22,14 @@ namespace WMass{
   static const int PDF_members = PAR_PDF_MEMBERS;
   static const int NtoysMomCorr = PAR_TOYS_MOMCORR;
   
-  static const double fit_xmin[3]={30, 60,25};
-  static const double fit_xmax[3]={60,120,60};
+  static const int WpTcut = 15;
+  
+  // static const double sel_xmin[3]={30,  60, 30};
+  static const double sel_xmin[3]={30,  60, 30};
+  static const double sel_xmax[3]={55, 100, 55};
+  
+  static const double fit_xmin[3]={32,  65, 32};
+  static const double fit_xmax[3]={45,  90, 45};
 
 
   // bool isGood_WGenPos_1_Gen(double WGen_m,

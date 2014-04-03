@@ -29,7 +29,8 @@ WAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = False,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False    
     )
 
 WtreeProducer = cfg.Analyzer(
@@ -46,7 +47,8 @@ ZAna = cfg.Analyzer(
     iso = 0.5,
     savegenp = False,
     verbose = True,
-    triggerMap = pathsAndFilters
+    triggerMap = pathsAndFilters,
+    keepFailingEvents = False    
     )
 
 ZtreeProducer = cfg.Analyzer(

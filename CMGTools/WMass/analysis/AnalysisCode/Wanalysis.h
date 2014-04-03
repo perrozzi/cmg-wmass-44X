@@ -80,6 +80,7 @@ class Wanalysis {
   Double_t        Jet_leading_pt;
   Double_t        Jet_leading_eta;
   Double_t        Jet_leading_phi;
+  Double_t        FSRWeight;
 
   // List of branches
   TBranch        *b_scalePDF;   //!
@@ -138,6 +139,7 @@ class Wanalysis {
   TBranch        *b_Jet_leading_pt;   //!
   TBranch        *b_Jet_leading_eta;   //!
   TBranch        *b_Jet_leading_phi;   //!
+  TBranch        *b_FSRWeight;   //!
 
   Wanalysis(TString f_str=0, double lumi_scaling_input=1, int useGen=0, TTree *tree=0);
   virtual ~Wanalysis();
@@ -146,7 +148,7 @@ class Wanalysis {
   virtual Long64_t LoadTree(Long64_t entry);
   virtual Long64_t NumEntries();
   virtual void     Init(TTree *tree);
-  virtual void     Loop(int chunk=0, int Entry_ini=0, int Entry_fin=0, int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int useRochCorr=0, int smearRochCorr=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1, int usePhiMETCorr=0, int useRecoilCorr=0, int RecoilCorrResolutionNSigma=0, int RecoilCorrScaleNSigma=0);
+  virtual void     Loop(int chunk=0, int Entry_ini=0, int Entry_fin=0, int IS_MC_CLOSURE_TEST=0, int isMCorDATA=0, TString outputdir=0, int useRochCorr=0, int smearRochCorr=0, int useEffSF=0, int usePtSF=0, int useVtxSF=0, int controlplots=0, TString sampleName="", int generated_PDF_set=-1, int generated_PDF_member=-1, int contains_PDF_reweight=-1, int usePhiMETCorr=0, int useRecoilCorr=0, int RecoilCorrResolutionNSigma=0, int RecoilCorrScaleNSigma=0, int use_PForNoPUorTKmet=0, int use_syst_ewk_Alcaraz=0);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
 };
@@ -201,7 +203,7 @@ Long64_t Wanalysis::LoadTree(Long64_t entry)
 }
 Long64_t Wanalysis::NumEntries(){
 
-return fChain->GetEntries();
+  return fChain->GetEntries();
 };
 
 void Wanalysis::Init(TTree *tree)
@@ -260,6 +262,7 @@ void Wanalysis::Init(TTree *tree)
   fChain->SetBranchAddress("Jet_leading_pt", &Jet_leading_pt, &b_Jet_leading_pt);
   fChain->SetBranchAddress("Jet_leading_eta", &Jet_leading_eta, &b_Jet_leading_eta);
   fChain->SetBranchAddress("Jet_leading_phi", &Jet_leading_phi, &b_Jet_leading_phi);
+  fChain->SetBranchAddress("FSRWeight", &FSRWeight, &b_FSRWeight);
   if(useGenVar){
     fChain->SetBranchAddress("WGen_m", &WGen_m, &b_WGen_m);
     fChain->SetBranchAddress("WGen_pt", &WGen_pt, &b_WGen_pt);

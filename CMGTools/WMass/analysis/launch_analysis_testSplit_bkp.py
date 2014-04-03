@@ -15,7 +15,7 @@ useLHAPDF = False # DEFAULT IS False, before to switch to True follow https://tw
 # foldername = "test_RecoilCorr_scale1";
 # foldername = "test_RecoilCorrNewFiles";
 # foldername = "test_NoPUmet_recoil15";
-foldername = "test_TKmet";
+foldername = "test_pfnopu_std";
 # foldername = "test_PhiStarEta";
 
 ntuple_folder = "root://eoscms//eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
@@ -32,7 +32,7 @@ useMomentumCorr = 1; # 0=none, 1=Rochester, 2=MuscleFit
 LocalSmearingRochCorrNToys = 0;
 GlobalSmearingRochCorrNsigma = 0;
 usePhiMETCorr = 0; # 0=none, 1=yes
-useRecoilCorr = 0; # 0=none, 1=yes
+useRecoilCorr = 1; # 0=none, 1=yes
 RecoilCorrResolutionNSigma = "0"; # 0=none, 1=yes
 RecoilCorrScaleNSigma = "0"; # 0=none, 1=yes
 # LHAPDF_reweighting_sets="11200" # cteq6ll.LHpdf=10042 CT10nnlo.LHgrid=11200, NNPDF23_nnlo_as_0118.LHgrid=232000, MSTW2008nnlo68cl.LHgrid=21200
@@ -53,7 +53,7 @@ WMassNSteps = "5"; # 60
 # WMassNSteps = "0"; # 60
 # WMassNSteps = "0"; # 60
 etaMuonNSteps = "1"; # 5
-etaMaxMuons = "2.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
+etaMaxMuons = "1.6"; # 0.6, 0.8, 1.2, 1.6, 2.1
 # etaMaxMuons = "2.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
 
 parallelize = 1;
@@ -384,17 +384,54 @@ if(runWanalysis or runZanalysis or run_BuildEvByEvTemplates or runPhiStarEta):
                     print("c++ -o runZanalysis.o `root-config --glibs --libs --cflags`  -lm Zanalysis.C rochcor_44X_v3.C common_stuff.C ../includes/common.h RecoilCorrector.cc runZanalysis.C")
                     os.system("rm runZanalysis.o; c++ -o runZanalysis.o `root-config --glibs --libs --cflags`  -lm Zanalysis.C rochcor_44X_v3.C common_stuff.C ../includes/common.h RecoilCorrector.cc runZanalysis.C")
 
-            print zstring
+            print " "
+            line = os.popen("./runZanalysis.o -1,0,0,"+zstring).read()
+            nEntries = [int(s) for s in line.split() if s.isdigit()][0]
+            # print zstring
             if not parallelize:
-                # os.system("root -l -b -q \'runZanalysis.C("+zstring+")\'");
+                # os.system("./runZanalysis.o 0,0,"+str(nEntries)+","+zstring)
                 os.system("./runZanalysis.o "+zstring)
-
+                # os.system("root -l -b -q \'runZanalysis.C("+zstring+")\'");
             else:
-                if(runWanalysis): os.system("sleep 3");
-                os.system("./runZanalysis.o "+zstring+" > ../"+filename_outputdir+"Zlog.log 2>&1 &")
-                # print "root -l -b -q \'runZanalysis.C("+zstring+")\' > ../"+filename_outputdir+"Zlog.log 2>&1 &";
-                # os.system("root -l -b -q \'runZanalysis.C("+zstring+")\' > ../"+filename_outputdir+"/Zlog.log 2>&1 &");
+                nevents = 2e5
+                if ("DATA" in sample[i]):
+                  nevents = 1e6  
+                if (WMassNSteps=="0"):
+                  nevents = 100e6  
+                  
+                nChuncks =  int(nEntries/nevents)+2
+                if(nChuncks>2): print "nChuncks ",nChuncks-1
+                if nChuncks>2  and (("DYJetsSig" in sample[i]) or ("DATA" in sample[i])):
+                  for x in xrange(1, nChuncks):
+                    ev_ini=int(nevents*(x-1))
+                    ev_fin= nEntries 
+                    if (x<nChuncks-1):
+                      ev_fin= int(nevents*(x)-1)
+                    # ev_fin= int(nevents*(x)-1) if (x<nChuncks-1) else nEntries
+                    print x,ev_ini,ev_fin
+                    os.system("./runZanalysis.o "+str(x)+","+str(ev_ini)+","+str(ev_fin)+","+zstring+" > ../"+filename_outputdir+"Zlog_"+str(x)+".log 2>&1 &")
+                    os.system("sleep 3");
+                else:
+                    os.system("./runZanalysis.o 0,0,"+str(nEntries)+","+zstring+" > ../"+filename_outputdir+"Zlog.log 2>&1 &")
+                # print "root -l -b -q \'runWanalysis.C("+zstring+")\' ../> "+filename_outputdir+"Wlog.log 2>&1 &";
+                # os.system("root -l -b -q \'runWanalysis.C("+zstring+")\' > ../"+filename_outputdir+"Wlog.log 2>&1 &");
+                os.system("sleep 3");
+                    
+            # print zstring
+            # if not parallelize:
+                # # os.system("root -l -b -q \'runZanalysis.C("+zstring+")\'");
+                # os.system("./runZanalysis.o "+zstring)
 
+            # else:
+                # if(runWanalysis): os.system("sleep 3");
+                # os.system("./runZanalysis.o "+zstring+" > ../"+filename_outputdir+"Zlog.log 2>&1 &")
+                # # print "root -l -b -q \'runZanalysis.C("+zstring+")\' > ../"+filename_outputdir+"Zlog.log 2>&1 &";
+                # # os.system("root -l -b -q \'runZanalysis.C("+zstring+")\' > ../"+filename_outputdir+"/Zlog.log 2>&1 &");
+
+                
+                
+                
+                
         if(runPhiStarEta):
 
             zstring="\""+ZfileDATA+"\","+str(ZfileDATA_lumi_SF)+",\""+sample[i]+"\","+str(useAlsoGenPforSig)+","+str(IS_MC_CLOSURE_TEST)+","+str(isMCorDATA[i])+",\""+filename_outputdir+"\","+str(useMomentumCorr)+","+str(GlobalSmearingRochCorrNsigma)+","+str(useEffSF)+","+str(usePtSF)+","+str(usePileupSF)+","+str(0)+","+str(controlplots)+","+str(generated_PDF_set[i])+""+","+str(generated_PDF_member[i])+","+str(contains_PDF_reweight[i])+","+str(usePhiMETCorr)+","+str(useRecoilCorr)+","+str(RecoilCorrResolutionNSigma)+","+str(RecoilCorrScaleNSigma)

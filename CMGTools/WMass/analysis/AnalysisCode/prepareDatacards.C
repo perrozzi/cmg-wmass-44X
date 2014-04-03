@@ -5,610 +5,323 @@
 #include "TFile.h"
 #include "../includes/common.h"
 
-static const int Nsamples=13;
-enum                                 {  WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD     ,  DATA  ,  EWK  ,  EWKTT  ,  MCDATALIKE  };
-TString     samples_str[Nsamples]  = { "WJetsSig", "WJetsFake", "DYJetsSig", "DYJetsFake",  "TTJets",  "ZZJets",  "WWJets", "WZJets", "QCD"    , "DATA" , "EWK" , "EWKTT" , "MCDATALIKE" };
-TString     WCharge_str[]={"Pos","Neg"};
+void prepareDatacards(TString folder, TString syst_folder, TString sample, int generated_PDF_set=1, int generated_PDF_member=0, TString WorZ="W"){
 
-// double xmin=0.8, xmax=1.2;
-// double xmin=0.65, xmax=2;
-double xmin=(30.*(1+(int)(1==1)))/(WMass::WMassCentral_MeV/1e3), xmax=(50.*(1+(int)(1==1)))/(WMass::WMassCentral_MeV/1e3);
-
-void prepareDatacards(TString folder, TString syst_folder, TString sample, int generated_PDF_set=1, int generated_PDF_member=0){
-
-  cout << "folder= " << folder << endl;
-  cout << "samples= " << sample << endl;
+  TString original;
+  std::vector<TString> tokenized;
+  original = WorZ;
+      
+  TObjArray* LineColumns = original.Tokenize(",");
   
-  // TOKENIZE SAMPLES
-  // std::vector<TString> samples_str;
-  TFile* finTemplatesZ[Nsamples], *finTemplatesW[Nsamples];
-  TH1D *TemplatesZ[WMass::NtoysMomCorr][WMass::PDF_members][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesZ_NonScaled[WMass::NtoysMomCorr][WMass::PDF_members][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
-  // TH1D *TemplatesW[WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesW_NonScaled[WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
-  TH1D *TemplatesW[2][WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesW_NonScaled[2][WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
-  // vector <*TH1D>
-  // std::vector<std::vector<std::vector< std::vector< std::vector< std::vector< *TH1D > > > > > >;
-  // TObjArray* samples_obj = sample.Tokenize("-");
-  // int Nsamples = samples_obj->GetEntries();
+  for(int j=0;j<LineColumns->GetEntriesFast();j++)
+  {
+    tokenized.push_back(((TObjString *)LineColumns->At(j))->GetString());
+    // cout << "tokenized["<<j<<"]= " << tokenized[j] << endl;
+  }
   
-  // LOAD ALL THE HISTOS FROM THE VARIOUS FILES IN MEMORY
-  for(int isample=0; isample<Nsamples;isample++){
-    // samples_str.push_back( ((TObjString *)samples_obj->At(isample))->GetString() );
-    finTemplatesZ[isample] = new TFile(Form("%s/test_numbers_%s/WSimpleTemplates.root",folder.Data(),samples_str[isample].Data()));
-    finTemplatesW[isample] = new TFile(Form("%s/test_numbers_%s/WanalysisOnDATA.root",folder.Data(),samples_str[isample].Data()));
-    finTemplatesZ[isample]->Print();
-    finTemplatesW[isample]->Print();
-    for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
-      TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
-      for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
-        int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
-        
-        for(int h=0; h<WMass::PDF_members; h++){
+  for(unsigned int itoken=0; itoken<tokenized.size(); itoken++){
+
+    static const int Nsamples=13;
+    enum                                 {  WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD     ,  DATA  ,  EWK  ,  EWKTT  ,  MCDATALIKE  };
+    TString     samples_str[Nsamples]  = { "WJetsSig", "WJetsFake", "DYJetsSig", "DYJetsFake",  "TTJets",  "ZZJets",  "WWJets", "WZJets", "QCD"    , "DATA" , "EWK" , "EWKTT" , "MCDATALIKE" };
+    TString     WCharge_str[]={"Pos","Neg"};
+
+
+    cout << "folder= " << folder << endl;
+    cout << "samples= " << sample << endl;
+    
+    WorZ = tokenized.at(itoken); // "Z" or "W"
+    TString Wlike = WorZ.Contains("W")?"":"like";
+    int charges = WorZ.Contains("W")?2:1;
+    cout << "WorZ= " << WorZ << endl;
+    
+    // double xmin=0.8, xmax=1.2;
+    // double xmin=0.65, xmax=2;
+    // double xmin=(30.*(1+(int)(1==1)))/(WorZ.Contains("W")?WMass::WMassCentral_MeV:91178.6/1e3), xmax=(50.*(1+(int)(1==1)))/(WorZ.Contains("W")?WMass::WMassCentral_MeV:91187.6/1e3);
+    double xmin=(30.*(1+(int)(1==1)))/(WMass::WMassCentral_MeV/1e3), xmax=(50.*(1+(int)(1==1)))/(WMass::WMassCentral_MeV/1e3);
+    
+    // TOKENIZE SAMPLES
+    // std::vector<TString> samples_str;
+    TFile* finTemplatesZ[Nsamples], *finTemplatesW[Nsamples];
+    TH1D *TemplatesZ[WMass::NtoysMomCorr][WMass::PDF_members][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesZ_NonScaled[WMass::NtoysMomCorr][WMass::PDF_members][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
+    // TH1D *TemplatesW[WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesW_NonScaled[WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
+    TH1D *TemplatesW[2][WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1], *TemplatesW_NonScaled[2][WMass::NtoysMomCorr][WMass::PDF_members][WMass::NFitVar][Nsamples][WMass::etaMuonNSteps][2*WMass::WMassNSteps+1];
+    // vector <*TH1D>
+    // std::vector<std::vector<std::vector< std::vector< std::vector< std::vector< *TH1D > > > > > >;
+    // TObjArray* samples_obj = sample.Tokenize("-");
+    // int Nsamples = samples_obj->GetEntries();
+    
+    // LOAD ALL THE HISTOS FROM THE VARIOUS FILES IN MEMORY
+    for(int isample=0; isample<Nsamples;isample++){
+      // samples_str.push_back( ((TObjString *)samples_obj->At(isample))->GetString() );
+      // finTemplatesZ[isample] = new TFile(Form("%s/test_numbers_%s/WSimpleTemplates.root",folder.Data(),samples_str[isample].Data()));
+      finTemplatesW[isample] = new TFile(Form("%s/test_numbers_%s/%sanalysisOnDATA.root",folder.Data(),samples_str[isample].Data(),WorZ.Data()));
+      // finTemplatesZ[isample]->Print();
+      finTemplatesW[isample]->Print();
+      for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
+        TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
+        for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
+          int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
+          
+          for(int h=0; h<WMass::PDF_members; h++){
+              for(int m=0; m<WMass::NtoysMomCorr; m++){
+              // TemplatesZ[m][h][isample][ieta][jmass] = (TH1D*) finTemplatesZ[isample]->Get(Form("hWlikePos_PtScaled_RWeighted_SimpleTemplates_pdf%d-%d%s_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
+              // TemplatesZ_NonScaled[m][h][isample][ieta][jmass] = (TH1D*) finTemplatesZ[isample]->Get(Form("hWlikePos_PtNonScaled_RWeighted_SimpleTemplates_pdf%d-%d%s_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
+              // cout << Form("hWlikePos_PtNonScaled_RWeighted_SimpleTemplates_pdf%d-%d_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data(),jWmass) << endl;
+              // TemplatesZ_NonScaled[h][isample][ieta][jmass]->Print();
+              for(int k=0;k<3;k++){
+                for(int c=0;c<charges;c++){
+                  TemplatesW[c][m][h][k][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hW%s%s_%sNonScaled_8_JetCut_pdf%d-%d%s_eta%s_%d",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
+                  // TemplatesW_NonScaled[h][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hWPos_PtNonScaled_8_JetCut_eta%s_%d",eta_str.Data(),jWmass));
+                  
+                  // N.B. IS ALWAYS THE SAME TEMPLATE!!! MASS INDEX IS FIXED TO MC GENERATED W MASS, i.e. WMass::WMassCentral_MeV)
+                  // TemplatesW_NonScaled[h][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hWPos_PtNonScaled_8_JetCut_eta%s_%d",eta_str.Data(),WMass::WMassCentral_MeV));
+                  
+                  TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hW%s%s_%sNonScaled_8_JetCut_pdf%d-%d%s_eta%s_%d",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
+                  // TemplatesZ[h][isample][ieta][jmass]->Print();
+                  // TemplatesW[h][isample][ieta][jmass]->Print();
+                  
+                  // TemplatesW_NonScaled[h][k][isample][ieta][jmass]->Print();
+                  // cout << TemplatesW_NonScaled[h][k][isample][ieta][jmass]->Integral() << " "<< TemplatesW_NonScaled[h][k][isample][ieta][jmass]->GetMean() << " "<< TemplatesW_NonScaled[h][k][isample][ieta][jmass]->GetRMS() << endl;
+                }
+              }
+            }
+          }
+          
+        }
+      }
+      
+    }
+    for(int isample=0; isample<Nsamples;isample++){
+      for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
+        for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
+          for(int h=0; h<WMass::PDF_members; h++){
             for(int m=0; m<WMass::NtoysMomCorr; m++){
-            TemplatesZ[m][h][isample][ieta][jmass] = (TH1D*) finTemplatesZ[isample]->Get(Form("hWlikePos_PtScaled_RWeighted_SimpleTemplates_pdf%d-%d%s_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
-            TemplatesZ_NonScaled[m][h][isample][ieta][jmass] = (TH1D*) finTemplatesZ[isample]->Get(Form("hWlikePos_PtNonScaled_RWeighted_SimpleTemplates_pdf%d-%d%s_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
-            // cout << Form("hWlikePos_PtNonScaled_RWeighted_SimpleTemplates_pdf%d-%d_eta%s_%d",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data(),jWmass) << endl;
-            // TemplatesZ_NonScaled[h][isample][ieta][jmass]->Print();
-            for(int k=0;k<3;k++){
-              for(int c=0;c<2;c++){
-                TemplatesW[c][m][h][k][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hW%s_%sScaled_8_JetCut_pdf%d-%d%s_eta%s_%d",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
-                // TemplatesW_NonScaled[h][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hWPos_PtNonScaled_8_JetCut_eta%s_%d",eta_str.Data(),jWmass));
-                
-                // N.B. IS ALWAYS THE SAME TEMPLATE!!! MASS INDEX IS FIXED TO MC GENERATED W MASS, i.e. WMass::WMassCentral_MeV)
-                // TemplatesW_NonScaled[h][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hWPos_PtNonScaled_8_JetCut_eta%s_%d",eta_str.Data(),WMass::WMassCentral_MeV));
-                TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass] = (TH1D*) finTemplatesW[isample]->Get(Form("hW%s_%sNonScaled_8_JetCut_pdf%d-%d%s_eta%s_%d",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass));
-                // TemplatesZ[h][isample][ieta][jmass]->Print();
-                // TemplatesW[h][isample][ieta][jmass]->Print();
-                
-                // TemplatesW_NonScaled[h][k][isample][ieta][jmass]->Print();
-                // cout << TemplatesW_NonScaled[h][k][isample][ieta][jmass]->Integral() << " "<< TemplatesW_NonScaled[h][k][isample][ieta][jmass]->GetMean() << " "<< TemplatesW_NonScaled[h][k][isample][ieta][jmass]->GetRMS() << endl;
+              for(int k=0;k<3;k++){
+                for(int c=0;c<charges;c++){
+                                      // TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->Print();
+                  double int_hist_data = TemplatesW_NonScaled[c][0][0][k][DATA][ieta][WMass::WMassNSteps]->Integral();
+                  
+                  if(TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]){
+                    double int_hist_mcdatalike = TemplatesW_NonScaled[c][m][h][k][MCDATALIKE][ieta][jmass]->Integral();
+                    double norm_factor_to_match_data = int_hist_mcdatalike>0 ? int_hist_data/int_hist_mcdatalike : 1;
+                    
+                    TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->Scale(norm_factor_to_match_data);
+                  }
+                }
               }
             }
           }
         }
-        
       }
     }
+    // return;
+    // PROCESS THE HISTOS AND STORE THEM IN A SUITABLE FILE, STORE NORMALIZATIONS IN A SEPARATE TEXT FILE
+    TFile *foutDATA = new TFile(Form("%s/DataCards/datacards_DATA%s.root",folder.Data(),WorZ.Contains("W")?"":"_Wlike"),"RECREATE");
     
-  }
-  
-  // PROCESS THE HISTOS AND STORE THEM IN A SUITABLE FILE, STORE NORMALIZATIONS IN A SEPARATE TEXT FILE
-  TFile *foutDATA = new TFile(Form("%s/DataCards/datacards_DATA.root",folder.Data()),"RECREATE");
-  
-  for(int c=0; c<2; c++){
-    ofstream outTXTfile;
-    outTXTfile.open(Form("%s/DataCards/datacard_Wmass_Mu%s_normalizations.txt",folder.Data(),WCharge_str[c].Data()));
-    
-    // LOOP OVER MAX-ETA BINS
-  
-    for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
-      TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
-      outTXTfile << "-----------------------" << endl;
-      outTXTfile << "-----------------------" << endl;
-      // outTXTfile << "MuPos with |eta| < " << WMass::etaMaxMuons[ieta] << " PDF " << (WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h<< endl;
-      outTXTfile << "Mu"<<WCharge_str[c].Data()<< " with |eta| < " << WMass::etaMaxMuons[ieta] << endl;
-      outTXTfile << "-----------------------" << endl;
-      outTXTfile << "-----------------------" << endl;
-      outTXTfile << endl;
-      // TDirectory *channel_dir = foutDATA->mkdir(Form("MuPos_pdf%d-%d_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data()));
-      TDirectory *channel_dir = foutDATA->mkdir(Form("Mu%s_eta%s",WCharge_str[c].Data(),eta_str.Data()));
-      // foutDATA->cd(Form("MuPos_pdf%d-%d_eta%s/",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data()));
-      foutDATA->cd(Form("Mu%s_eta%s",WCharge_str[c].Data(),eta_str.Data()));
+    for(int c=0; c<charges; c++){
+      ofstream outTXTfile;
+      outTXTfile.open(Form("%s/DataCards/datacard_Wmass_Mu%s%s_normalizations.txt",folder.Data(),Wlike.Data(),WCharge_str[c].Data()));
       
-      //LOOP OVER w MASS BINS
-      for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
-        int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
+      // LOOP OVER MAX-ETA BINS
+    
+      for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
+        TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
+        outTXTfile << "-----------------------" << endl;
+        outTXTfile << "-----------------------" << endl;
+        // outTXTfile << "MuPos with |eta| < " << WMass::etaMaxMuons[ieta] << " PDF " << (WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h<< endl;
+        outTXTfile << "Mu"<<Wlike.Data()<<WCharge_str[c].Data()<< " with |eta| < " << WMass::etaMaxMuons[ieta] << endl;
+        outTXTfile << "-----------------------" << endl;
+        outTXTfile << "-----------------------" << endl;
+        outTXTfile << endl;
+        // TDirectory *channel_dir = foutDATA->mkdir(Form("MuPos_pdf%d-%d_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data()));
+        TDirectory *channel_dir = foutDATA->mkdir(Form("Mu%s%s_eta%s",Wlike.Data(),WCharge_str[c].Data(),eta_str.Data()));
+        // foutDATA->cd(Form("MuPos_pdf%d-%d_eta%s/",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,eta_str.Data()));
+        foutDATA->cd(Form("Mu%s%s_eta%s",Wlike.Data(),WCharge_str[c].Data(),eta_str.Data()));
         
-        // double fitrange_Scaling = double(jWmass)/double(WMass::WMassCentral_MeV);
-        double fitrange_Scaling = 1;
-        
-        cout << "W"<<WCharge_str[c]<<" eta cut " << WMass::etaMaxMuons[ieta]<< " jWmass= " << jWmass; fflush(stdout);
-        TDirectory *mass_dir = channel_dir->mkdir(Form("%d",jWmass));
-        mass_dir->cd();
-        
-        for(int h=0; h<WMass::PDF_members; h++){
-          cout << " PDF " << (WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h; fflush(stdout);
-          for(int m=0; m<WMass::NtoysMomCorr; m++){
-            if(WMass::NtoysMomCorr>1) cout << " MomScale toy " << m; fflush(stdout);
-            // gDirectory->pwd();
-            // TH1D*data_obs=new TH1D("data_obs","data_obs",TemplatesW[h][DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesW[h][DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
-            outTXTfile << "-----------------------" << endl;
-            outTXTfile << "Mass hypothesis  " << jWmass << " PDF " << Form("%d-%d%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form(" MomCorrToy%d",m):"") << endl;
-            outTXTfile << "-----------------------" << endl;
-            outTXTfile << endl;
-
-            TString Z_histoname[2*Nsamples], W_histoname[2*Nsamples];
-            TString Z_histoname_NonScaled[2*Nsamples], W_histoname_NonScaled[2*Nsamples];
-            double Z_integrals[2*Nsamples], W_integrals[2*Nsamples];
-            
-            //LOOP OVER THE SAMPLES
-            for(int isample=0; isample<Nsamples;isample++){
-              // cout << "using " << samples_str[isample].Data() << endl;
-              if(samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD")) continue;
-              for(int k=0;k<3;k++){
-            
-                // DEFINE NEW HISTO NAMES
-                Z_histoname[isample] = Form("Z_%s_%s_pdf%d-%d%s",samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
-                W_histoname[isample] = samples_str[isample] == "DATA" ? Form("data_obs_W%s_%s",WCharge_str[c].Data(),WMass::FitVar_str[k].Data()) : Form("W%s_%s_%s_pdf%d-%d%s",WCharge_str[c].Data(),samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
-                // DECLARE NEW HISTOS
-                TH1D*Ztempl,*Wtempl;
-                TH1D*Ztempl_NonScaled, *Wtempl_NonScaled;
-                // SAME AS BEFORE FOR NON-SCALED VARIABLES
-                if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
-                  Ztempl=new TH1D(Z_histoname[isample],Z_histoname[isample],TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling)-TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*fitrange_Scaling);
-                  Z_histoname_NonScaled[isample] = Form("Z_%s_%s_NonScaled_pdf%d-%d%s",samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
-                  Ztempl_NonScaled=new TH1D(Z_histoname_NonScaled[isample],Z_histoname_NonScaled[isample],TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*80/2*fitrange_Scaling)-TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*80/2*fitrange_Scaling);
-                }
-                if(!(samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                  Wtempl=new TH1D(W_histoname[isample],W_histoname[isample],TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling)-TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*fitrange_Scaling);
-                  W_histoname_NonScaled[isample] = samples_str[isample] == "DATA" ? Form("data_obs_W%s_%sNonScaled",WCharge_str[c].Data(),WMass::FitVar_str[k].Data()) : Form("W%s_%s_%sNonScaled_pdf%d-%d%s",WCharge_str[c].Data(),samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
-                  // Wtempl_NonScaled=new TH1D(W_histoname_NonScaled[isample],W_histoname_NonScaled[isample],TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*80/2*fitrange_Scaling)-TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*80/2*fitrange_Scaling);
-                  Wtempl_NonScaled=new TH1D(W_histoname_NonScaled[isample],W_histoname_NonScaled[isample],50, WMass::fit_xmin[k],WMass::fit_xmax[k]);
-                }
-                // TH1D*Ztempl=(TH1D*)TemplatesZ[h][isample][ieta][jmass]->Clone(Z_histoname[isample]);
-                // TH1D*Wtempl=(TH1D*)TemplatesW[h][isample][ieta][jmass]->Clone(W_histoname[isample]);
-                int ibin=1;      
-                double z_templ_sign = 1 /* -1 */;
-                // if( Z_histoname[isample].Contains("DYJetsSig") || Z_histoname[isample].Contains("DATA") ) z_templ_sign = 1;
-                int start_bin, end_bin;
-                
-                if(!(samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                  // start_bin = TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling);
-                  // end_bin = TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling);
-                  start_bin = TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(WMass::fit_xmin[k]/(WMass::WMassCentral_MeV/1e3));
-                  end_bin = TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(WMass::fit_xmax[k]/(WMass::WMassCentral_MeV/1e3)-1e-10);
-                  // cout<<WMass::fit_xmin[k] << " " << start_bin << " " << WMass::fit_xmax[k] << " " << end_bin << endl;
-                }else{
-                  start_bin = TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling);
-                  end_bin = TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling);
-                }
-                  
-                for(int ibinhisto=start_bin; ibinhisto<end_bin; ibinhisto++){
-                  if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
-                    Ztempl->SetBinContent(ibin,z_templ_sign*TemplatesZ[m][h][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-                    Ztempl_NonScaled->SetBinContent(ibin,z_templ_sign*TemplatesZ_NonScaled[m][h][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-                  }
-                  if(!(samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                    Wtempl->SetBinContent(ibin,TemplatesW[c][m][h][k][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-                    Wtempl_NonScaled->SetBinContent(ibin,TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-                  }
-                  ibin++;
-                }
-
-                if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
-                  Ztempl->Write();
-                  Ztempl_NonScaled->Write();
-                }
-                if(!(samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                  Wtempl->Write();
-                  Wtempl_NonScaled->Write();
-                }
-                
-                if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                  outTXTfile << Ztempl->GetName();
-                  int nspaces1 = 15 - Z_histoname[isample].Length();
-                  for(int ispace=0;ispace<nspaces1;ispace++) outTXTfile << " ";
-                    Z_integrals[isample] = Ztempl->Integral();
-                    outTXTfile << Z_integrals[isample];
-
-                  std::ostringstream s; s << Ztempl->Integral();
-                  TString number_str = s.str();
-                  int nspaces2 = 15 - number_str.Length();
-
-                  for(int ispace=0;ispace<nspaces2;ispace++) outTXTfile << " ";
-                  outTXTfile << Wtempl->GetName();
-                  for(int ispace=0;ispace<nspaces1;ispace++) outTXTfile << " ";
-                  W_integrals[isample] = Wtempl->Integral();
-                  outTXTfile << W_integrals[isample] << endl;
-                }
-
-                // Wtempl_NonScaled->Print();
-                // cout << "integral= " << Wtempl_NonScaled->Integral() << " mean= " << Wtempl_NonScaled->GetMean() << " rms= " << Wtempl_NonScaled->GetRMS() << endl;
-
-                
-                if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
-                  Ztempl->Delete();
-                  Ztempl_NonScaled->Delete();
-                }
-                if(!(samples_str[isample].Contains("DYJetsSig") || samples_str[isample].Contains("DYJetsFake") || samples_str[isample].Contains("QCD"))){
-                  Wtempl->Delete();
-                  Wtempl_NonScaled->Delete();
-                }
-              }
-            }
-            outTXTfile << endl;
-            
-            // // PREPARE DUMMY DATACARD
-
-            // PREPARE DUMMY DATACARD NON SCALED WITH BACKGROUND WITHOUT Z DATADRIVEN
-            for(int k=0;k<3;k++){
-
-              ofstream DummyDatacard;
-              DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_Mu%s_pdf%d-%d%s_eta%s_%d_%sNonScaled.txt",folder.Data(),WCharge_str[c].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass,WMass::FitVar_str[k].Data()));
-              
-              DummyDatacard << "shapes   *          *   datacards_DATA.root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
-              // cout << "syst_folder.Data()= -" << syst_folder.Data() << "- syst_folder.Length()= " << syst_folder.Length() << endl;
-              if(syst_folder.Length()<15){
-                DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
-              }else{
-                // DummyDatacard << "shapes   data_obs   *   /afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_4/src/CMGTools/WMass/analysis/JobOutputs/test_controlplots_RochCorr_EffSFCorr_PileupSFCorr/DataCards/datacards_DATA.root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<"/W_MCDATALIKE_NonScaled" << endl;
-                DummyDatacard << "shapes   data_obs   *   "<<Form("../../%s/DataCards/datacards_DATA.root",syst_folder.Data()) << " $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
-              }
-              DummyDatacard << Form("shapes   W%s_WJetsSig_%sNonScaled_ALT   *   datacards_DATA.root $CHANNEL/",WCharge_str[c].Data(),WMass::FitVar_str[k].Data())<<(WMass::WMassCentral_MeV-WMass::WMassNSteps*WMass::WMassStep_MeV)<<Form("/W%s_WJetsSig_%sNonScaled_pdf%d-%d%s",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;
-              DummyDatacard << "----------------------------------------" << endl;
-              // DummyDatacard << "bin                 MuPos_pdf"<<(WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h<<"_eta"<<eta_str<< endl;
-              DummyDatacard << "bin                 Mu"<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
-              DummyDatacard << "observation              -1 " << endl;
-              DummyDatacard << "----------------------------------------" << endl;
-              DummyDatacard << "bin            Mu"<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"          Mu"<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"         Mu"<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
-              DummyDatacard << Form("process        W%s_WJetsSig_%sNonScaled_pdf%d-%d%s        W%s_WJetsSig_%sNonScaled_ALT        W%s_EWKTT_%sNonScaled_pdf%d-%d%s        ",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
-              DummyDatacard << "process               -1                             0                            1   " << endl;
-              DummyDatacard << "rate                 -1                             -1                            -1  " << endl;
-              // cout          << "rate                 -1                             -1                          -1    " << endl;
-              DummyDatacard << "--------------------------------------------------------------------------------" << endl;
-              DummyDatacard << "lumi    lnN    1.044    1.044   1.044 " << endl;
-              DummyDatacard.close();
-            }
-
-
-            // ofstream DummyDatacard;
-            // DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_MuPos_eta%s_%d.txt",folder.Data(),eta_str.Data(),jWmass));
-            
-            // DummyDatacard << "shapes   *          *   datacards_DATA.root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
-            // // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/$MASS/W_MCDATALIKE" << endl;
-            // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/80299/W_MCDATALIKE" << endl;
-            // // DummyDatacard << "shapes data_PDG   *   datacards_DATA.root $CHANNEL/80385/W_MCDATALIKE  $CHANNEL/80385/data_$SYSTEMATIC" << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard << "bin                 MuPos_eta"<<eta_str<<"" << endl;
-            // // DummyDatacard << "observation         " << Form("%f",W_integrals[MCDATALIKE]) << endl;
-            // DummyDatacard << "observation              -1 " << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard << "bin            MuPos_eta"<<eta_str<<"       MuPos_eta"<<eta_str<<"" << endl;
-            // DummyDatacard << "process        Z_DYJetsSig        W_EWKTT" << endl;   
-            // DummyDatacard << "process           0                 1     " << endl;
-            // // DummyDatacard << "rate           "<<Form("%f",Z_integrals[DYJetsSig])<<"           "<<Form("%f",W_integrals[EWKTT]) << endl;
-            // DummyDatacard << "rate             -1                -1 " << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard.close();
-
-            // // PREPARE DUMMY DATACARD NON SCALED
-            // ofstream DummyDatacard;
-            // DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.txt",folder.Data(),eta_str.Data(),jWmass));
-            
-            // DummyDatacard << "shapes   *          *   datacards_DATA.root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
-            // // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/$MASS/W_MCDATALIKE_NonScaled" << endl;
-            // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/80299/W_MCDATALIKE_NonScaled" << endl;
-            // // DummyDatacard << shapes data_PDG   *   datacards_DATA.root $CHANNEL/80385/W_MCDATALIKE  $CHANNEL/80385/data_$SYSTEMATIC" << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard << "bin                 MuPos_eta"<<eta_str<<"" << endl;
-            // // DummyDatacard << "observation         " << Form("%f",W_integrals[MCDATALIKE]) << endl;
-            // DummyDatacard << "observation              -1 " << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard << "bin            MuPos_eta"<<eta_str<<"       MuPos_eta"<<eta_str<<"" << endl;
-            // DummyDatacard << "process        Z_DYJetsSig_NonScaled        W_EWKTT_NonScaled" << endl;   
-            // DummyDatacard << "process           0                 1     " << endl;
-            // // DummyDatacard << "rate           "<<Form("%f",Z_integrals[DYJetsSig])<<"           "<<Form("%f",W_integrals[EWKTT]) << endl;
-            // DummyDatacard << "rate             -1                -1 " << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard.close();
-
-            // // PREPARE DUMMY DATACARD NON SCALED WITH BACKGROUND
-            // ofstream DummyDatacard;
-            // DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.txt",folder.Data(),eta_str.Data(),jWmass));
-            
-            // DummyDatacard << "shapes   *          *   datacards_DATA.root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
-            // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/$MASS/W_MCDATALIKE_NonScaled" << endl;
-            // DummyDatacard << "shapes   W_EWK_NonScaled_ALT   *   datacards_DATA.root $CHANNEL/"<<WMass::WMassCentral_MeV-(WMass::WMassNSteps-(WMass::WMassNSteps+1))*WMass::WMassStep_MeV<<"/W_EWK_NonScaled" << endl;
-            // // DummyDatacard << "shapes   data_obs   *   datacards_DATA.root $CHANNEL/80299/W_MCDATALIKE_NonScaled" << endl;
-            // // DummyDatacard << shapes data_PDG   *   datacards_DATA.root $CHANNEL/80385/W_MCDATALIKE  $CHANNEL/80385/data_$SYSTEMATIC" << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // DummyDatacard << "bin                 MuPos_eta"<<eta_str<<"" << endl;
-            // // DummyDatacard << "observation         " << Form("%f",W_integrals[MCDATALIKE]) << endl;
-            // DummyDatacard << "observation              -1 " << endl;
-            // DummyDatacard << "----------------------------------------" << endl;
-            // // DummyDatacard << "bin            MuPos_eta"<<eta_str<<"       MuPos_eta"<<eta_str<<"" << endl;
-            // // DummyDatacard << "process        Z_DYJetsSig_NonScaled        W_EWKTT_NonScaled" << endl;   
-            // // DummyDatacard << "process           0                 1     " << endl;
-            // // DummyDatacard << "rate             -1                -1 " << endl;
-            // // DummyDatacard << "bin            MuPos_eta"<<eta_str<<"       MuPos_eta"<<eta_str<<"       MuPos_eta"<<eta_str<< endl;
-            // // DummyDatacard << "process        Z_DYJetsSig_NonScaled        W_EWK_NonScaled        W_TTJets_NonScaled" << endl;   
-            // // DummyDatacard << "process               0                           1                      2     " << endl;
-            // // DummyDatacard << "rate                 -1                          -1                     -1 " << endl;
-            // DummyDatacard << "bin            MuPos_eta"<<eta_str<<"             MuPos_eta"<<eta_str<<"            MuPos_eta"<<eta_str<<"            MuPos_eta"<<eta_str<<"            MuPos_eta"<<eta_str<< endl;
-            // DummyDatacard << "process        Z_MCDATALIKE_NonScaled       Z_EWKTT_NonScaled        W_EWK_NonScaled        W_TTJets_NonScaled        W_EWK_NonScaled_ALT" << endl;   
-            // DummyDatacard << "process               2                           1                      -1                       3                       0     " << endl;
-            // DummyDatacard << "rate                 -1                     "<< -TemplatesZ_NonScaled[EWKTT][ieta][jmass]->Integral()<<"              -1                     -1                     " << TemplatesW_NonScaled[EWK][ieta][WMass::WMassNSteps+1]->Integral() << endl;
-            // cout << "rate                 -1                     "<< -TemplatesZ_NonScaled[EWKTT][ieta][jmass]->Integral()<<"              -1                     -1                     " << TemplatesW_NonScaled[EWK][ieta][WMass::WMassNSteps+1]->Integral() << endl;
-            // DummyDatacard << "--------------------------------------------------------------------------------" << endl;
-            // DummyDatacard << "lumi    lnN    1.044    1.044   1.044    1.044   1.044" << endl;
-            // DummyDatacard.close();
+        //LOOP OVER w MASS BINS
+        for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
+          int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
           
+          // double fitrange_Scaling = double(jWmass)/double(WMass::WMassCentral_MeV);
+          double fitrange_Scaling = 1;
+          
+          cout << "W"<<Wlike.Data()<<WCharge_str[c]<<" eta cut " << WMass::etaMaxMuons[ieta]<< " jWmass= " << jWmass; fflush(stdout);
+          TDirectory *mass_dir = channel_dir->mkdir(Form("%d",jWmass));
+          mass_dir->cd();
+          
+          for(int h=0; h<WMass::PDF_members; h++){
+            cout << " PDF " << (WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h; fflush(stdout);
+            for(int m=0; m<WMass::NtoysMomCorr; m++){
+              if(WMass::NtoysMomCorr>1) cout << " MomScale toy " << m; fflush(stdout);
+              // gDirectory->pwd();
+              // TH1D*data_obs=new TH1D("data_obs","data_obs",TemplatesW[h][DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesW[h][DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
+              outTXTfile << "-----------------------" << endl;
+              outTXTfile << "Mass hypothesis  " << jWmass << " PDF " << Form("%d-%d%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form(" MomCorrToy%d",m):"") << endl;
+              outTXTfile << "-----------------------" << endl;
+              outTXTfile << endl;
+
+              TString Z_histoname[2*Nsamples], W_histoname[2*Nsamples];
+              TString Z_histoname_NonScaled[2*Nsamples], W_histoname_NonScaled[2*Nsamples];
+              double Z_integrals[2*Nsamples], W_integrals[2*Nsamples];
+              
+              //LOOP OVER THE SAMPLES
+              for(int isample=0; isample<Nsamples;isample++){
+                // if(isample==0)cout << "\n";
+                // cout << "using " << samples_str[isample].Data() << endl;
+                if(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD")) continue;
+                
+                for(int k=0;k<3;k++){
+                  // DEFINE NEW HISTO NAMES
+                  // Z_histoname[isample] = Form("Z_%s_%s_pdf%d-%d%s",samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
+                  W_histoname[isample] = samples_str[isample] == "DATA" ? Form("data_obs_W%s%s_%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data()) : Form("W%s%s_%s_%s_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
+                  // cout << W_histoname[isample] << endl;
+                  // DECLARE NEW HISTOS
+                  TH1D*Ztempl,*Wtempl;
+                  TH1D*Ztempl_NonScaled, *Wtempl_NonScaled;
+                  // SAME AS BEFORE FOR NON-SCALED VARIABLES
+                  // if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
+                    // Ztempl=new TH1D(Z_histoname[isample],Z_histoname[isample],TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling)-TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*fitrange_Scaling);
+                    // Z_histoname_NonScaled[isample] = Form("Z_%s_%s_NonScaled_pdf%d-%d%s",samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
+                    // Ztempl_NonScaled=new TH1D(Z_histoname_NonScaled[isample],Z_histoname_NonScaled[isample],TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*80/2*fitrange_Scaling)-TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*80/2*fitrange_Scaling);
+                  // }
+                  if(!(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                    Wtempl=new TH1D(W_histoname[isample],W_histoname[isample],TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling)-TemplatesW[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*fitrange_Scaling);
+                    W_histoname_NonScaled[isample] = samples_str[isample] == "DATA" ? Form("data_obs_W%s%s_%sNonScaled",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data()) : Form("W%s%s_%s_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),samples_str[isample].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"");
+                    // Wtempl_NonScaled=new TH1D(W_histoname_NonScaled[isample],W_histoname_NonScaled[isample],TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*80/2*fitrange_Scaling)-TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling),xmin*fitrange_Scaling,xmax*80/2*fitrange_Scaling);
+                    Wtempl_NonScaled=new TH1D(W_histoname_NonScaled[isample],W_histoname_NonScaled[isample],50, WMass::fit_xmin[k],WMass::fit_xmax[k]);
+                  }
+                  
+                  // TH1D*Ztempl=(TH1D*)TemplatesZ[h][isample][ieta][jmass]->Clone(Z_histoname[isample]);
+                  // TH1D*Wtempl=(TH1D*)TemplatesW[h][isample][ieta][jmass]->Clone(W_histoname[isample]);
+                  int ibin=1;      
+                  double z_templ_sign = 1 /* -1 */;
+                  // if( Z_histoname[isample].Contains("DYJetsSig") || Z_histoname[isample].Contains("DATA") ) z_templ_sign = 1;
+                  int start_bin=1, end_bin=2;
+                  
+                  if(!(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                    // start_bin = TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling);
+                    // end_bin = TemplatesW[m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling);
+                    start_bin = TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(WMass::fit_xmin[k]/* /(WMass::WMassCentral_MeV/1e3) */);
+                    end_bin = TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->GetXaxis()->FindBin(WMass::fit_xmax[k]/* /(WMass::WMassCentral_MeV/1e3) */-1e-10);
+                  // }else{
+                    // start_bin = TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmin*fitrange_Scaling);
+                    // end_bin = TemplatesZ[m][h][isample][ieta][jmass]->GetXaxis()->FindBin(xmax*fitrange_Scaling);
+                    // cout<<WMass::fit_xmin[k] << " " << start_bin << " " << WMass::fit_xmax[k] << " " << end_bin << endl;
+                  }
+                    
+                  
+                  for(int ibinhisto=start_bin; ibinhisto<end_bin; ibinhisto++){
+                    // if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
+                      // Ztempl->SetBinContent(ibin,z_templ_sign*TemplatesZ[m][h][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
+                      // Ztempl_NonScaled->SetBinContent(ibin,z_templ_sign*TemplatesZ_NonScaled[m][h][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
+                    // }
+                    if(!(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                      Wtempl->SetBinContent(ibin,TemplatesW[c][m][h][k][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
+                      Wtempl_NonScaled->SetBinContent(ibin,TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
+                      // cout << "inspecting after filling, ibinhisto="<<ibinhisto<<" start_bin="<<start_bin<< " end_bin="<<end_bin<<endl;
+                      // TemplatesW_NonScaled[c][m][h][k][isample][ieta][jmass]->Print();
+                      // Wtempl_NonScaled->Print();
+                    }
+                    ibin++;
+                  }
+
+                  // if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
+                    // Ztempl->Write();
+                    // Ztempl_NonScaled->Write();
+                  // }
+                  if(!(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                    // Wtempl->Write();
+                    // Wtempl_NonScaled->Scale(norm_factor_to_match_data);
+                    Wtempl_NonScaled->Write();
+                  }
+                  
+                  if(!(samples_str[isample].Contains(WorZ.Contains("W")?"WJetsSig":"DYJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                    // outTXTfile << Ztempl->GetName();
+                    // int nspaces1 = 15 - Z_histoname[isample].Length();
+                    // for(int ispace=0;ispace<nspaces1;ispace++) outTXTfile << " ";
+                      // Z_integrals[isample] = Ztempl->Integral();
+                      // outTXTfile << Z_integrals[isample];
+
+                    // std::ostringstream s; s << Ztempl->Integral();
+                    // TString number_str = s.str();
+                    // int nspaces2 = 15 - number_str.Length();
+
+                    int nspaces1 = 15 - W_histoname[isample].Length();
+                    // for(int ispace=0;ispace<nspaces2;ispace++) outTXTfile << " ";
+                    outTXTfile << Wtempl->GetName();
+                    for(int ispace=0;ispace<nspaces1;ispace++) outTXTfile << " ";
+                    W_integrals[isample] = Wtempl->Integral();
+                    outTXTfile << W_integrals[isample] << endl;
+                  }
+
+                  // Wtempl_NonScaled->Print();
+                  // cout << "integral= " << Wtempl_NonScaled->Integral() << " mean= " << Wtempl_NonScaled->GetMean() << " rms= " << Wtempl_NonScaled->GetRMS() << endl;
+
+                  
+                  // if(!(samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("QCD"))){
+                    // Ztempl->Delete();
+                    // Ztempl_NonScaled->Delete();
+                  // }
+                  if(!(samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsSig":"WJetsSig") || samples_str[isample].Contains(WorZ.Contains("W")?"DYJetsFake":"WJetsFake") || samples_str[isample].Contains("QCD"))){
+                    Wtempl->Delete();
+                    Wtempl_NonScaled->Delete();
+                  }
+                }
+              }
+              outTXTfile << endl;
+              
+              // // PREPARE DUMMY DATACARD
+
+              // PREPARE DUMMY DATACARD NON SCALED WITH BACKGROUND WITHOUT Z DATADRIVEN
+              for(int k=0;k<3;k++){
+
+                ofstream DummyDatacard;
+                DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_Mu%s%s_pdf%d-%d%s_eta%s_%d_%sNonScaled.txt",folder.Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass,WMass::FitVar_str[k].Data()));
+                
+                DummyDatacard << "shapes   *          *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
+                // cout << "syst_folder.Data()= -" << syst_folder.Data() << "- syst_folder.Length()= " << syst_folder.Length() << endl;
+                if(syst_folder.Length()<15){
+                  DummyDatacard << "shapes   data_obs   *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
+                }else{
+                  // DummyDatacard << "shapes   data_obs   *   /afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_4/src/CMGTools/WMass/analysis/JobOutputs/test_controlplots_RochCorr_EffSFCorr_PileupSFCorr/DataCards/datacards_DATA.root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<"/W_MCDATALIKE_NonScaled" << endl;
+                  DummyDatacard << "shapes   data_obs   *   "<<Form("../../%s/DataCards/datacards_DATA%s.root",syst_folder.Data(),WorZ.Contains("W")?"":"_Wlike") << " $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
+                }
+                DummyDatacard << Form("shapes   W%s%s_%sJetsSig_%sNonScaled_ALT   *   datacards_DATA%s.root $CHANNEL/",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WorZ.Contains("W")?"":"_Wlike")<<(WMass::WMassCentral_MeV-WMass::WMassNSteps*WMass::WMassStep_MeV)<<Form("/W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;
+                DummyDatacard << "----------------------------------------" << endl;
+                // DummyDatacard << "bin                 MuPos_pdf"<<(WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h<<"_eta"<<eta_str<< endl;
+                DummyDatacard << "bin                 Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
+                DummyDatacard << "observation              -1 " << endl;
+                DummyDatacard << "----------------------------------------" << endl;
+                DummyDatacard << "bin            Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"          Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"         Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
+                DummyDatacard << Form("process        W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s        W%s%s_%sJetsSig_%sNonScaled_ALT        W%s%s_EWKTT_%sNonScaled_pdf%d-%d%s        ",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
+                // DummyDatacard << Form("process        W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s        W%s%s_%sJetsSig_%sNonScaled_ALT        W%s%s_WJetsFake_%sNonScaled_pdf%d-%d%s        ",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
+                DummyDatacard << "process               -1                             0                            1   " << endl;
+                DummyDatacard << "rate                 -1                             -1                            -1  " << endl;
+                // cout          << "rate                 -1                             -1                          -1    " << endl;
+                DummyDatacard << "--------------------------------------------------------------------------------" << endl;
+                DummyDatacard << "lumi    lnN    1.044    1.044   1.044 " << endl;
+                DummyDatacard.close();
+              }
+
+            }
           }
+          cout << endl;
         }
         cout << endl;
+        outTXTfile << endl;
+        outTXTfile << endl;
       }
-      cout << endl;
-      outTXTfile << endl;
-      outTXTfile << endl;
+      outTXTfile.close();
     }
-    outTXTfile.close();
+    
+    foutDATA->Write();
+    foutDATA->Close();
+    foutDATA->Delete();
+    
+    cout << "program ended..." << endl;
+    
   }
-  
-  foutDATA->Write();
-  foutDATA->Close();
-  foutDATA->Delete();
-  
-
-      
-  // TFile *foutMC_DATALIKE = new TFile(Form("%s/DataCards/datacards_MC_DATALIKE.root",folder.Data()),"RECREATE");
-  
-  // for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
-    // TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
-    // TDirectory *channel_dir = foutMC_DATALIKE->mkdir(Form("MuPos_eta%s",eta_str.Data()));
-    // foutMC_DATALIKE->cd(Form("MuPos_eta%s/",eta_str.Data()));
-    // for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
-      // int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
-      // TDirectory *mass_dir = channel_dir->mkdir(Form("%d",jWmass));
-      // mass_dir->cd();
-      // for(int isample=0; isample<Nsamples;isample++){
-        // if (samples_str[isample] == "DATA") continue;
-        
-        // TString Z_histoname = Form("Z_%s",samples_str[isample].Data());
-        // TString W_histoname = samples_str[isample].Contains("MCDATALIKE") ? "data_obs" : Form("W_%s",samples_str[isample].Data());
-        // TH1D*Ztempl=new TH1D(Z_histoname,Z_histoname,TemplatesZ[isample][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesZ[isample][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
-        // TH1D*Wtempl=new TH1D(W_histoname,W_histoname,TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
-        // // TH1D*Ztempl=(TH1D*)TemplatesZ[isample][ieta][jmass]->Clone(Z_histoname);
-        // // TH1D*Wtempl=(TH1D*)TemplatesW[isample][ieta][jmass]->Clone(W_histoname);
-
-        // int ibin=1;      
-        // for(int ibinhisto=TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-          // Ztempl->SetBinContent(ibin,TemplatesZ[isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-          // Wtempl->SetBinContent(ibin,TemplatesW[isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-          // ibin++;
-        // }
-        // if(!samples_str[isample].Contains("WJetsSig")) Ztempl->Write();
-        // if(!samples_str[isample].Contains("DYJetsSig")) Wtempl->Write();
-        // Wtempl->Delete();
-        // Ztempl->Delete();
-      // }
-    // }
-  // }
-  // foutMC_DATALIKE->Write();
-  // foutMC_DATALIKE->Close();
-
-
-
-  // TFile *foutMC_SIGNAL_ONLY = new TFile(Form("%s/DataCards/datacards_MC_SIGNAL_ONLY.root",folder.Data()),"RECREATE");
-      
-  // for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
-    // TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
-    // TDirectory *channel_dir = foutMC_SIGNAL_ONLY->mkdir(Form("MuPos_eta%s",eta_str.Data()));
-    // foutMC_SIGNAL_ONLY->cd(Form("MuPos_eta%s/",eta_str.Data()));
-    // for(int jmass=0; jmass<2*WMass::WMassNSteps+1; jmass++){
-      // int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-jmass)*WMass::WMassStep_MeV;
-      // TDirectory *mass_dir = channel_dir->mkdir(Form("%d",jWmass));
-      // mass_dir->cd();
-      // for(int isample=0; isample<Nsamples;isample++){
-        // if ( !( samples_str[isample].Contains("WJetsSig") || samples_str[isample].Contains("DYJetsSig") ) ) continue;
-        
-        // TString Z_histoname = Form("Z_%s",samples_str[isample].Data());
-        // TString W_histoname = samples_str[isample].Contains("WJetsSig") ? "data_obs" : Form("W_%s",samples_str[isample].Data());
-        // TH1D*Ztempl=new TH1D(Z_histoname,Z_histoname,TemplatesZ[isample][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesZ[isample][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
-        // TH1D*Wtempl=new TH1D(W_histoname,W_histoname,TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmax)-TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmin),xmin,xmax);
-        // // TH1D*Ztempl=(TH1D*)TemplatesZ[isample][ieta][jmass]->Clone(Z_histoname);
-        // // TH1D*Wtempl=(TH1D*)TemplatesW[isample][ieta][jmass]->Clone(W_histoname);
-
-        // int ibin=1;      
-        // for(int ibinhisto=TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[isample][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-          // Ztempl->SetBinContent(ibin,TemplatesZ[isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-          // Wtempl->SetBinContent(ibin,TemplatesW[isample][ieta][jmass]->Integral(ibinhisto,ibinhisto));
-          // ibin++;
-        // }
-        // if ( !samples_str[isample].Contains("WJetsSig") ) Ztempl->Write();
-        // if ( !samples_str[isample].Contains("DYJetsSig") ) Wtempl->Write();
-        // Wtempl->Delete();
-        // Ztempl->Delete();        
-      // }
-    // }
-  // }
-  // foutMC_SIGNAL_ONLY->Write();
-  // foutMC_SIGNAL_ONLY->Close();
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    // {  
-      // ofstream outTXTfile;
-      // outTXTfile.open (Form("%s/DataCards/datacard_Wmass_MuPos_eta%s_%d.txt",folder.Data(),eta_str.Data(),jWmass));
-      // outTXTfile << "\# W mass hypothesis " << jWmass << " MeV, measurement performed with positive muons \|eta\|\< " << WMass::etaMaxMuons[ieta] << endl;
-      // outTXTfile << "imax " << (TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax) - TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin)) <<" number of channels" << endl;
-      // outTXTfile << "jmax " << (Nsamples-3)*2 << " number of backgrounds" << endl;
-      // outTXTfile << "kmax 1  number of nuisance parameters (sources of systematical uncertainties)" << endl;
-      // outTXTfile << "------------" << endl;
-      // outTXTfile << "\# we have just one channel, in which we observe " << TemplatesW[DATA][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) << " events, Z template contains " << TemplatesZ[DATA][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) << " events after reweighting" << endl;
-      // outTXTfile << "bin\t\t\t\t\t  ";
-      
-      // // DATA (observation
-      // int ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-        // outTXTfile << ibin <<"   \t";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-      // outTXTfile << "observation\t";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-        // outTXTfile << TemplatesW[DATA][ieta][jmass]->Integral(ibinhisto,ibinhisto) <<"\t";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-
-      // // TEMPLATE BINS
-      // outTXTfile << "------------" << endl;
-      // outTXTfile << "\# now we list the expected events for signal and all backgrounds in that bin" << endl;
-      // outTXTfile << "\# the second 'process' line must have a positive number for backgrounds, and 0 for signal" << endl;
-      // outTXTfile << "bin\t\t\t\t\t  ";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-        // for(int isample=0; isample<(Nsamples-3)*2+1; isample++) outTXTfile << ibin <<"  \t\t";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-
-      // // TEMPLATE PROCESS NAMES
-      // outTXTfile << "process \t\t  ";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-
-        // outTXTfile << "Z_"<<samples_str[DATA] <<" ";
-        // // outTXTfile << "Z_"<<samples_str[WJetsSig] <<" ";
-        // outTXTfile << "Z_"<<samples_str[WJetsFake] <<" ";
-        // outTXTfile << "Z_"<<samples_str[DYJetsFake] <<" ";
-        // outTXTfile << "Z_"<<samples_str[TTJets] <<" ";
-        // outTXTfile << "Z_"<<samples_str[WWJets] <<" ";
-        // outTXTfile << "Z_"<<samples_str[WZJets] <<" ";
-        // outTXTfile << "Z_"<<samples_str[ZZJets] <<" ";
-        // outTXTfile << "Z_"<<samples_str[QCD] <<" ";
-
-        // outTXTfile << "W_"<<samples_str[WJetsFake] <<" ";
-        // // outTXTfile << "W_"<<samples_str[DYJetsSig] <<" ";
-        // outTXTfile << "W_"<<samples_str[DYJetsFake] <<" ";
-        // outTXTfile << "W_"<<samples_str[TTJets] <<" ";
-        // outTXTfile << "W_"<<samples_str[WWJets] <<" ";
-        // outTXTfile << "W_"<<samples_str[WZJets] <<" ";
-        // outTXTfile << "W_"<<samples_str[ZZJets] <<" ";
-        // outTXTfile << "W_"<<samples_str[QCD] <<" ";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-
-      // // TEMPLATE PROCESS NUMBER
-      // outTXTfile << "process \t\t  ";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-        // for(int isample=0; isample<(Nsamples-3)*2+1; isample++) outTXTfile << isample <<"  \t\t";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-
-      // // TEMPLATE PROCESS RATE
-      // outTXTfile << "rate \t\t\t  ";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax); ibinhisto++){
-
-        // // outTXTfile << TemplatesW[DATA][ieta][jmass]->GetBinContent(ibinhisto) <<"\t";
-        
-        // double norm_SF = (TemplatesW[DATA][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[WJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[DYJetsSig][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[DYJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[TTJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[WWJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[WZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[ZZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesW[QCD][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) ) / 
-        //                 (TemplatesZ[DATA][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[WJetsSig][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[WJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[DYJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[TTJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[WWJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[WZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[ZZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) - TemplatesZ[QCD][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) );
-        // //double norm_SF = TemplatesW[DATA][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) /
-        //               (TemplatesW[WJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[DYJetsSig][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[DYJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[TTJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[WWJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[WZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[ZZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesW[QCD][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) +
-        //             TemplatesZ[DATA][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[WJetsSig][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[WJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[DYJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[TTJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[WWJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[WZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[ZZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) double sf_WDATA = TemplatesZ[QCD][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)) );
-        
-        // double sf_W_DATA       = TemplatesW[DATA][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_WJetsFake  = TemplatesW[WJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_DYJetsSig  = TemplatesW[DYJetsSig][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_DYJetsFake = TemplatesW[DYJetsFake][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax)); 
-        // double sf_W_TTJets     = TemplatesW[TTJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_WWJets     = TemplatesW[WWJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_WZJets     = TemplatesW[WZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_ZZJets     = TemplatesW[ZZJets][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_W_QCD        = TemplatesW[QCD][ieta][jmass]->Integral(TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        
-        // double sf_Z_DATA = TemplatesZ[DATA][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_WJetsSig = TemplatesZ[WJetsSig][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_WJetsFake = TemplatesZ[WJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_DYJetsFake = TemplatesZ[DYJetsFake][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_TTJets = TemplatesZ[TTJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_WWJets = TemplatesZ[WWJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_WZJets = TemplatesZ[WZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_ZZJets = TemplatesZ[ZZJets][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-        // double sf_Z_QCD = TemplatesZ[QCD][ieta][jmass]->Integral(TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin),TemplatesZ[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax));
-
-        // double norm_SF = sf_W_DATA / 
-        // ( (sf_Z_DATA - (sf_Z_WJetsSig + sf_Z_WJetsFake + sf_Z_DYJetsFake + sf_Z_TTJets + sf_Z_WWJets + sf_Z_WZJets + sf_Z_ZZJets + sf_Z_QCD)
-        // + (sf_W_WJetsFake + sf_W_DYJetsSig + sf_W_DYJetsFake + sf_W_TTJets + sf_W_WWJets + sf_W_WZJets + sf_W_ZZJets + sf_W_QCD) ) );
-        
-        
-        
-        // // cout << "sf_W_DATA= " << sf_W_DATA << " sf_W_WJetsFake= " << sf_W_WJetsFake << " sf_W_DYJetsSig= " << sf_W_DYJetsSig << " sf_W_DYJetsFake= " << sf_W_DYJetsFake
-        // // << " sf_W_TTJets= " << sf_W_TTJets << " sf_W_WWJets= " << sf_W_WWJets << " sf_W_WZJets= " << sf_W_WZJets << " sf_W_ZZJets= " << sf_W_ZZJets << " sf_W_QCD= " << sf_W_QCD 
-        // // << endl;
-        // // cout << "sf_Z_DATA= " << sf_Z_DATA << " sf_Z_WJetsSig= " << sf_Z_WJetsSig << " sf_Z_WJetsFake= " << sf_Z_WJetsFake << " sf_Z_DYJetsFake= " << sf_Z_DYJetsFake
-        // // << " sf_Z_TTJets= " << sf_Z_TTJets << " sf_Z_WWJets= " << sf_Z_WWJets << " sf_Z_WZJets= " << sf_Z_WZJets << " sf_Z_ZZJets= " << sf_Z_ZZJets << " sf_Z_QCD= " << sf_Z_QCD 
-        // // << endl;
-
-        // // cout << "norm_SF= " << norm_SF << " norm_SF2= " << norm_SF2 << endl;
-        
-        // // outTXTfile << "Z_"<<samples_str[DATA] <<" ";
-        // outTXTfile << TemplatesZ[DATA][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // // outTXTfile << "Z_"<<samples_str[WJetsSig] <<" ";
-        // // outTXTfile << -TemplatesZ[WJetsSig][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[WJetsFake] <<" ";
-        // outTXTfile << -TemplatesZ[WJetsFake][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[DYJetsFake] <<" ";
-        // outTXTfile << -TemplatesZ[DYJetsFake][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[TTJets] <<" ";
-        // outTXTfile << -TemplatesZ[TTJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[WWJets] <<" ";
-        // outTXTfile << -TemplatesZ[WWJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[WZJets] <<" ";
-        // outTXTfile << -TemplatesZ[WZJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[ZZJets] <<" ";
-        // outTXTfile << -TemplatesZ[ZZJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "Z_"<<samples_str[QCD] <<" ";
-        // // outTXTfile << -TemplatesZ[QCD][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // outTXTfile << -0.001 <<" ";
-
-        // // outTXTfile << "W_"<<samples_str[WJetsFake] <<" ";
-        // outTXTfile << TemplatesW[WJetsFake][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[DYJetsSig] <<" ";
-        // // outTXTfile << TemplatesW[DYJetsSig][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // // outTXTfile << "W_"<<samples_str[DYJetsFake] <<" ";
-        // outTXTfile << TemplatesW[DYJetsFake][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[TTJets] <<" ";
-        // outTXTfile << TemplatesW[TTJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[WWJets] <<" ";
-        // outTXTfile << TemplatesW[WWJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[WZJets] <<" ";
-        // outTXTfile << TemplatesW[WZJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[ZZJets] <<" ";
-        // outTXTfile << TemplatesW[ZZJets][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // // outTXTfile << "W_"<<samples_str[QCD] <<" ";
-        // // outTXTfile << TemplatesW[QCD][ieta][jmass]->Integral(ibinhisto,ibinhisto)*norm_SF <<" ";
-        // outTXTfile << 0.001 <<" ";
-
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-
-      // outTXTfile << "------------"<< endl;
-      // outTXTfile << "lumi    lnN    1.0001 \t";
-      // ibin=0;
-      // for(int ibinhisto=TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmin); ibinhisto<TemplatesW[DATA][ieta][jmass]->GetXaxis()->FindBin(xmax) - 1; ibinhisto++){
-        // for(int i=0;i<(Nsamples-3)*2+2; i++) outTXTfile << " - \t";
-        // ibin++;
-      // }
-      // outTXTfile << endl;
-      
-      // outTXTfile.close();
-      
-    // }
-  // }
-
-  cout << "program ended..." << endl;
 }
 
 
