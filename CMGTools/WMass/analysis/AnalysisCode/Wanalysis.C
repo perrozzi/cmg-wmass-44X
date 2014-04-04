@@ -23,7 +23,7 @@
 #include <ctime>
 #include <time.h>
 
-void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigma, int RecoilCorrScaleNSigma, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
+void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigmaU1, int RecoilCorrScaleNSigmaU1, int RecoilCorrResolutionNSigmaU2, int RecoilCorrScaleNSigmaU2, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
 {
   if (fChain == 0) return;
 
@@ -179,6 +179,17 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
   //////////////
   ////////   Initialize recoil corrections
   ////////
+  
+  ///////////// NEW FROM MARIAROSARIA ////////////////
+  
+  // /// TKMET type1
+  // // fileCorrectTo = Form("../RecoilCode/recoilfit_genZ_%s_inclusiveNvtx_eta11_pol2_type3_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  // // RecoilCorrector::RecoilCorrector*  correctorRecoil_W_; // TYPE1
+  // // correctorRecoil_W_ = new RecoilCorrector(fileCorrectTo.c_str(),123456);
+  // // correctorRecoil_W_->addDataFile(fileZmmData.c_str());
+  // // correctorRecoil_W_->addMCFile(fileZmmMC.c_str());
+
+  ///////////// END NEW FROM MARIAROSARIA ////////////////
 
   // int use_PForNoPUorTKmet = 2; // 0:PF, 1:NOPU, 2:TK // TO BE CHANGED BY HAND FOR THE MOMENT!!!
   bool use_InclusiveAB_RecoilCorr = true; // TO BE CHANGED BY HAND FOR THE MOMENT!!!
@@ -189,62 +200,27 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
   TString metSuffix=use_PForNoPUorTKmet==1?"_pfnoPU":"";
   if(use_PForNoPUorTKmet==2) metSuffix="_tkmet";
   if(use_PForNoPUorTKmet==0) metSuffix="_pfmet";
-  
-  // std::string fileCorrectToNeg = Form("../RecoilCode/recoilfit_genWneg%s_inc.root",metSuffix.Data());
-  // std::string fileCorrectToPos = Form("../RecoilCode/recoilfit_genWpos%s_inc.root",metSuffix.Data());
-  std::string fileCorrectToNeg = Form("../RecoilCode/recoilfit_genWneg_pfnoPU_inc.root"); // TEMP FIX
-  std::string fileCorrectToPos = Form("../RecoilCode/recoilfit_genWpos_pfnoPU_inc.root"); // TEMP FIX
-  std::string fileZmmDataA = Form("../RecoilCode/recoilfit_DATA_runB_inc.root");
-  std::string fileZmmDataB = Form("../RecoilCode/recoilfit_DATA_runB_inc.root");
-  
-  // std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s_inc.root",metSuffix.Data());
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_inc.root",metSuffix.Data());
+   
+  /// TKMET type2
+  std::string fileCorrectToPos = Form("../RecoilCode/recoilfit_Wpos%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  std::string fileCorrectToNeg = Form("../RecoilCode/recoilfit_Wneg%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix.root",metSuffix.Data());
 
-  std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s_pol2_type1.root",metSuffix.Data());
-  std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_madgraph.root",metSuffix.Data());
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_MIXBKG.root",metSuffix.Data()); // MADGRAPH
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_powheg.root",metSuffix.Data());
+  RecoilCorrector::RecoilCorrector*  correctorRecoil_W_Pos_; // TYPE2
+  RecoilCorrector::RecoilCorrector*  correctorRecoil_W_Neg_; // TYPE2
 
-  if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2){
-    TString eta_str = Form("%.1f",WMass::etaMaxMuons[0]); eta_str.ReplaceAll(".","");
-    fileCorrectToNeg = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_eta%s_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data()); // TEMP FIX
-    fileCorrectToPos = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_eta%s_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data()); // TEMP FIX
-    fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_eta%s_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data()); // TEMP FIX
-    fileZmmDataA = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-    fileZmmDataB = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-    fileZmmData = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-  }
+  correctorRecoil_W_Neg_ = new RecoilCorrector(fileCorrectToNeg.c_str(),123456);
+  correctorRecoil_W_Neg_->addDataFile(fileZmmData.c_str());
+  correctorRecoil_W_Neg_->addMCFile(fileZmmMC.c_str());
 
-  RecoilCorrector::RecoilCorrector *correctorRecoilWPosRunA_,*correctorRecoilWNegRunA_,*correctorRecoilWPosRunB_,*correctorRecoilWNegRunB_;
-  
-  correctorRecoilWPosRunA_ = new RecoilCorrector(fileCorrectToPos.c_str(),123450);
-  correctorRecoilWPosRunA_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilWPosRunA_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilWPosRunA_->addDataFile(fileZmmDataA.c_str());
+  correctorRecoil_W_Pos_ = new RecoilCorrector(fileCorrectToPos.c_str(),123456);
+  correctorRecoil_W_Pos_->addDataFile(fileZmmData.c_str());
+  correctorRecoil_W_Pos_->addMCFile(fileZmmMC.c_str());
 
-  correctorRecoilWNegRunA_ = new RecoilCorrector(fileCorrectToNeg.c_str(),123451);
-  correctorRecoilWNegRunA_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilWNegRunA_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilWNegRunA_->addDataFile(fileZmmDataA.c_str());
-
-  correctorRecoilWPosRunB_ = new RecoilCorrector(fileCorrectToPos.c_str(),123452);
-  correctorRecoilWPosRunB_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilWPosRunB_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilWPosRunB_->addDataFile(fileZmmDataB.c_str());
-
-  correctorRecoilWNegRunB_ = new RecoilCorrector(fileCorrectToNeg.c_str(),123453);
-  correctorRecoilWNegRunB_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilWNegRunB_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilWNegRunB_->addDataFile(fileZmmDataB.c_str());
-
+  bool doSingleGauss=false;
+    
+    
   // the following variables are dummy, but necessary to call the RecoilCorrector.
   double u1_dummy = 0;
   double u2_dummy = 0;
@@ -432,8 +408,8 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
               if(nvtx>18 && runopt==0) vtxBin=18;
               // if(j==0 && runopt==0 && nvtx>17) cout << "runopt= " << runopt << " nvtx= " << nvtx << " vtxBin= " << vtxBin << endl;
               // continue;
-              if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2) vtxBin=1;
-
+              if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2) vtxBin=0;
+              
               double pfmet_bla,pfmetphi_bla;
               if(use_PForNoPUorTKmet==0){
                 pfmet_bla = pfmet;
@@ -449,40 +425,30 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                 return;
               }
               
-              if(useRecoilCorr==1 && use_PForNoPUorTKmet<3 && sampleName.Contains("WJetsSig")){ // use Rochester Momentum scale corrections if required
+              if(useRecoilCorr==1 && use_PForNoPUorTKmet<3 && sampleName.Contains("WJetsSig")){ // use Rochester Recoil corrections if required
                 // cout << "use_PForNoPUorTKmet " << use_PForNoPUorTKmet << " pfmet_bla " << pfmet_bla << " pfmetphi_bla " << pfmetphi_bla << " WGen_pt " << WGen_pt << 
-                // "u1_dummy " << u1_dummy << " u2_dummy " << u2_dummy << " RecoilCorrResolutionNSigma " << RecoilCorrResolutionNSigma << " RecoilCorrScaleNSigma " << RecoilCorrScaleNSigma << " vtxBin " << vtxBin << endl;
+                // "u1_dummy " << u1_dummy << " u2_dummy " << u2_dummy << " RecoilCorrResolutionNSigmaU1 " << RecoilCorrResolutionNSigmaU1 << " RecoilCorrScaleNSigmaU1 " << RecoilCorrScaleNSigmaU1 << " vtxBin " << vtxBin 
+                // << " doSingleGauss= " << doSingleGauss << endl;
                 
                 if(Mu_charge>0){ // W plus corrections
-                  if(runopt==0){
-                    correctorRecoilWPosRunA_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        WGen_pt, WGen_phi, 
-                                                        mu.Pt(), mu.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }else{
-                    correctorRecoilWPosRunB_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        WGen_pt, WGen_phi, 
-                                                        mu.Pt(), mu.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }
+                  correctorRecoil_W_Pos_->CorrectType2( pfmet_bla, pfmetphi_bla,
+                                    WGen_pt, WGen_phi,
+                                    mu.Pt(), mu.Phi(),
+                                    u1_dummy, u2_dummy,
+                                    RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
+                                   vtxBin,doSingleGauss);                                      
+
                 }else{ // W minus corrections
-                  if(runopt==0){
-                    correctorRecoilWNegRunA_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        WGen_pt, WGen_phi, 
-                                                        mu.Pt(), mu.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }else{
-                    correctorRecoilWNegRunB_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        WGen_pt, WGen_phi, 
-                                                        mu.Pt(), mu.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }
+                  correctorRecoil_W_Neg_->CorrectType2( pfmet_bla, pfmetphi_bla,
+                                    WGen_pt, WGen_phi,
+                                    mu.Pt(), mu.Phi(),
+                                    u1_dummy, u2_dummy,
+                                    RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
+                                    vtxBin,doSingleGauss);
+
                 }
               }
+              continue;
 
               if(usePhiMETCorr==1){ // use MET Phi correction if required
                 pair<double, double> pfmet_phicorr = common_stuff::getPhiCorrMET( pfmet_bla, pfmetphi_bla, nvtx, !sampleName.Contains("DATA"));

@@ -19,7 +19,7 @@ useLHAPDF = False
 # foldername = "test_autom";
 # foldername = "test_MR1p1_range3245LSel_nopdf";
 # foldername = "test_CT10nlo";
-foldername = "test_AbsIso1NoCut";
+foldername = "test_updated";
 foldername_orig=foldername
 
 ntuple_folder = "root://eoscms//eos/cms/store/group/phys_smp/Wmass/perrozzi/ntuples/ntuples_2013_09_14/";
@@ -41,8 +41,10 @@ LocalSmearingRochCorrNToys = 0;
 GlobalSmearingRochCorrNsigma = 0;
 usePhiMETCorr = 0; # 0=none, 1=yes
 useRecoilCorr = 1; # 0=none, 1=yes
-RecoilCorrResolutionNSigma = "0"; # 0=none, 1=yes
-RecoilCorrScaleNSigma = "0"; # 0=none, 1=yes
+RecoilCorrResolutionNSigmaU1 = "0"; # 0=none, 1=yes
+RecoilCorrScaleNSigmaU1 = "0"; # 0=none, 1=yes
+RecoilCorrResolutionNSigmaU2 = "0"; # 0=none, 1=yes
+RecoilCorrScaleNSigmaU2 = "0"; # 0=none, 1=yes
 syst_ewk_Alcaraz = "0"; # 0=none, 1=yes
 # LHAPDF_reweighting_sets="11200" # cteq6ll.LHpdf=10042 CT10nnlo.LHgrid=11200, NNPDF23_nnlo_as_0118.LHgrid=232000, MSTW2008nnlo68cl.LHgrid=21200
 # LHAPDF_reweighting_members="51" # cteq6ll.LHpdf=1 CT10nnlo.LHgrid=51, NNPDF23_nnlo_as_0118.LHgrid=100, MSTW2008nnlo68cl.LHgrid=41
@@ -68,11 +70,11 @@ etaMuonNSteps = "1"; # 5
 etaMaxMuons = "1.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
 # etaMaxMuons = "2.1"; # 0.6, 0.8, 1.2, 1.6, 2.1
 
-parallelize = 1;
-resumbit_sample = "" # DATA , WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD
+parallelize = 0;
+resumbit_sample = "WJetsSig" # DATA , WJetsSig ,  WJetsFake ,  DYJetsSig ,  DYJetsFake ,   TTJets ,   ZZJets ,   WWJets ,  WZJets ,  QCD
 
 runPhiStarEta = 0;
-runWanalysis = 0;
+runWanalysis = 1;
 runZanalysis = 0;
 controlplots = 0;
 almostSkipData = 0; # TO SAVE TIME, IF NEEDED
@@ -162,10 +164,10 @@ if(usePhiMETCorr==1):
   foldername+="_phiMETcorr";
 if(useRecoilCorr==1): 
   foldername+="_RecoilCorr";
-  if("0" not in RecoilCorrResolutionNSigma):
-    foldername+="_Resol"+str(RecoilCorrResolutionNSigma);
-  if("0" not in RecoilCorrScaleNSigma):
-    foldername+="_Scale"+str(RecoilCorrScaleNSigma);
+  if(("0" not in RecoilCorrResolutionNSigmaU1) or ("0" not in RecoilCorrResolutionNSigmaU2)):
+    foldername+="_Resol_U1_"+str(RecoilCorrResolutionNSigmaU1)+"_U2_"+str(RecoilCorrResolutionNSigmaU2);
+  if(("0" not in RecoilCorrScaleNSigmaU1) or ("0" not in RecoilCorrScaleNSigmaU2)):
+    foldername+="_Scale_U1_"+str(RecoilCorrScaleNSigmaU1)+"_U2_"+str(RecoilCorrScaleNSigmaU2);
 
 if(useEffSF==1): foldername+="_EffSFCorr";
 if(useEffSF==2): foldername+="_EffHeinerSFCorr";
@@ -370,7 +372,7 @@ if(runWanalysis or runZanalysis or run_BuildEvByEvTemplates or runPhiStarEta):
         
         if(runWanalysis):
             
-            wstring="\""+WfileDATA+"\","+str(WfileDATA_lumi_SF)+",\""+sample[i]+"\","+str(useAlsoGenPforSig)+","+str(IS_MC_CLOSURE_TEST)+","+str(isMCorDATA[i])+",\""+filename_outputdir+"\","+str(useMomentumCorr)+","+str(GlobalSmearingRochCorrNsigma)+","+str(useEffSF)+","+str(usePtSF)+","+str(usePileupSF)+","+str(controlplots)+","+str(generated_PDF_set[i])+""+","+str(generated_PDF_member[i])+","+str(contains_PDF_reweight[i])+","+str(usePhiMETCorr)+","+str(useRecoilCorr)+","+str(RecoilCorrResolutionNSigma)+","+str(RecoilCorrScaleNSigma)+","+str(use_PForNoPUorTKmet)+","+str(syst_ewk_Alcaraz)
+            wstring="\""+WfileDATA+"\","+str(WfileDATA_lumi_SF)+",\""+sample[i]+"\","+str(useAlsoGenPforSig)+","+str(IS_MC_CLOSURE_TEST)+","+str(isMCorDATA[i])+",\""+filename_outputdir+"\","+str(useMomentumCorr)+","+str(GlobalSmearingRochCorrNsigma)+","+str(useEffSF)+","+str(usePtSF)+","+str(usePileupSF)+","+str(controlplots)+","+str(generated_PDF_set[i])+""+","+str(generated_PDF_member[i])+","+str(contains_PDF_reweight[i])+","+str(usePhiMETCorr)+","+str(useRecoilCorr)+","+str(RecoilCorrResolutionNSigmaU1)+","+str(RecoilCorrScaleNSigmaU1)+","+str(RecoilCorrResolutionNSigmaU2)+","+str(RecoilCorrScaleNSigmaU2)+","+str(use_PForNoPUorTKmet)+","+str(syst_ewk_Alcaraz)
             if(counter<2):
                 if(useLHAPDF):
                     os.system("sed -i 's/.*\#define\ LHAPDF_ON.*/\#define\ LHAPDF_ON/' Wanalysis.C")
