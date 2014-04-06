@@ -1,4 +1,5 @@
 #include "../test_numbers_DATA/common.h"
+#include "../../../includes/common2.h"
 
 void ClosureTest_fits(int generated_PDF_set=1, int generated_PDF_member=0, TString WorZ="W"){
 
@@ -33,9 +34,9 @@ void ClosureTest_fits(int generated_PDF_set=1, int generated_PDF_member=0, TStri
           cout << "preparing pdf eta bin= " << i; fflush(stdout);
           for(int m=0; m<WMass::NtoysMomCorr; m++){
               if(WMass::NtoysMomCorr>1) cout << " MomCorr toy " << m; fflush(stdout);
-            for(int j=0; j<2*WMass::WMassNSteps+1; j++){
-              // for(int j=WMass::WMassNSteps-3; j<WMass::WMassNSteps+3; j++){
-                int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-j)*WMass::WMassStep_MeV;
+            for(int j=0; j<2*WMass2::WMassNSteps+1; j++){
+              // for(int j=WMass2::WMassNSteps-3; j<WMass2::WMassNSteps+3; j++){
+                int jWmass = WMass2::WMassCentral_MeV-(WMass2::WMassNSteps-j)*WMass2::WMassStep_MeV;
                 cout << " mass value= " << jWmass; fflush(stdout);
                   // gROOT->ProcessLine(Form(".! combine -M MaxLikelihoodFit --saveNorm --justFit dummy_datacard_Wmass_MuPos_eta%s_%d.txt  -v10 -m %d  > dummy_datacard_Wmass_MuPos_eta%s_%d.log 2>&1",eta_str.Data(),jWmass,jWmass,eta_str.Data(),jWmass));
                   // gROOT->ProcessLine(Form(".! combine -M MaxLikelihoodFit --saveNorm --justFit dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.txt  -v10 -m %d  > dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.log 2>&1",eta_str.Data(),jWmass,jWmass,eta_str.Data(),jWmass));
@@ -55,15 +56,17 @@ void ClosureTest_fits(int generated_PDF_set=1, int generated_PDF_member=0, TStri
           }
         }
       // }
-
+      
+      gROOT->ProcessLine(".! sleep 3");
+      
         for(int i=0; i<WMass::etaMuonNSteps; i++){
           TString eta_str = Form("%.1f",WMass::etaMaxMuons[i]); eta_str.ReplaceAll(".","p");
           cout << "fitting eta bin= " << i ; fflush(stdout);
           for(int m=0; m<WMass::NtoysMomCorr; m++){
             if(WMass::NtoysMomCorr>1) cout << " MomCorr toy " << m; fflush(stdout);        
-            for(int j=0; j<2*WMass::WMassNSteps+1; j++){
-              // for(int j=WMass::WMassNSteps-3; j<WMass::WMassNSteps+3; j++){
-              int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-j)*WMass::WMassStep_MeV;
+            for(int j=0; j<2*WMass2::WMassNSteps+1; j++){
+              // for(int j=WMass2::WMassNSteps-3; j<WMass2::WMassNSteps+3; j++){
+              int jWmass = WMass2::WMassCentral_MeV-(WMass2::WMassNSteps-j)*WMass2::WMassStep_MeV;
                 cout << " mass value= " << jWmass; fflush(stdout);
                 // gROOT->ProcessLine(Form(".! combine -M MaxLikelihoodFit --saveNorm --justFit dummy_datacard_Wmass_MuPos_eta%s_%d.txt  -v10 -m %d  > dummy_datacard_Wmass_MuPos_eta%s_%d.log 2>&1",eta_str.Data(),jWmass,jWmass,eta_str.Data(),jWmass));
                 // gROOT->ProcessLine(Form(".! combine -M MaxLikelihoodFit --saveNorm --justFit dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.txt  -v10 -m %d  > dummy_datacard_Wmass_MuPos_eta%s_%d_NonScaled.log 2>&1",eta_str.Data(),jWmass,jWmass,eta_str.Data(),jWmass));

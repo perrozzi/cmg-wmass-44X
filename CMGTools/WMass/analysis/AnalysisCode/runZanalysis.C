@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char ** argv) 
 {
 
-  const int Nvars=26;
+  const int Nvars=27;
   TString original, tokenized[Nvars];
   original = Form("%s",argv[1]);
       
@@ -65,13 +65,15 @@ int main(int argc, char ** argv)
   if(GetEntriesOrNchunck>-1) cout << " usePhiMETCorr= " << usePhiMETCorr;
   int useRecoilCorr=tokenized[21].Atof();
   if(GetEntriesOrNchunck>-1) cout << " useRecoilCorr= " << useRecoilCorr;
-  int RecoilCorrResolutionNSigma=tokenized[22].Atof();
-  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrResolutionNSigma= " << RecoilCorrResolutionNSigma;
-  int RecoilCorrScaleNSigma=tokenized[23].Atof();
-  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrScaleNSigma= " << RecoilCorrScaleNSigma;
-  int use_PForNoPUorTKmet=tokenized[24].Atof();
+  int RecoilCorrResolutionNSigmaU1=tokenized[22].Atof();
+  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrResolutionNSigmaU1= " << RecoilCorrResolutionNSigmaU1;
+  int RecoilCorrScaleNSigmaU1=tokenized[23].Atof();
+  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrScaleNSigmaU1= " << RecoilCorrScaleNSigmaU1;
+  int RecoilCorrResolutionNSigmaU2=tokenized[24].Atof();
+  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrResolutionNSigmaU2= " << RecoilCorrResolutionNSigmaU2;
+  int use_PForNoPUorTKmet=tokenized[25].Atof();
   if(GetEntriesOrNchunck>-1) cout << " use_PForNoPUorTKmet= " << use_PForNoPUorTKmet;
-  int use_syst_ewk_Alcaraz=tokenized[24].Atof();
+  int use_syst_ewk_Alcaraz=tokenized[26].Atof();
   if(GetEntriesOrNchunck>-1) cout << " use_syst_ewk_Alcaraz= " << use_syst_ewk_Alcaraz;
   if(GetEntriesOrNchunck>-1) cout << endl;
   
@@ -85,7 +87,7 @@ int main(int argc, char ** argv)
   if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("Zanalysis zDATA(\"%s\",%f,%d)",ZfileDATA.Data(),ZfileDATA_lumi_SF,sample.Contains("DYJetsSig")?useAlsoGenPforSig:0) << endl;
   Zanalysis zDATA(ZfileDATA.Data(),ZfileDATA_lumi_SF,sample.Contains("DYJetsSig")?useAlsoGenPforSig:0);
                              
-  if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("zDATA.Loop(%d,%d,\"../%s\",%d,%d,%d,%d,%d,%d,\"%s\",%d,%d,%d,%d,%d,%d,%d)",IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigma,RecoilCorrScaleNSigma,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz) << endl;
+  if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("zDATA.Loop(%d,%d,\"../%s\",%d,%d,%d,%d,%d,%d,\"%s\",%d,%d,%d,%d,%d,%d,%d)",IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz) << endl;
   int nEntries;
   if(GetEntriesOrNchunck==-1){
     nEntries = zDATA.NumEntries();
@@ -94,7 +96,7 @@ int main(int argc, char ** argv)
   }
   
   cout<< "chunk " << GetEntriesOrNchunck << " Entry_ini= " << Entry_ini << " Entry_fin= " << Entry_fin << endl;
-  zDATA.Loop(GetEntriesOrNchunck,Entry_ini,Entry_fin,IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),run_BuildEvByEvTemplates,useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigma,RecoilCorrScaleNSigma,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz);
+  zDATA.Loop(GetEntriesOrNchunck,Entry_ini,Entry_fin,IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),run_BuildEvByEvTemplates,useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz);
   TString chunk_str = GetEntriesOrNchunck>0? Form("_chunk%d",GetEntriesOrNchunck) : "";
   TString outputfilename = run_BuildEvByEvTemplates ? "WEvByEvTemplates" : "ZanalysisOnDATA";
   if(GetEntriesOrNchunck==0)

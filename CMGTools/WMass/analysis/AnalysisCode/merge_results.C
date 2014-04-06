@@ -9,6 +9,7 @@
 #include "TGraphErrors.h"
 #include "TRandom3.h"
 #include "../test_numbers_DATA/common.h"
+#include "../../../includes/common2.h"
 
 void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString WorZ="W"){
 
@@ -98,8 +99,8 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
               std::vector<double> l_res;
               double lmin=0, lmax=0, deriv1=0, deriv2=0, deriv3=0;
 
-              for(int j=0; j<2*WMass::WMassNSteps+1; j++){
-                int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-j)*WMass::WMassStep_MeV;
+              for(int j=0; j<2*WMass2::WMassNSteps+1; j++){
+                int jWmass = WMass2::WMassCentral_MeV-(WMass2::WMassNSteps-j)*WMass2::WMassStep_MeV;
             
                 // std::ifstream fileNames(Form("dummy_datacard_Wmass_MuPos_eta%s_%d.log",eta_str.Data(),jWmass));
                 string StringFromFile;
@@ -149,8 +150,8 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
                 if(likelihood_val>lmax) lmax=likelihood_val;
                 
                 if(npoint==0) deriv1=likelihood_val;
-                else if(npoint==WMass::WMassNSteps) deriv2=likelihood_val;
-                else if(npoint==2*WMass::WMassNSteps) deriv3=likelihood_val;
+                else if(npoint==WMass2::WMassNSteps) deriv2=likelihood_val;
+                else if(npoint==2*WMass2::WMassNSteps) deriv3=likelihood_val;
 
                 npoint++;
             
@@ -163,8 +164,8 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
               else
                 l_offset=-lmin;
               // cout << "lmin= " << lmin << " lmax= " << lmax << endl;  
-              for(int j=0; j<2*WMass::WMassNSteps+1; j++){
-                int jWmass = WMass::WMassCentral_MeV-(WMass::WMassNSteps-j)*WMass::WMassStep_MeV;
+              for(int j=0; j<2*WMass2::WMassNSteps+1; j++){
+                int jWmass = WMass2::WMassCentral_MeV-(WMass2::WMassNSteps-j)*WMass2::WMassStep_MeV;
                 // cout << "result_NonScaled[h][k]->SetPoint("<<j<<","<<jWmass<<","<<(lmax>0 ? -l_res.at(j) -l_offset : l_res.at(j) -l_offset) <<");"<<endl;
                 result_NonScaled[m][h][k][c]->SetPoint(j,jWmass,deriv3-2*deriv2+deriv1<0 ? -l_res.at(j) -l_offset : l_res.at(j) -l_offset );
               }
@@ -201,7 +202,7 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
                 attempts++;
               }
               for(int ifit=0;ifit<50;ifit++){
-                if((ffit[k][c]->GetChisquare()/ ffit[k][c]->GetNDF())>1e3 || TMath::Abs(ffit[k][c]->GetParameter(1) - WMass::WMassCentral_MeV)>1e5 ){
+                if((ffit[k][c]->GetChisquare()/ ffit[k][c]->GetNDF())>1e3 || TMath::Abs(ffit[k][c]->GetParameter(1) - WMass2::WMassCentral_MeV)>1e5 ){
                   // ffit[k][c]->SetParameter(0,result_NonScaled[m][h][k][c]->GetMinimum());
                   // ffit[k][c]->SetParameter(1, initmass->Gaus(80410, 200); );
                   result_NonScaled[m][h][k][c]->Fit(Form("ffit_W%s%s_%s_pdf%d-%d%s_eta%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data()),"QWEM");
@@ -214,15 +215,15 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
               text = new TLatex(0.25,0.7,Form("Best M_{W} with %s= %.0f #pm %.0f MeV", WMass::FitVar_str[k].Data(),ffit[k][c]->GetParameter(1),ffit[k][c]->GetParameter(2)));
               text->SetNDC();
               text->Draw();
-              text = new TLatex(0.25,0.6,Form("#DeltaM_{W} = %.0f MeV", (ffit[k][c]->GetParameter(1) - WMass::WMassCentral_MeV )));
+              text = new TLatex(0.25,0.6,Form("#DeltaM_{W} = %.0f MeV", (ffit[k][c]->GetParameter(1) - WMass2::WMassCentral_MeV )));
               text->SetNDC();
               text->Draw();
               // text2 = new TLatex(0.25,0.6,Form("Best #chi^{2} ratio = %.1f", ffit[k]->GetParameter(0) ));
               // text2->SetNDC();
               // text2->Draw();
-              cout << Form("Best M_W%s value with %s = %.0f +/- %.0f MeV,\t DeltaM_W%s = %.0f +/- %.0f MeV,\t chi2/ndof= %.2f",Wlike.Data(),WMass::FitVar_str[k].Data(), ffit[k][c]->GetParameter(1), ffit[k][c]->GetParameter(2),Wlike.Data(), (ffit[k][c]->GetParameter(1) - WMass::WMassCentral_MeV), ffit[k][c]->GetParameter(2),(ffit[k][c]->GetChisquare()/ffit[k][c]->GetNDF())) << endl;
-              outTXTfile2 << Form("Best M_W%s %s value with %s = %.0f +/- %.0f MeV,\t DeltaM_W%s = %.0f +/- %.0f MeV,\t chi2/ndof= %.2f",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(), ffit[k][c]->GetParameter(1), ffit[k][c]->GetParameter(2),Wlike.Data(), (ffit[k][c]->GetParameter(1) - WMass::WMassCentral_MeV), ffit[k][c]->GetParameter(2),(ffit[k][c]->GetChisquare()/ffit[k][c]->GetNDF())) << endl;
-              outTXTfile << Form("%.0f\t +/-\t %.0f",(ffit[k][c]->GetParameter(1) - WMass::WMassCentral_MeV), TMath::Abs(ffit[k][c]->GetParameter(2))) << endl;
+              cout << Form("Best M_W%s value with %s = %.0f +/- %.0f MeV,\t DeltaM_W%s = %.0f +/- %.0f MeV,\t chi2/ndof= %.2f",Wlike.Data(),WMass::FitVar_str[k].Data(), ffit[k][c]->GetParameter(1), ffit[k][c]->GetParameter(2),Wlike.Data(), (ffit[k][c]->GetParameter(1) - WMass2::WMassCentral_MeV), ffit[k][c]->GetParameter(2),(ffit[k][c]->GetChisquare()/ffit[k][c]->GetNDF())) << endl;
+              outTXTfile2 << Form("Best M_W%s %s value with %s = %.0f +/- %.0f MeV,\t DeltaM_W%s = %.0f +/- %.0f MeV,\t chi2/ndof= %.2f",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(), ffit[k][c]->GetParameter(1), ffit[k][c]->GetParameter(2),Wlike.Data(), (ffit[k][c]->GetParameter(1) - WMass2::WMassCentral_MeV), ffit[k][c]->GetParameter(2),(ffit[k][c]->GetChisquare()/ffit[k][c]->GetNDF())) << endl;
+              outTXTfile << Form("%.0f\t +/-\t %.0f",(ffit[k][c]->GetParameter(1) - WMass2::WMassCentral_MeV), TMath::Abs(ffit[k][c]->GetParameter(2))) << endl;
               // cout << "Best chi2 ratio value = " << ffit[k]->GetParameter(0) << endl;
               // cout << "Measured mass points chi2 min = " << chi2min << " max = " << chi2max << endl;
               
@@ -236,9 +237,9 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
             TCanvas *c_summary=new TCanvas(Form("c_summary_W%s%s_pdf%d-%d%s_eta%s",Wlike.Data(),WCharge_str[c].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data()),Form("c_summary_pdf%d-%d%s_eta%s",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data())); 
             c_summary->SetGridy();
             c_summary->SetGridx();
-            TH2D*frame=new TH2D("frame",Form("pdf %d-%d %s eta %s;M_{W} (MeV); -2ln(L/L_{ref})",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data()),2*WMass::WMassStep_MeV+1,WMass::WMassCentral_MeV-(WMass::WMassNSteps)*WMass::WMassStep_MeV,WMass::WMassCentral_MeV+(WMass::WMassNSteps)*WMass::WMassStep_MeV,10,0,5);
+            TH2D*frame=new TH2D("frame",Form("pdf %d-%d %s eta %s;M_{W} (MeV); -2ln(L/L_{ref})",WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h,WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data()),2*WMass2::WMassStep_MeV+1,WMass2::WMassCentral_MeV-(WMass2::WMassNSteps)*WMass2::WMassStep_MeV,WMass2::WMassCentral_MeV+(WMass2::WMassNSteps)*WMass2::WMassStep_MeV,10,0,5);
             frame->Draw();
-            TLine *l=new TLine(WMass::WMassCentral_MeV,0,WMass::WMassCentral_MeV,5);
+            TLine *l=new TLine(WMass2::WMassCentral_MeV,0,WMass2::WMassCentral_MeV,5);
             l->SetLineStyle(6);
             l->SetLineColor(4);
             l->SetLineWidth(2);
@@ -247,7 +248,7 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
             TLegend *leg1 = new TLegend(0.51,0.7,0.89,0.89);
             leg1->SetFillColor(10);  leg1->SetBorderSize(1);
             leg1->SetTextSize(0.035);
-            leg1->AddEntry(l, Form("gen M_{W} (%d MeV)",WMass::WMassCentral_MeV), "l");
+            leg1->AddEntry(l, Form("gen M_{W} (%d MeV)",WMass2::WMassCentral_MeV), "l");
 
             TF1*f[3];
             for(int k=0;k<3;k++){
@@ -257,13 +258,13 @@ void merge_results(int generated_PDF_set=1, int generated_PDF_member=0, TString 
               f[k]->SetLineColor(k+1);
               f[k]->SetLineWidth(2);
               f[k]->Draw("same");
-              leg1->AddEntry(f[k], Form("%s Fit (#DeltaM_{W} = %.0f #pm %0.f MeV)",WMass::FitVar_str[k].Data(), (f[k]->GetParameter(1) - WMass::WMassCentral_MeV),f[k]->GetParameter(2)), "l");
+              leg1->AddEntry(f[k], Form("%s Fit (#DeltaM_{W} = %.0f #pm %0.f MeV)",WMass::FitVar_str[k].Data(), (f[k]->GetParameter(1) - WMass2::WMassCentral_MeV),f[k]->GetParameter(2)), "l");
               // result_NonScaled[h][k]->Draw("l same");
               // ffit[k]->SetLineColor(4);
               // ffit[k]->SetLineWidth(4);
               // ffit[k]->Draw(k>0?"same":"");
               // result_NonScaled[h][k]->SaveAs("test_func");
-              deltaM[m][h][k][c]=f[k]->GetParameter(1) - WMass::WMassCentral_MeV;
+              deltaM[m][h][k][c]=f[k]->GetParameter(1) - WMass2::WMassCentral_MeV;
               if(deltaM[m][h][k][c]<deltaMmin[k][c]) deltaMmin[k][c]=deltaM[m][h][k][c];
               if(deltaM[m][h][k][c]>deltaMmax[k][c]) deltaMmax[k][c]=deltaM[m][h][k][c];
 

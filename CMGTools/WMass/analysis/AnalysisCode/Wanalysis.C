@@ -23,7 +23,7 @@
 #include <ctime>
 #include <time.h>
 
-void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigmaU1, int RecoilCorrScaleNSigmaU1, int RecoilCorrResolutionNSigmaU2, int RecoilCorrScaleNSigmaU2, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
+void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigmaU1, int RecoilCorrScaleNSigmaU1, int RecoilCorrResolutionNSigmaU2, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
 {
   if (fChain == 0) return;
 
@@ -380,24 +380,12 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                   common_stuff::plot1D("hPileUp_Fall11_Sig_1_TrgAndGoodVtx", npu, evt_weight, h_1d, 50,0,50 );
               }
               
-              TLorentzVector mu; //TLorentzVector of the reconstructed muon
+              TLorentzVector mu, muCentralCorr, nuCentralCorr; //TLorentzVector of the reconstructed muon
               //Set TLorentzVector of mu
               mu.SetPtEtaPhiM(Mu_pt,Mu_eta,Mu_phi,Mu_mass);
+              muCentralCorr.SetPtEtaPhiM(Mu_pt,Mu_eta,Mu_phi,Mu_mass);
               // mu.Print();
               // cout << "before roch= " << m << " " << Mu_pt << " " << Mu_eta << " " << Mu_phi << " "<< Mu_mass << endl;
-              //use rochester correction if required
-              if(useMomentumCorr==1){ // use Rochester Momentum scale corrections if required
-                if(IS_MC_CLOSURE_TEST || isMCorDATA==0){
-                  // IN THE LAST VERSION NO RUN DEPENDENCE IN MC (TO be CHECKED)
-                  // int runopt = r->Rndm()<0.457451 ? 0 : 1; // smear MC according to Run2011A and Run2011B statistics (if cut on pileup the 0.457... must be changed accordingly!!!
-                  rmcor44X->momcor_mc(mu, Mu_charge, smearRochCorrByNsigma/* , runopt */);
-                }
-                else{
-                  rmcor44X->momcor_data(mu, Mu_charge, smearRochCorrByNsigma, run<175832 ? 0 : 1 );
-                }
-              }else if(useMomentumCorr==2){ // use MuscleFit Momentum scale corrections if required
-                corrector->applyPtCorrection(mu,Mu_charge);
-              }
               
               //------------------------------------------------------------------------------------------------
               // Apply recoil corrections
@@ -410,21 +398,27 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
               // continue;
               if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2) vtxBin=0;
               
-              double pfmet_bla,pfmetphi_bla;
+              double pfmet_bla,pfmetphi_bla,pfmet_blaCentralCorr,pfmetphi_blaCentralCorr;
               if(use_PForNoPUorTKmet==0){
                 pfmet_bla = pfmet;
                 pfmetphi_bla = pfmet_phi;
+                pfmet_blaCentralCorr = pfmet;
+                pfmetphi_blaCentralCorr = pfmet_phi;
               }else if(use_PForNoPUorTKmet==1){
                 pfmet_bla = nopumet;
                 pfmetphi_bla = nopumet_phi;
+                pfmet_blaCentralCorr = nopumet;
+                pfmetphi_blaCentralCorr = nopumet_phi;
               }else if(use_PForNoPUorTKmet==2){
                 pfmet_bla = tkmet;
                 pfmetphi_bla = tkmet_phi;
+                pfmet_blaCentralCorr = tkmet;
+                pfmetphi_blaCentralCorr = tkmet_phi;
               }else{
                 cout << "MET TYPE OPTION use_PForNoPUorTKmet: " << use_PForNoPUorTKmet << " NOT DEFINED, USE 0:PF, 1:NOPU, 2:TK" << endl;
                 return;
               }
-              
+                            
               if(useRecoilCorr==1 && use_PForNoPUorTKmet<3 && sampleName.Contains("WJetsSig")){ // use Rochester Recoil corrections if required
                 // cout << "use_PForNoPUorTKmet " << use_PForNoPUorTKmet << " pfmet_bla " << pfmet_bla << " pfmetphi_bla " << pfmetphi_bla << " WGen_pt " << WGen_pt << 
                 // "u1_dummy " << u1_dummy << " u2_dummy " << u2_dummy << " RecoilCorrResolutionNSigmaU1 " << RecoilCorrResolutionNSigmaU1 << " RecoilCorrScaleNSigmaU1 " << RecoilCorrScaleNSigmaU1 << " vtxBin " << vtxBin 
@@ -437,6 +431,12 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                                     u1_dummy, u2_dummy,
                                     RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
                                    vtxBin,doSingleGauss);                                      
+                  correctorRecoil_W_Pos_->CorrectType2( pfmet_blaCentralCorr, pfmetphi_blaCentralCorr,
+                                    WGen_pt, WGen_phi,
+                                    muCentralCorr.Pt(), muCentralCorr.Phi(),
+                                    u1_dummy, u2_dummy,
+                                    0, 0, 0,
+                                   vtxBin,doSingleGauss);                                      
 
                 }else{ // W minus corrections
                   correctorRecoil_W_Neg_->CorrectType2( pfmet_bla, pfmetphi_bla,
@@ -445,10 +445,15 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                                     u1_dummy, u2_dummy,
                                     RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
                                     vtxBin,doSingleGauss);
+                  correctorRecoil_W_Neg_->CorrectType2( pfmet_blaCentralCorr, pfmetphi_blaCentralCorr,
+                                    WGen_pt, WGen_phi,
+                                    muCentralCorr.Pt(), muCentralCorr.Phi(),
+                                    u1_dummy, u2_dummy,
+                                    0, 0, 0,
+                                    vtxBin,doSingleGauss);
 
                 }
               }
-              continue;
 
               if(usePhiMETCorr==1){ // use MET Phi correction if required
                 pair<double, double> pfmet_phicorr = common_stuff::getPhiCorrMET( pfmet_bla, pfmetphi_bla, nvtx, !sampleName.Contains("DATA"));
@@ -457,15 +462,37 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                 pfmetphi_bla = pfmet_phicorr.second;
                 // cout << "1 pfmet_bla= " << pfmet_bla << " pfmetphi_bla= " << pfmetphi_bla << endl;
               }
+              
+              //use rochester correction if required
+              if(useMomentumCorr==1){ // use Rochester Momentum scale corrections if required
+                if(IS_MC_CLOSURE_TEST || isMCorDATA==0){
+                  // IN THE LAST VERSION NO RUN DEPENDENCE IN MC (TO be CHECKED)
+                  // int runopt = r->Rndm()<0.457451 ? 0 : 1; // smear MC according to Run2011A and Run2011B statistics (if cut on pileup the 0.457... must be changed accordingly!!!
+                  rmcor44X->momcor_mc(mu, Mu_charge, smearRochCorrByNsigma/* , runopt */);
+                  rmcor44X->momcor_mc(muCentralCorr, Mu_charge, 0/* , runopt */);
+                }
+                else{
+                  rmcor44X->momcor_data(mu, Mu_charge, smearRochCorrByNsigma, run<175832 ? 0 : 1 );
+                  rmcor44X->momcor_data(muCentralCorr, Mu_charge, 0, run<175832 ? 0 : 1 );
+                }
+              }else if(useMomentumCorr==2){ // use MuscleFit Momentum scale corrections if required
+                corrector->applyPtCorrection(mu,Mu_charge);
+                corrector->applyPtCorrection(muCentralCorr,Mu_charge);
+              }
+              
               // cout << "after roch= " << m << " " << mu.Pt() << " " << mu.Eta() << " " << mu.Phi() << " "<< Mu_mass << endl;
-              TLorentzVector mubla,nu,W; //TLorentzVector of the reconstructed W
+              TLorentzVector mubla,mublaCentralCorr,nu,W,WCentralCorr; //TLorentzVector of the reconstructed W
               nu.SetPtEtaPhiM(pfmet_bla,0,pfmetphi_bla,0);
+              nuCentralCorr.SetPtEtaPhiM(pfmet_blaCentralCorr,0,pfmetphi_blaCentralCorr,0);
               mubla.SetPtEtaPhiM(mu.Pt(),0,mu.Phi(),0);
+              mublaCentralCorr.SetPtEtaPhiM(muCentralCorr.Pt(),0,muCentralCorr.Phi(),0);
               W = mubla + nu;
+              WCentralCorr = mublaCentralCorr + nuCentralCorr;
               // W = mu + nu;      // <<<<<<------ LUCA BUGGY FOR TEST
 
               double Mu_var_jacobian[3] = {2*mu.Pt()/iWmass,W.Mt()/iWmass,2*nu.Pt()/iWmass}; // SCALED VARIABLE
               double Mu_var_NotScaled[3] = {mu.Pt(),W.Mt(),nu.Pt()}; // SCALED VARIABLE 
+              double Mu_var_NotScaledCentralCorr[3] = {muCentralCorr.Pt(),WCentralCorr.Mt(),nuCentralCorr.Pt()}; // SCALED VARIABLE 
               // double Mu_var_NotScaled[3] = {mu.Pt(),W.Mt()*W.Mt(),nu.Pt()}; // SCALED VARIABLE LUCA TEMP!!!
               double dphiGen = MuGen_phi-NuGen_phi;
               if(dphiGen > TMath::Pi()) dphiGen -= 2*TMath::Pi();
@@ -481,12 +508,12 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
               // bool masscut = sampleName.Contains("WJetsSig") ? (WGen_m>50&&WGen_m<250):true;
               if( /* Z_mass>50  not possible to apply something similar to Z mass cut*/
                   // masscut && 
-                  TMath::Abs(mu.Eta())<WMass::etaMaxMuons[i] && mu.Pt()>WMass::sel_xmin[0]/* WMass::fit_xmin[0] *//* 30 */
+                  TMath::Abs(muCentralCorr.Eta())<WMass::etaMaxMuons[i] && muCentralCorr.Pt()>WMass::sel_xmin[0]/* WMass::fit_xmin[0] *//* 30 */
                 ){
                 // muon candidate is passing tight, iso, dxy requirements
                 if(MuIsTightAndIso 
-                   // && MuRelIso<0.12 // REL ISO
-                   && MuRelIso*mu.Pt()<1  // ABS ISO
+                   && MuRelIso<0.12 // REL ISO
+                   // && MuRelIso*mu.Pt()<1  // ABS ISO
                    && Mu_dxy<0.02 
                 && noTrgMuonsLeadingPt<10
                 ){
@@ -507,10 +534,10 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                                     Mu_var_NotScaled[k], evt_weight*Mu_tight_muon_SF, h_1d, 50, WMass::fit_xmin[k],WMass::fit_xmax[k] );
 
                     // PLOT OF MET WITHIN THE WHOLE RANGE
-                    if(W.Pt()<WMass::WpTcut && m==0 && j==WMass::WMassNSteps && WMass::PDF_members<2){
+                    if(WCentralCorr.Pt()<WMass::WpTcut && m==0 && j==WMass::WMassNSteps && WMass::PDF_members<2){
                       if(
-                        Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0]
-                        && Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
+                        Mu_var_NotScaledCentralCorr[0] > WMass::sel_xmin[0] && Mu_var_NotScaledCentralCorr[0] < WMass::sel_xmax[0]
+                        && Mu_var_NotScaledCentralCorr[1] > WMass::sel_xmin[1] && Mu_var_NotScaledCentralCorr[1] < WMass::sel_xmax[1]
                         // && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
                        )
                         common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRange_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[2].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
@@ -519,7 +546,7 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                           50*(WMass::sel_xmax[2]-WMass::sel_xmin[2])/(WMass::fit_xmax[2]-WMass::fit_xmin[2]), WMass::sel_xmin[2],WMass::sel_xmax[2] );
                     }
 
-                  if(pfmet_bla>WMass::sel_xmin[2]/* WMass::fit_xmin[2] *//* 25 */){
+                  if(pfmet_blaCentralCorr>WMass::sel_xmin[2]/* WMass::fit_xmin[2] *//* 25 */){
                   
                     if(controlplots && m==0 && i==0 && j==0 && WMass::PDF_members<2){
                       common_stuff::plot1D("hnvtx_6_METCut", nvtx, evt_weight, h_1d, 50,0,50 );
@@ -537,7 +564,7 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                                     Mu_var_NotScaled[k], evt_weight*Mu_tight_muon_SF, h_1d, 50, WMass::fit_xmin[k],WMass::fit_xmax[k] );
                     
                     // if(W_pt<20){
-                    if(W.Pt()<WMass::WpTcut){ // DEFAULT IS WMass::WpTcut
+                    if(WCentralCorr.Pt()<WMass::WpTcut){ // DEFAULT IS WMass::WpTcut
                       for(int k=0;k<3;k++)
                         // if(m==0) hWPos_VarScaled_7_RecoilCut[k][i][j]->Fill(Mu_var_jacobian[k],evt_weight*Mu_tight_muon_SF);
                         // if(m==0) common_stuff::plot1D(Form("hW%s_%sScaled_7_RecoilCut_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[k].Data(),eta_str.Data(),jWmass),
@@ -550,16 +577,16 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                       if(m==0 && j==WMass::WMassNSteps && WMass::PDF_members<2){
                         if(
                             // Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0] && 
-                            Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
-                            && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
+                            Mu_var_NotScaledCentralCorr[1] > WMass::sel_xmin[1] && Mu_var_NotScaledCentralCorr[1] < WMass::sel_xmax[1]
+                            && Mu_var_NotScaledCentralCorr[2] > WMass::sel_xmin[2] && Mu_var_NotScaledCentralCorr[2] < WMass::sel_xmax[2]
                            )
                           common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRange_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[0].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
                               Mu_var_NotScaled[0] ,evt_weight*Mu_tight_muon_SF, h_1d, 
                               50*(WMass::sel_xmax[0]-WMass::sel_xmin[0])/(WMass::fit_xmax[0]-WMass::fit_xmin[0]), WMass::sel_xmin[0],WMass::sel_xmax[0] );
                         if(
-                            Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0]
+                            Mu_var_NotScaledCentralCorr[0] > WMass::sel_xmin[0] && Mu_var_NotScaledCentralCorr[0] < WMass::sel_xmax[0]
                             // && Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
-                            && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
+                            && Mu_var_NotScaledCentralCorr[2] > WMass::sel_xmin[2] && Mu_var_NotScaledCentralCorr[2] < WMass::sel_xmax[2]
                            )
                           common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRange_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[1].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
                               Mu_var_NotScaled[1] ,evt_weight*Mu_tight_muon_SF, h_1d, 
@@ -579,9 +606,9 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                           // Mu_var_NotScaled[0] > WMass::fit_xmin[0] && Mu_var_NotScaled[0] < WMass::fit_xmax[0]
                           // && Mu_var_NotScaled[1] > WMass::fit_xmin[1] && Mu_var_NotScaled[1] < WMass::fit_xmax[1]
                           // && Mu_var_NotScaled[2] > WMass::fit_xmin[2] && Mu_var_NotScaled[2] < WMass::fit_xmax[2]
-                          Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0]
-                          && Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
-                          && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
+                          Mu_var_NotScaledCentralCorr[0] > WMass::sel_xmin[0] && Mu_var_NotScaledCentralCorr[0] < WMass::sel_xmax[0]
+                          && Mu_var_NotScaledCentralCorr[1] > WMass::sel_xmin[1] && Mu_var_NotScaledCentralCorr[1] < WMass::sel_xmax[1]
+                          && Mu_var_NotScaledCentralCorr[2] > WMass::sel_xmin[2] && Mu_var_NotScaledCentralCorr[2] < WMass::sel_xmax[2]
                          ){
                       // if(Jet_leading_pt<30){
                         // cout << (mu.Pt()<xmax*80/2 ? mu.Pt() : (xmax-binsize2/2)*80/2 )<< endl;
@@ -782,16 +809,16 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                   // }
                     
                   if(
-                    // MuRelIso<0.12 // single muon cuts (inverted REL iso (is <0.12 for signal) , no tight requirement)
-                    MuRelIso*mu.Pt()<1 // single muon cuts (inverted ABD iso (is <0.12 for signal) , no tight requirement)
+                    MuRelIso<0.12 // single muon cuts (inverted REL iso (is <0.12 for signal) , no tight requirement)
+                    // MuRelIso*mu.Pt()<1 // single muon cuts (inverted ABD iso (is <0.12 for signal) , no tight requirement)
                     && Mu_dxy>0.02 // single muon cuts (inverted iso (is <0.02 for signal) , no tight requirement)
                     // && W_pt<20
-                    && W.Pt()<WMass::WpTcut // TEMPORARY
+                    && WCentralCorr.Pt()<WMass::WpTcut // TEMPORARY
                   ){
                   
                       if(
-                        Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0]
-                        && Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
+                        Mu_var_NotScaledCentralCorr[0] > WMass::sel_xmin[0] && Mu_var_NotScaledCentralCorr[0] < WMass::sel_xmax[0]
+                        && Mu_var_NotScaledCentralCorr[1] > WMass::sel_xmin[1] && Mu_var_NotScaledCentralCorr[1] < WMass::sel_xmax[1]
                         // && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
                        )
                         common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRangeQCD_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[2].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
@@ -805,16 +832,16 @@ void Wanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                                     // h_1d, 200,0,200 );
                       if(
                           // Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0] && 
-                          Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
-                          && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
+                          Mu_var_NotScaledCentralCorr[1] > WMass::sel_xmin[1] && Mu_var_NotScaledCentralCorr[1] < WMass::sel_xmax[1]
+                          && Mu_var_NotScaledCentralCorr[2] > WMass::sel_xmin[2] && Mu_var_NotScaledCentralCorr[2] < WMass::sel_xmax[2]
                          )
                         common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRangeQCD_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[0].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
                             Mu_var_NotScaled[0] ,evt_weight*Mu_tight_muon_SF, h_1d, 
                             50*(WMass::sel_xmax[0]-WMass::sel_xmin[0])/(WMass::fit_xmax[0]-WMass::fit_xmin[0]), WMass::sel_xmin[0],WMass::sel_xmax[0] );
                       if(
-                          Mu_var_NotScaled[0] > WMass::sel_xmin[0] && Mu_var_NotScaled[0] < WMass::sel_xmax[0]
+                          Mu_var_NotScaledCentralCorr[0] > WMass::sel_xmin[0] && Mu_var_NotScaledCentralCorr[0] < WMass::sel_xmax[0]
                           // && Mu_var_NotScaled[1] > WMass::sel_xmin[1] && Mu_var_NotScaled[1] < WMass::sel_xmax[1]
-                          && Mu_var_NotScaled[2] > WMass::sel_xmin[2] && Mu_var_NotScaled[2] < WMass::sel_xmax[2]
+                          && Mu_var_NotScaledCentralCorr[2] > WMass::sel_xmin[2] && Mu_var_NotScaledCentralCorr[2] < WMass::sel_xmax[2]
                          )
                         common_stuff::plot1D(Form("hW%s_%sNonScaled_SelRangeQCD_8_JetCut_pdf%d-0%s_eta%s_%d",MuCharge_str.Data(),WMass::FitVar_str[1].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,toys_str.Data(),eta_str.Data(),jWmass),
                             Mu_var_NotScaled[1] ,evt_weight*Mu_tight_muon_SF, h_1d, 

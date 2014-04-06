@@ -4,8 +4,9 @@
 #include <vector>
 #include "TFile.h"
 #include "../includes/common.h"
+#include "../includes/common2.h"
 
-void prepareDatacards(TString folder, TString syst_folder, TString sample, int generated_PDF_set=1, int generated_PDF_member=0, TString WorZ="W"){
+void prepareDatacardsFast(TString folder, TString syst_folder, TString sample, int generated_PDF_set=1, int generated_PDF_member=0, TString WorZ="W"){
 
   TString original;
   std::vector<TString> tokenized;
@@ -117,6 +118,7 @@ void prepareDatacards(TString folder, TString syst_folder, TString sample, int g
         }
       }
     }
+
     // return;
     // PROCESS THE HISTOS AND STORE THEM IN A SUITABLE FILE, STORE NORMALIZATIONS IN A SEPARATE TEXT FILE
     TFile *foutDATA = new TFile(Form("%s/DataCards/datacards_DATA%s.root",folder.Data(),WorZ.Contains("W")?"":"_Wlike"),"RECREATE");
@@ -273,39 +275,6 @@ void prepareDatacards(TString folder, TString syst_folder, TString sample, int g
               }
               outTXTfile << endl;
               
-              // // PREPARE DUMMY DATACARD
-
-              // PREPARE DUMMY DATACARD NON SCALED WITH BACKGROUND WITHOUT Z DATADRIVEN
-              for(int k=0;k<3;k++){
-
-                ofstream DummyDatacard;
-                DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_Mu%s%s_pdf%d-%d%s_eta%s_%d_%sNonScaled.txt",folder.Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass,WMass::FitVar_str[k].Data()));
-                
-                DummyDatacard << "shapes   *          *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
-                // cout << "syst_folder.Data()= -" << syst_folder.Data() << "- syst_folder.Length()= " << syst_folder.Length() << endl;
-                if(syst_folder.Length()<15){
-                  DummyDatacard << "shapes   data_obs   *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
-                }else{
-                  // DummyDatacard << "shapes   data_obs   *   /afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_4/src/CMGTools/WMass/analysis/JobOutputs/test_controlplots_RochCorr_EffSFCorr_PileupSFCorr/DataCards/datacards_DATA.root $CHANNEL/"<<(WMass::WMassCentral_MeV)<<"/W_MCDATALIKE_NonScaled" << endl;
-                  DummyDatacard << "shapes   data_obs   *   "<<Form("../../%s/DataCards/datacards_DATA%s.root",syst_folder.Data(),WorZ.Contains("W")?"":"_Wlike") << " $CHANNEL/"<<(WMass::WMassCentral_MeV)<<Form("/W%s%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
-                }
-                DummyDatacard << Form("shapes   W%s%s_%sJetsSig_%sNonScaled_ALT   *   datacards_DATA%s.root $CHANNEL/",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WorZ.Contains("W")?"":"_Wlike")<<(WMass::WMassCentral_MeV-WMass::WMassNSteps*WMass::WMassStep_MeV)<<Form("/W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;
-                DummyDatacard << "----------------------------------------" << endl;
-                // DummyDatacard << "bin                 MuPos_pdf"<<(WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets)<<"-"<<h<<"_eta"<<eta_str<< endl;
-                DummyDatacard << "bin                 Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
-                DummyDatacard << "observation              -1 " << endl;
-                DummyDatacard << "----------------------------------------" << endl;
-                DummyDatacard << "bin            Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"          Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"         Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
-                DummyDatacard << Form("process        W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s        W%s%s_%sJetsSig_%sNonScaled_ALT        W%s%s_EWKTT_%sNonScaled_pdf%d-%d%s        ",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
-                // DummyDatacard << Form("process        W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s        W%s%s_%sJetsSig_%sNonScaled_ALT        W%s%s_WJetsFake_%sNonScaled_pdf%d-%d%s        ",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
-                DummyDatacard << "process               -1                             0                            1   " << endl;
-                DummyDatacard << "rate                 -1                             -1                            -1  " << endl;
-                // cout          << "rate                 -1                             -1                          -1    " << endl;
-                DummyDatacard << "--------------------------------------------------------------------------------" << endl;
-                DummyDatacard << "lumi    lnN    1.044    1.044   1.044 " << endl;
-                DummyDatacard.close();
-              }
-
             }
           }
           cout << endl;
@@ -314,6 +283,59 @@ void prepareDatacards(TString folder, TString syst_folder, TString sample, int g
         outTXTfile << endl;
         outTXTfile << endl;
       }
+      
+      // for(int isample=0; isample<Nsamples;isample++){
+      for(int ieta=0; ieta<WMass::etaMuonNSteps; ieta++){
+        TString eta_str = Form("%.1f",WMass::etaMaxMuons[ieta]); eta_str.ReplaceAll(".","p");
+        for(int jmass=0; jmass<2*WMass2::WMassNSteps+1; jmass++){
+          int jWmass = WMass2::WMassCentral_MeV-(WMass2::WMassNSteps-jmass)*WMass2::WMassStep_MeV;
+          for(int h=0; h<WMass::PDF_members; h++){
+            for(int m=0; m<WMass::NtoysMomCorr; m++){
+                
+              // // PREPARE DUMMY DATACARD
+
+              // PREPARE DUMMY DATACARD NON SCALED WITH BACKGROUND WITHOUT Z DATADRIVEN
+              for(int k=0;k<3;k++){
+
+                ofstream DummyDatacard;
+                DummyDatacard.open(Form("%s/DataCards/dummy_datacard_Wmass_Mu%s%s_pdf%d-%d%s_eta%s_%d_%sNonScaled.txt",folder.Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",eta_str.Data(),jWmass,WMass::FitVar_str[k].Data()));
+                
+                if(syst_folder.Length()<15){
+                  DummyDatacard << "shapes   *          *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
+                }else{
+                  DummyDatacard << "shapes   *          *   "<<Form("../../%s/DataCards/datacards_DATA%s.root",syst_folder.Data(),WorZ.Contains("W")?"":"_Wlike") << " $CHANNEL/$MASS/$PROCESS $CHANNEL/$MASS/$PROCESS_$SYSTEMATIC" << endl;
+                }
+                
+                  DummyDatacard << "shapes   data_obs   *   datacards_DATA"<<(WorZ.Contains("W")?"":"_Wlike")<<".root $CHANNEL/"<<(WMass2::WMassCentral_MeV)<<Form("/W%s%s_MCDATALIKE_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,0, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",0):"") << endl;
+                
+                if(syst_folder.Length()<15){
+                  DummyDatacard << Form("shapes   W%s%s_%sJetsSig_%sNonScaled_ALT   *   datacards_DATA%s.root $CHANNEL/",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WorZ.Contains("W")?"":"_Wlike")<<(WMass2::WMassCentral_MeV-WMass2::WMassNSteps*WMass2::WMassStep_MeV)<<Form("/W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;
+                }else{
+                  DummyDatacard << Form("shapes   W%s%s_%sJetsSig_%sNonScaled_ALT   *   ../../%s/DataCards/datacards_DATA%s.root $CHANNEL/",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),syst_folder.Data(),WorZ.Contains("W")?"":"_Wlike")<<(WMass2::WMassCentral_MeV-WMass2::WMassNSteps*WMass2::WMassStep_MeV)<<Form("/W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;
+                  
+                }
+                
+                DummyDatacard << "----------------------------------------" << endl;
+                DummyDatacard << "bin                 Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
+                DummyDatacard << "observation              -1 " << endl;
+                DummyDatacard << "----------------------------------------" << endl;
+                DummyDatacard << "bin            Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"          Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<<"         Mu"<<Wlike.Data()<<WCharge_str[c].Data()<<"_eta"<<eta_str<< endl;
+                DummyDatacard << Form("process        W%s%s_%sJetsSig_%sNonScaled_pdf%d-%d%s        W%s%s_%sJetsSig_%sNonScaled_ALT        W%s%s_EWKTT_%sNonScaled_pdf%d-%d%s        ",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"",Wlike.Data(),WCharge_str[c].Data(),WorZ.Contains("W")?"W":"DY",WMass::FitVar_str[k].Data(),Wlike.Data(),WCharge_str[c].Data(),WMass::FitVar_str[k].Data(),WMass::PDF_sets<0?generated_PDF_set:WMass::PDF_sets,h, WMass::NtoysMomCorr>1?Form("_MomCorrToy%d",m):"") << endl;   
+                DummyDatacard << "process               -1                             0                            1   " << endl;
+                DummyDatacard << "rate                 -1                             -1                            -1  " << endl;
+                // cout          << "rate                 -1                             -1                          -1    " << endl;
+                DummyDatacard << "--------------------------------------------------------------------------------" << endl;
+                DummyDatacard << "lumi    lnN    1.001    1.001   1.001 " << endl;
+                DummyDatacard.close();
+              }
+                
+                
+            }
+          }
+        }
+      }
+    // }
+
       outTXTfile.close();
     }
     

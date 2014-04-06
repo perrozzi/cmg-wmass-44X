@@ -23,7 +23,7 @@
 #include <ctime>
 #include <time.h>
 
-void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int buildTemplates, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigma, int RecoilCorrScaleNSigma, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
+void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_TEST, int isMCorDATA, TString outputdir, int buildTemplates, int useMomentumCorr, int smearRochCorrByNsigma, int useEffSF, int usePtSF, int useVtxSF, int controlplots, TString sampleName, int generated_PDF_set, int generated_PDF_member, int contains_PDF_reweight, int usePhiMETCorr, int useRecoilCorr, int RecoilCorrResolutionNSigmaU1, int RecoilCorrScaleNSigmaU1, int RecoilCorrResolutionNSigmaU2, int use_PForNoPUorTKmet, int use_syst_ewk_Alcaraz)
 {
 
   if (fChain == 0) return;
@@ -167,49 +167,6 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
   }
 
   
-  // // std::string fileCorrectTo = "../RecoilCode/RecoilCorrector_v6/recoilfits/recoilfit_wjets53X_20pv_njet.root";
-  // std::string fileCorrectTo = "../RecoilCode/RecoilCorrector_v6/recoilfits/recoilfit_zmm42X_20pv_0jet.root";
-
-  // // Original from PHIL
-  // std::string fileZmmData_P = "../RecoilCode/RecoilCorrector_v6/recoilfits/recoilfit_datamm42X_20pv_0jet.root"; 
-  // std::string fileZmmMC_P = "../RecoilCode/RecoilCorrector_v6/recoilfits/recoilfit_zmm42X_20pv_njet.root";
-
-  // /// these are for inclusive jets and inclusive vtx
-  // /// MADE by Maria
-  // ////  std::string fileZmmData_M = "../RecoilCode/recoilfit_Z_inc_1.root";
-  // ////  std::string fileZmmMC_M = "../RecoilCode/recoilfit_DATA.root";
-
-  // //  std::string fileZmmMC_M = "../RecoilCode/recoilfit_Z_inc_1.root";
-  // std::string fileZmmData_M = "../RecoilCode/RecoilCorrector_v6/fitcode/recoilfits/recoilfit_DATA_inc.root";
-  // std::string fileZmmMC_M = "../RecoilCode/RecoilCorrector_v6/fitcode/recoilfits/recoilfit_genZ_inc.root";
-
-  // RecoilCorrector::RecoilCorrector*  correctorRecoil_M_;
-  // RecoilCorrector::RecoilCorrector*  correctorRecoil_P_;
-
-  // RecoilCorrector::RecoilCorrector*  correctorRecoil_Z_;
-  // RecoilCorrector::RecoilCorrector*  correctorRecoil_W_;
-
-  // correctorRecoil_M_ = new RecoilCorrector(fileCorrectTo.c_str(),123456); // this file is used to read the jet mutliplicity, will be a dummy file
-  // correctorRecoil_M_->addDataFile(fileZmmData_M.c_str());
-  // correctorRecoil_M_->addMCFile(fileZmmMC_M.c_str());
-
-  // ////////
-  // ////////
-
-  // correctorRecoil_Z_ = new RecoilCorrector(fileCorrectTo.c_str(),123456); // this file is used to read the jet mutliplicity, will be a dummy file
-  // correctorRecoil_Z_->addDataFile(fileZmmData_M.c_str());
-  // correctorRecoil_Z_->addMCFile(fileZmmMC_M.c_str());
-
-  // correctorRecoil_W_ = new RecoilCorrector(fileCorrectTo.c_str(),123456); // this file is used to read the jet mutliplicity, will be a dummy file
-  // correctorRecoil_W_->addDataFile(fileZmmData_M.c_str());
-  // correctorRecoil_W_->addMCFile(fileZmmMC_M.c_str());
-
-  // ////////
-  // ////////
-
-  // correctorRecoil_P_ = new RecoilCorrector(fileCorrectTo.c_str(),123456); // this file is used to read the jet mutliplicity, will be a dummy file
-  // correctorRecoil_P_->addDataFile(fileZmmData_P.c_str());
-  // correctorRecoil_P_->addMCFile(fileZmmMC_P.c_str());
 
   // the following variables are dummy, but necessary to call the corrector.
   double u1_dummy = 0;
@@ -270,44 +227,18 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
   if(use_PForNoPUorTKmet==2) metSuffix="_tkmet";
   if(use_PForNoPUorTKmet==0) metSuffix="_pfmet";
   
-  // std::string fileCorrectTo = Form("../RecoilCode/recoilfit_genWneg%s_inc.root",metSuffix.Data());
-  // std::string fileCorrectToPos = Form("../RecoilCode/recoilfit_genWpos%s_inc.root",metSuffix.Data());
-  std::string fileCorrectTo = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_madgraph.root",metSuffix.Data());
-  std::string fileZmmDataA = Form("../RecoilCode/recoilfit_DATA_runB_inc.root");
-  std::string fileZmmDataB = Form("../RecoilCode/recoilfit_DATA_runB_inc.root");
-  
-  // std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s_inc.root",metSuffix.Data());
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_inc.root",metSuffix.Data());
+  /// TKMET type2
+  std::string fileCorrectTo = Form("../RecoilCode/recoilfit_genZ%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix_madgraph.root",metSuffix.Data());
+  std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s_inclusiveNvtx_eta11_pol3_type2_oneGauss_x2Stat_ErrorFix.root",metSuffix.Data());
 
-  std::string fileZmmData = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1.root",metSuffix.Data(),InclusiveNVTXSuffix.Data());
-  std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data());
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_MIXBKG.root",metSuffix.Data()); // MADGRAPH
-  // std::string fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s_pol2_type1_powheg.root",metSuffix.Data());
-  
-  if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2){
-    TString eta_str = Form("%.1f",WMass::etaMaxMuons[0]); eta_str.ReplaceAll(".","");
-    fileCorrectTo = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_eta%s_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data()); // TEMP FIX
-    fileZmmMC = Form("../RecoilCode/recoilfit_genZ%s%s_pol2_type1_eta%s_madgraph.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data()); // TEMP FIX
-    fileZmmDataA = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-    fileZmmDataB = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-    fileZmmData = Form("../RecoilCode/recoilfit_DATA%s%s_pol2_type1_eta%s.root",metSuffix.Data(),InclusiveNVTXSuffix.Data(),eta_str.Data());
-  }
+  RecoilCorrector::RecoilCorrector*  correctorRecoil_Z; // TYPE2
 
-  RecoilCorrector::RecoilCorrector *correctorRecoilZRunA_,*correctorRecoilZRunB_;
-  
-  correctorRecoilZRunA_ = new RecoilCorrector(fileCorrectTo.c_str(),123451);
-  correctorRecoilZRunA_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilZRunA_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilZRunA_->addDataFile(fileZmmDataA.c_str());
+  correctorRecoil_Z = new RecoilCorrector(fileCorrectTo.c_str(),123456);
+  correctorRecoil_Z->addDataFile(fileZmmData.c_str());
+  correctorRecoil_Z->addMCFile(fileZmmMC.c_str());
 
-  correctorRecoilZRunB_ = new RecoilCorrector(fileCorrectTo.c_str(),123453);
-  correctorRecoilZRunB_->addMCFile(fileZmmMC.c_str());
-  if(use_InclusiveAB_RecoilCorr)
-    correctorRecoilZRunB_->addDataFile(fileZmmData.c_str());
-  else
-    correctorRecoilZRunB_->addDataFile(fileZmmDataB.c_str());
+  bool doSingleGauss=false;
 
   double ZWmassRatio = WMass::ZMass/(WMass::WMassCentral_MeV/1e3);
   
@@ -487,38 +418,17 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
             
             if( evtHasGoodVtx && evtHasTrg && MuPos_pt>0){ // good reco event
 
-              TLorentzVector muPosCorr,muNegCorr, muPosNoCorr,muNegNoCorr, Zcorr; //TLorentzVector of the reconstructed muon
+              TLorentzVector muPosCorr,muNegCorr,muPosCorrCentral,muNegCorrCentral, muPosNoCorr,muNegNoCorr, Zcorr, ZNocorr, ZcorrCentral; //TLorentzVector of the reconstructed muon
               //Set TLorentzVector of mu, and mubar
               // cout << Z_mass << " " << MuPos_pt << " " << MuPos_eta << " " << MuPos_phi << " " << MuPos_mass << endl;
               muPosCorr.SetPtEtaPhiM(MuPos_pt,MuPos_eta,MuPos_phi,MuPos_mass);
+              muPosCorrCentral = muPosCorr;
               muPosNoCorr = muPosCorr;
               muNegCorr.SetPtEtaPhiM(MuNeg_pt,MuNeg_eta,MuNeg_phi,MuNeg_mass);
+              muNegCorrCentral = muNegCorr;
               muNegNoCorr = muNegCorr;
 
-              if(useMomentumCorr==1){ // use rochester corrections if required
-                if(IS_MC_CLOSURE_TEST || isMCorDATA==0){
-                  // int runopt = r->Rndm()<0.457451 ? 0 : 1;
-                  // int runopt = 1;
-                  // rmcor42X->momcor_mc(muPosCorr, MuPos_charge, smearRochCorrByNsigma, runopt);
-                  // rmcor42X->momcor_mc(muNegCorr, MuNeg_charge, smearRochCorrByNsigma, runopt);
-                  rmcor44X->momcor_mc(muPosCorr, MuPos_charge, smearRochCorrByNsigma/* , runopt */);
-                  rmcor44X->momcor_mc(muNegCorr, MuNeg_charge, smearRochCorrByNsigma/* , runopt */);
-                  // musclefit_data
-                }
-                else{
-                  rmcor44X->momcor_data(muPosCorr, MuPos_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
-                  rmcor44X->momcor_data(muNegCorr, MuNeg_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
-                }
-              }else if(useMomentumCorr==2){ // use Momentum scale corrections if required
-                corrector->applyPtCorrection(muPosCorr,MuPos_charge);
-                corrector->applyPtCorrection(muNegCorr,MuNeg_charge);
-              }
-              // cout << "toy= " << m 
-                   // << " " << muPosCorr.Pt() << " " << muPosCorr.Eta() << " " << muPosCorr.Phi() 
-                   // << " " << muNegCorr.Pt() << " " << muNegCorr.Eta() << " " << muNegCorr.Phi() 
-                   // << " " << endl;
-
-              Zcorr = muPosCorr + muNegCorr;
+              ZNocorr = muPosNoCorr + muNegNoCorr;
 
               //------------------------------------------------------------------------------------------------
               // Apply recoil corrections
@@ -531,7 +441,7 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
               // continue;
               if(use_InclusiveNVTX_RecoilCorr && use_PForNoPUorTKmet==2) vtxBin=1;
 
-              double pfmet_bla,pfmetphi_bla;
+              double pfmet_bla,pfmetphi_bla,pfmet_blaCentral,pfmetphi_blaCentral;
               if(use_PForNoPUorTKmet==0){
                 pfmet_bla = pfmet;
                 pfmetphi_bla = pfmet_phi;
@@ -546,25 +456,28 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                 return;
               }
               
+              pfmet_blaCentral = pfmet_bla;
+              pfmetphi_blaCentral = pfmetphi_bla;
+              
               // cout << "pfmet_bla before " << pfmet_bla;
               if(useRecoilCorr==1 && use_PForNoPUorTKmet<3 && sampleName.Contains("DYJetsSig")){ // use Rochester Momentum scale corrections if required
                 // if(Mu_charge>0){
                   // if(runopt==0){
                 // }else{
-                  if(runopt==0){
-                    correctorRecoilZRunA_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        ZGen_pt, ZGen_phi, 
-                                                        Zcorr.Pt(), Zcorr.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }else{
-                    correctorRecoilZRunB_->CorrectType1( pfmet_bla, pfmetphi_bla,
-                                                        ZGen_pt, ZGen_phi, 
-                                                        Zcorr.Pt(), Zcorr.Phi(), 
-                                                        u1_dummy, u2_dummy, RecoilCorrResolutionNSigma, RecoilCorrScaleNSigma,
-                                                        vtxBin);
-                  }
-
+                correctorRecoil_Z->CorrectType2( pfmet_bla, pfmetphi_bla,
+                                  ZGen_pt, ZGen_phi,
+                                  ZNocorr.Pt(), ZNocorr.Phi(),
+                                  u1_dummy, u2_dummy,
+                                  RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
+                                 vtxBin,doSingleGauss); 
+                
+                correctorRecoil_Z->CorrectType2( pfmet_blaCentral, pfmetphi_blaCentral,
+                                  ZGen_pt, ZGen_phi,
+                                  ZNocorr.Pt(), ZNocorr.Phi(),
+                                  u1_dummy, u2_dummy,
+                                  RecoilCorrResolutionNSigmaU2, RecoilCorrResolutionNSigmaU1, RecoilCorrScaleNSigmaU1,
+                                 vtxBin,doSingleGauss); 
+                                 
                 // }
               }
               // cout << " and after " << pfmet_bla << endl;
@@ -576,19 +489,58 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                 pfmetphi_bla = pfmet_phicorr.second;
                 // cout << "1 pfmet_bla= " << pfmet_bla << " pfmetphi_bla= " << pfmetphi_bla << endl;
               }
-                   
-              TLorentzVector Z_met,WlikePos_met,WlikePos,mupos_bla,muneg_bla;
+
+              if(useMomentumCorr==1){ // use rochester corrections if required
+                if(IS_MC_CLOSURE_TEST || isMCorDATA==0){
+                  // int runopt = r->Rndm()<0.457451 ? 0 : 1;
+                  // int runopt = 1;
+                  // rmcor42X->momcor_mc(muPosCorr, MuPos_charge, smearRochCorrByNsigma, runopt);
+                  // rmcor42X->momcor_mc(muNegCorr, MuNeg_charge, smearRochCorrByNsigma, runopt);
+                  rmcor44X->momcor_mc(muPosCorr, MuPos_charge, smearRochCorrByNsigma/* , runopt */);
+                  rmcor44X->momcor_mc(muNegCorr, MuNeg_charge, smearRochCorrByNsigma/* , runopt */);
+                  rmcor44X->momcor_mc(muPosCorrCentral, MuPos_charge, 0/* , runopt */);
+                  rmcor44X->momcor_mc(muNegCorrCentral, MuNeg_charge, 0/* , runopt */);
+                  // musclefit_data
+                }
+                else{
+                  rmcor44X->momcor_data(muPosCorr, MuPos_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
+                  rmcor44X->momcor_data(muNegCorr, MuNeg_charge, smearRochCorrByNsigma , run<175832 ? 0 : 1 );
+                  rmcor44X->momcor_data(muPosCorrCentral, MuPos_charge, 0 , run<175832 ? 0 : 1 );
+                  rmcor44X->momcor_data(muNegCorrCentral, MuNeg_charge, 0 , run<175832 ? 0 : 1 );
+                }
+              }else if(useMomentumCorr==2){ // use Momentum scale corrections if required
+                corrector->applyPtCorrection(muPosCorr,MuPos_charge);
+                corrector->applyPtCorrection(muNegCorr,MuNeg_charge);
+                corrector->applyPtCorrection(muPosCorrCentral,MuPos_charge);
+                corrector->applyPtCorrection(muNegCorrCentral,MuNeg_charge);
+              }
+              // cout << "toy= " << m 
+                   // << " " << muPosCorr.Pt() << " " << muPosCorr.Eta() << " " << muPosCorr.Phi() 
+                   // << " " << muNegCorr.Pt() << " " << muNegCorr.Eta() << " " << muNegCorr.Phi() 
+                   // << " " << endl;
+              
+              Zcorr = muPosCorr + muNegCorr;
+              ZcorrCentral = muPosCorrCentral + muNegCorrCentral;
+              
+              TLorentzVector Z_met,Z_metCentral,WlikePos_met,WlikePos_metCentral,WlikePos,WlikePosCentral,mupos_bla,mupos_blaCentral,muneg_bla,muneg_blaCentral;
               Z_met.SetPtEtaPhiM(pfmet_bla,0,pfmetphi_bla,0);
+              Z_metCentral.SetPtEtaPhiM(pfmet_blaCentral,0,pfmetphi_blaCentral,0);
               muneg_bla.SetPtEtaPhiM(muNegCorr.Pt(),0,muNegCorr.Phi(),0);
+              muneg_blaCentral.SetPtEtaPhiM(muNegCorrCentral.Pt(),0,muNegCorrCentral.Phi(),0);
               mupos_bla.SetPtEtaPhiM(muPosCorr.Pt(),0,muPosCorr.Phi(),0);
+              mupos_blaCentral.SetPtEtaPhiM(muPosCorrCentral.Pt(),0,muPosCorrCentral.Phi(),0);
               WlikePos_met = muneg_bla + Z_met;
+              WlikePos_metCentral = muneg_blaCentral + Z_metCentral;
               WlikePos_met.SetPtEtaPhiM(WlikePos_met.Pt(),0,WlikePos_met.Phi(),0);
+              WlikePos_metCentral.SetPtEtaPhiM(WlikePos_metCentral.Pt(),0,WlikePos_metCentral.Phi(),0);
               WlikePos = mupos_bla + WlikePos_met;
+              WlikePosCentral = mupos_blaCentral + WlikePos_metCentral;
               
               // double MuPos_pt_jacobian = 2*muPosCorr.Pt()/WMass::ZMass;
               double MuPos_var_jacobian[3] = {2*muPosCorr.Pt()/WMass::ZMass,WlikePos.Mt()/WMass::ZMass,2*WlikePos_met.Pt()/WMass::ZMass};
               // double MuPos_var_NotScaled[3] = {muPosCorr.Pt(),WlikePos.Mt(),WlikePos_met.Pt()};
-              double MuPos_var_NotScaled[3] = {muPosCorr.Pt(),Zcorr.M(),WlikePos_met.Pt()}; // TEMP !!!!
+              double MuPos_var_NotScaled[3] = {muPosCorr.Pt(),Zcorr.Mt(),WlikePos_met.Pt()}; // TEMP !!!!
+              double MuPos_var_NotScaledCentral[3] = {muPosCorrCentral.Pt(),ZcorrCentral.Mt(),WlikePos_metCentral.Pt()}; // TEMP !!!!
               // LUCA ADD TO AVOID OVERFLOW
               for(int k=0;k<3;k++)
                 if(MuPos_var_jacobian[k]>=xmax) MuPos_var_jacobian[k]=xmax-binsize2/2;
@@ -596,9 +548,9 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
               int zmass1 = iZmass*1e3;
               
               // good pair within acceptance cuts for both muons
-              if( /* Z_mass */Zcorr.M()>50
-                  && TMath::Abs(/* MuPos_eta */muPosCorr.Eta())<WMass::etaMaxMuons[i] && muPosCorr.Pt()>WMass::sel_xmin[0]/* WMass::fit_xmin[0] */*ZWmassRatio/* *WMass::ZMass/iZmass */ && MuPosTrg
-                  && TMath::Abs(muNegCorr.Eta())<2.4 && muNegCorr.Pt()>10 && MuPos_charge != MuNeg_charge
+              if( /* Z_mass */ZcorrCentral.M()>50
+                  && TMath::Abs(/* MuPos_eta */muPosCorrCentral.Eta())<WMass::etaMaxMuons[i] && muPosCorrCentral.Pt()>WMass::sel_xmin[0]/* WMass::fit_xmin[0] */*ZWmassRatio/* *WMass::ZMass/iZmass */ && MuPosTrg
+                  && TMath::Abs(muNegCorrCentral.Eta())<2.4 && muNegCorrCentral.Pt()>10 && MuPos_charge != MuNeg_charge
                   // && noTrgExtraMuonsLeadingPt<10 // REMOVED BECAUSE OF MARKUS
                   ){
                 // full ID and tight requirements on the muon
@@ -610,7 +562,7 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                     if(m==0) common_stuff::plot1D(Form("hWlikePos_%sNonScaled_5_RecoCut_eta%s_%d",WMass::FitVar_str[k].Data(),eta_str.Data(),jWmass),
                                           MuPos_var_NotScaled[k]/ZWmassRatio, evt_weight*MuPos_tight_muon_SF, h_1d, 50, WMass::fit_xmin[k], WMass::fit_xmax[k] );
 
-                  if(/* pfmetWlikePos */WlikePos_met.Pt()>WMass::sel_xmin[2]/* WMass::fit_xmin[2] */*ZWmassRatio/* *WMass::ZMass/iZmass */){
+                  if(/* pfmetWlikePos */WlikePos_metCentral.Pt()>WMass::sel_xmin[2]/* WMass::fit_xmin[2] */*ZWmassRatio/* *WMass::ZMass/iZmass */){
                     for(int k=0;k<3;k++)
                       // if(m==0) hWlikePos_VarScaled_6_METCut[k][i][j]->Fill(MuPos_var_jacobian[k],evt_weight*MuPos_tight_muon_SF);
                       // if(m==0) common_stuff::plot1D(Form("hWlikePos_%sScaled_6_METCut_eta%s_%d",WMass::FitVar_str[k].Data(),eta_str.Data(),jWmass),
@@ -622,7 +574,7 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                       if(controlplots && m==0) common_stuff::plot1D(Form("hZ_pt_%s_eta%s_%d",WMass::nSigOrQCD_str[0].Data(),eta_str.Data(),jWmass),
                                           Zcorr.Pt(),evt_weight*MuPos_tight_muon_SF, h_1d, 1000,0,250 );
                                         
-                    if(WlikePos.Pt()<15*ZWmassRatio/* *WMass::ZMass/iZmass */){ // DEFAULT IS 15
+                    if(WlikePosCentral.Pt()<15*ZWmassRatio/* *WMass::ZMass/iZmass */){ // DEFAULT IS 15
                       for(int k=0;k<3;k++)
                         // if(m==0) hWlikePos_VarScaled_7_RecoilCut[k][i][j]->Fill(MuPos_var_jacobian[k],evt_weight*MuPos_tight_muon_SF);
                         // if(m==0) common_stuff::plot1D(Form("hWlikePos_%sScaled_7_RecoilCut_eta%s_%d",WMass::FitVar_str[k].Data(),eta_str.Data(),jWmass),
@@ -634,9 +586,9 @@ void Zanalysis::Loop(int chunk, int Entry_ini, int Entry_fin, int IS_MC_CLOSURE_
                             // MuPos_var_NotScaled[0] > WMass::fit_xmin[0]*ZWmassRatio && MuPos_var_NotScaled[0] < WMass::fit_xmax[0]*ZWmassRatio
                             // && MuPos_var_NotScaled[1] > WMass::fit_xmin[1]*ZWmassRatio && MuPos_var_NotScaled[1] < WMass::fit_xmax[1]*ZWmassRatio
                             // && MuPos_var_NotScaled[2] > WMass::fit_xmin[2]*ZWmassRatio && MuPos_var_NotScaled[2] < WMass::fit_xmax[2]*ZWmassRatio
-                            MuPos_var_NotScaled[0] > WMass::sel_xmin[0]*ZWmassRatio && MuPos_var_NotScaled[0] < WMass::sel_xmax[0]*ZWmassRatio
-                            && MuPos_var_NotScaled[1] > WMass::sel_xmin[1]*ZWmassRatio && MuPos_var_NotScaled[1] < WMass::sel_xmax[1]*ZWmassRatio
-                            && MuPos_var_NotScaled[2] > WMass::sel_xmin[2]*ZWmassRatio && MuPos_var_NotScaled[2] < WMass::sel_xmax[2]*ZWmassRatio
+                            MuPos_var_NotScaledCentral[0] > WMass::sel_xmin[0]*ZWmassRatio && MuPos_var_NotScaledCentral[0] < WMass::sel_xmax[0]*ZWmassRatio
+                            && MuPos_var_NotScaledCentral[1] > WMass::sel_xmin[1]*ZWmassRatio && MuPos_var_NotScaledCentral[1] < WMass::sel_xmax[1]*ZWmassRatio
+                            && MuPos_var_NotScaledCentral[2] > WMass::sel_xmin[2]*ZWmassRatio && MuPos_var_NotScaledCentral[2] < WMass::sel_xmax[2]*ZWmassRatio
                            ){
                       // if(true){ // for the momet remove jet pt cut
                       // if(Jet_leading_pt<30){

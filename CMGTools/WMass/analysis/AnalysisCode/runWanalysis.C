@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char ** argv) 
 {
 
-  const int Nvars=27;
+  const int Nvars=26;
   TString original, tokenized[Nvars];
   original = Form("%s",argv[1]);
       
@@ -69,17 +69,15 @@ int main(int argc, char ** argv)
   if(GetEntriesOrNchunck>-1) cout << " RecoilCorrScaleNSigmaU1= " << RecoilCorrScaleNSigmaU1;
   int RecoilCorrResolutionNSigmaU2=tokenized[23].Atof();
   if(GetEntriesOrNchunck>-1) cout << " RecoilCorrResolutionNSigmaU2= " << RecoilCorrResolutionNSigmaU2;
-  int RecoilCorrScaleNSigmaU2=tokenized[24].Atof();
-  if(GetEntriesOrNchunck>-1) cout << " RecoilCorrScaleNSigmaU2= " << RecoilCorrScaleNSigmaU2;
-  int use_PForNoPUorTKmet=tokenized[25].Atof();
+  int use_PForNoPUorTKmet=tokenized[24].Atof();
   if(GetEntriesOrNchunck>-1) cout << " use_PForNoPUorTKmet= " << use_PForNoPUorTKmet;
-  int use_syst_ewk_Alcaraz=tokenized[26].Atof();
+  int use_syst_ewk_Alcaraz=tokenized[25].Atof();
   if(GetEntriesOrNchunck>-1) cout << " use_syst_ewk_Alcaraz= " << use_syst_ewk_Alcaraz;
   if(GetEntriesOrNchunck>-1) cout << endl;
   
   if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("Wanalysis wDATA(\"%s\",%f,%d)",WfileDATA.Data(),WfileDATA_lumi_SF,sample.Contains("WJetsSig")?useAlsoGenPforSig:0) << endl;
   Wanalysis wDATA(WfileDATA.Data(),WfileDATA_lumi_SF,sample.Contains("WJetsSig")?useAlsoGenPforSig:0);
-  if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("wDATA.Loop(%d,%d,\"../%s\",%d,%d,%d,%d,%d,%d,\"%s\",%d,%d,%d,%d,%d)",IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,RecoilCorrScaleNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz) << endl;
+  if(GetEntriesOrNchunck>-1) cout << "processing line "<< Form("wDATA.Loop(%d,%d,\"../%s\",%d,%d,%d,%d,%d,%d,\"%s\",%d,%d,%d,%d,%d)",IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz) << endl;
   int nEntries;
   if(GetEntriesOrNchunck==-1){
     nEntries = wDATA.NumEntries();
@@ -88,7 +86,7 @@ int main(int argc, char ** argv)
   }
   
   cout<< "chunk " << GetEntriesOrNchunck << " Entry_ini= " << Entry_ini << " Entry_fin= " << Entry_fin << endl;
-  wDATA.Loop(GetEntriesOrNchunck,Entry_ini,Entry_fin,IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,RecoilCorrScaleNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz);
+  wDATA.Loop(GetEntriesOrNchunck,Entry_ini,Entry_fin,IS_MC_CLOSURE_TEST,isMCorDATA,filename_outputdir.Data(),useMomentumCorr,smearRochCorrByNsigma,useEffSF,usePtSF,usePileupSF,controlplots,sample.Data(),generated_PDF_set,generated_PDF_member,contains_PDF_reweight,usePhiMETCorr,useRecoilCorr,RecoilCorrResolutionNSigmaU1,RecoilCorrScaleNSigmaU1,RecoilCorrResolutionNSigmaU2,use_PForNoPUorTKmet,use_syst_ewk_Alcaraz);
   TString chunk_str = GetEntriesOrNchunck>0? Form("_chunk%d",GetEntriesOrNchunck) : "";
   if(GetEntriesOrNchunck==0)
     gROOT->ProcessLine(Form(".! mv ../%s/Wanalysis%s.root ../%s/WanalysisOnDATA.root",filename_outputdir.Data(),chunk_str.Data(),filename_outputdir.Data()));
